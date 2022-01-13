@@ -36,8 +36,8 @@ class CalCurrent:
         """" Define the output dictionary """   
         self.d_dic_n = {}
         self.d_dic_p = {}
-        self.gain_dic_p = {}
-        self.gain_cu_p = [ [] for n in range(5) ]
+        self.gain_dic_p = [ [] for n in range(5) ]
+        self.gain_cu_p = {}
         self.events_position(my_g4p, batch) 
         for n in range(len(self.tracks_p)-1):
             self.d_dic_n["tk_"+str(n+1)] = [ [] for n in range(5) ]
