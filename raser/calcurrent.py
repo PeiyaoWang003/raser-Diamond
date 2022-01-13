@@ -392,8 +392,10 @@ class CalCurrent:
         my_d.gain_positive_cu.Reset()
         test_p_gain = ROOT.TH1F("testgain+","testgain+",my_d.n_bin,my_d.t_start,my_d.t_end)
         e0 = 1.60217733e-19
-        for i in range(len(self.gain_dic_p[0])-2):
-            test_p_gain.Fill(self.gain_cu_p[4][i],self.gain_cu_p[3][i]/my_d.t_bin*e0)
+        for j in range(len(self.gain_dic_p[0])-2):
+            for i in range(len(self.gain_cu_p["tk_"+str(j+1)][2])):
+                test_p_gain.Fill(self.gain_cu_p["tk_"+str(j+1)][4][i],
+                        self.gain_cu_p["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
             my_d.gain_positive_cu.Add(test_p_gain)
             test_p_gain.Reset()
         my_d.sum_cu.Add(my_d.gain_positive_cu)
