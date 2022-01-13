@@ -22,12 +22,12 @@ class FenicsCal:
         self.w_p_electric = []
         self.det_model = fen_dic['name']
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
-        self.fl_y=my_d.l_y/fen_dic['xyscale']  
+        self.fl_y=my_d.l_y/fen_dic['xyscale']
         self.fl_z=my_d.l_z
         self.tol = 1e-14
         self.det_dic=det_dic
-        m_sensor_box=self.fenics_space(my_d)  
-        self.mesh3D = mshr.generate_mesh(m_sensor_box,fen_dic['mesh'])  
+        m_sensor_box=self.fenics_space(my_d)
+        self.mesh3D = mshr.generate_mesh(m_sensor_box,fen_dic['mesh'])
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
         self.fenics_p_electric(my_d)
         self.fenics_p_w_electric(my_d)
@@ -123,9 +123,9 @@ class FenicsCal:
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
         if self.det_dic['name']=="lgad3D":
-            bond = self.det_dic['bond']
-            doping_avalanche = self.det_dic['doping_avalanche']
-            doping = self.det_dic['doping']
+            bond = self.f_value(my_d,self.det_dic['bond'])
+            doping_avalanche = self.f_value(my_d,self.det_dic['doping_avalanche'])
+            doping = self.f_value(my_d,self.det_dic['doping'])
             f = fenics.Expression('x[2] < width ? doping1 : doping2', degree=1,width=bond,doping1=doping_avalanche,doping2=doping)
         else:
             f = fenics.Constant(self.f_value(my_d))
@@ -249,7 +249,7 @@ class FenicsCal:
             print("The input fenics solver model is wrong")
         return p_ele,n_ele
 
-    def f_value(self,my_d):
+    def f_value(self,my_d,input_doping=None):
         """
         @description: 
             Cal f_value of Poisson equation
@@ -268,7 +268,10 @@ class FenicsCal:
             print("material is wrong")            
         e0 = 1.60217733e-19
         perm0 = 8.854187817e-12   #F/m
-        f_value = e0*my_d.d_neff*1e6/perm0/perm_mat
+        if self.det_dic['name']=="lgad3D":
+            f_value = e0*input_doping*1e6/perm0/perm_mat
+        else:
+            f_value = e0*my_d.d_neff*1e6/perm0/perm_mat
         return f_value
         
     def get_e_field(self,px,py,pz):
