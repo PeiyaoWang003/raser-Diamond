@@ -36,8 +36,8 @@ class CalCurrent:
         """" Define the output dictionary """   
         self.d_dic_n = {}
         self.d_dic_p = {}
-        self.gain_dic_p = [ [] for n in range(5)]
-        self.gain_cu_p = [ [] for n in range(5)]
+        self.gain_dic_p = {}
+        self.gain_cu_p = [ [] for n in range(5) ]
         self.events_position(my_g4p, batch) 
         for n in range(len(self.tracks_p)-1):
             self.d_dic_n["tk_"+str(n+1)] = [ [] for n in range(5) ]
@@ -97,6 +97,8 @@ class CalCurrent:
             The drift simulation of gain tracks
         """
         for i in range(len(self.gain_dic_p[0])-1):
+            self.gain_cu_p["tk_"+str(i+1)] = [ [] for n in range(5) ]
+            self.n_track = i+1
             self.initial_parameter()
             self.charg = self.gain_dic_p[1][i]
             self.d_time = self.gain_dic_p[0][i]
@@ -114,7 +116,7 @@ class CalCurrent:
                     self.save_gain_track(my_d) 
                     self.drift_end_condition()
                 self.n_step+=1 
-            self.get_current_gain()
+        self.get_current_gain(my_d)
 
     def energy_deposition(self,my_d,j):
         """" Deposition energy and generate e-h pair """
@@ -348,12 +350,14 @@ class CalCurrent:
                 self.d_dic_n["tk_"+str(self.n_track)][3].append(self.charge)
                 self.d_dic_n["tk_"+str(self.n_track)][4].append(self.d_time)
 
-    def save_gain_track(self):
-        self.gain_cu_p[0].append(self.d_x)
-        self.gain_cu_p[1].append(self.d_y)
-        self.gain_cu_p[2].append(self.d_z)
-        self.gain_cu_p[3].append(self.charge)
-        self.gain_cu_p[4].append(self.d_time)
+    def save_gain_track(self,my_d):
+        if(((self.charge<0 and my_d.v_voltage<0)  
+             or (self.charge>0 and my_d.v_voltage>0))):
+            self.gain_cu_p["tk_"+str(self.n_track)][0].append(self.d_x)
+            self.gain_cu_p["tk_"+str(self.n_track)][1].append(self.d_y)
+            self.gain_cu_p["tk_"+str(self.n_track)][2].append(self.d_z)
+            self.gain_cu_p["tk_"+str(self.n_track)][3].append(self.charge)
+            self.gain_cu_p["tk_"+str(self.n_track)][4].append(self.d_time)
 
     def get_current(self,my_d):
         """ Charge distribution to total current"""
@@ -385,9 +389,10 @@ class CalCurrent:
         # my_d.sum_cu.Scale(n_scale)
 
     def get_current_gain(self,my_d):
+        my_d.gain_positive_cu.Reset()
         test_p_gain = ROOT.TH1F("testgain+","testgain+",my_d.n_bin,my_d.t_start,my_d.t_end)
         e0 = 1.60217733e-19
-        for i in range(len(self.gain_cu_p[2])):
+        for i in range(len(self.gain_dic_p[0])-2):
             test_p_gain.Fill(self.gain_cu_p[4][i],self.gain_cu_p[3][i]/my_d.t_bin*e0)
             my_d.gain_positive_cu.Add(test_p_gain)
             test_p_gain.Reset()
@@ -411,7 +416,7 @@ class CalCurrent:
         """Choose the avalanche model"""
         my_avalanche = Avalanche(self.det_dic['Avalanche'])
         tmp_coefficient = my_avalanche.cal_coefficient(aver_e,self.charg,my_d.temperature)
-        self.s_gain = self.sstep*1e-4*tmp_coefficient
+        self.s_gain = math.exp(self.sstep*1e-4*tmp_coefficient)
 
     def get_trackspn(self, my_d, test_p, test_n, j):
         """ Total current of each e-h pair"""
