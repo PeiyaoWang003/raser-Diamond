@@ -164,7 +164,7 @@ class CalCurrent:
         self.gain_charge=0
         self.gain_time=0
         self.s_gain=0
-        self.num_of_drift=0
+        self.track_gain=1.0
 
     def judge_whether_insensor(self,my_d,my_f):
         """
@@ -290,6 +290,7 @@ class CalCurrent:
 
     def charge_collection(self,my_f):
         """ Calculate charge collection """ 
+        self.track_gain *=self.s_gain
         self.wpot = my_f.get_w_p(self.d_cx,self.d_cy,self.d_cz)
         delta_Uw = (self.wpot 
                     - my_f.get_w_p(self.d_x,self.d_y,self.d_z))
@@ -303,8 +304,8 @@ class CalCurrent:
 
     def update_gain_track(self):
         if self.det_dic['name']=="lgad3D":
-            if (self.charg>0) and (self.num_of_drift==0) and(self.s_gain>1):
-                self.gain_charge = self.ionized_pairs*self.charg*self.s_gain
+            if (self.charg>0) and (self.track_gain>1):
+                self.gain_charge = self.ionized_pairs*self.charg*(self.track_gain-1)
                 self.gain_time=self.d_time
                 self.gain_dic_p[0].append(self.gain_time)
                 self.gain_dic_p[1].append(self.gain_charge)
@@ -315,7 +316,6 @@ class CalCurrent:
                 pass
         else:
             pass
-        self.num_of_drift+=1
 
 
     def drift_end_condition(self): 
@@ -351,13 +351,11 @@ class CalCurrent:
                 self.d_dic_n["tk_"+str(self.n_track)][4].append(self.d_time)
 
     def save_gain_track(self,my_d):
-        if(((self.charge<0 and my_d.v_voltage<0)  
-             or (self.charge>0 and my_d.v_voltage>0))):
-            self.gain_cu_p["tk_"+str(self.n_track)][0].append(self.d_x)
-            self.gain_cu_p["tk_"+str(self.n_track)][1].append(self.d_y)
-            self.gain_cu_p["tk_"+str(self.n_track)][2].append(self.d_z)
-            self.gain_cu_p["tk_"+str(self.n_track)][3].append(self.charge)
-            self.gain_cu_p["tk_"+str(self.n_track)][4].append(self.d_time)
+        self.gain_cu_p["tk_"+str(self.n_track)][0].append(self.d_x)
+        self.gain_cu_p["tk_"+str(self.n_track)][1].append(self.d_y)
+        self.gain_cu_p["tk_"+str(self.n_track)][2].append(self.d_z)
+        self.gain_cu_p["tk_"+str(self.n_track)][3].append(self.charge)
+        self.gain_cu_p["tk_"+str(self.n_track)][4].append(self.d_time)
 
     def get_current(self,my_d):
         """ Charge distribution to total current"""
