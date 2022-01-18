@@ -112,15 +112,15 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
             # device_x = my_d.l_x*g4b.um 
             # device_y = my_d.l_y*g4b.um
             # device_z = my_d.l_z*g4b.um
-        self.create_AlorSi_box(
-                                name = "Al",
-                                sidex = my_d.l_x*g4b.um,
-                                sidey = my_d.l_y*g4b.um,
-                                sidez = 10*g4b.um,
-                                translation = [tx_all,ty_all,15000*g4b.um],
-                                material_type = "G4_Al",
-                                colour = [1,0.1,0.8],
-                                mother = 'world')
+        # self.create_AlorSi_box(
+        #                         name = "Al",
+        #                         sidex = my_d.l_x*g4b.um,
+        #                         sidey = my_d.l_y*g4b.um,
+        #                         sidez = 10*g4b.um,
+        #                         translation = [tx_all,ty_all,15000*g4b.um],
+        #                         material_type = "G4_Al",
+        #                         colour = [1,0.1,0.8],
+        #                         mother = 'world')
         self.create_AlorSi_box(
                                 name = "Si_main",
                                 sidex = 1300*g4b.um,
