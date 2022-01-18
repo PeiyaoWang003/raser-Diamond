@@ -94,55 +94,24 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
             tz_device = 10000*g4b.um+my_d.l_z/2.0*g4b.um
             self.init_tz_device = 10000
             tz_pcb2 = 10000*g4b.um-750*g4b.um
-            device_x = (my_f.sx_r-my_f.sx_l)*g4b.um 
+            device_x = (my_f.sx_r-my_f.sx_l)*g4b.um
             device_y = (my_f.sy_r-my_f.sy_l)*g4b.um
             device_z = my_d.l_z*g4b.um
         elif "planar3D" in sensor_model:
-            tz_Si = 10000*g4b.um
-            tz_device = my_d.l_z/2.0*g4b.um
-            self.init_tz_device = 0
-            tz_pcb2 = -1100*g4b.um
-            device_x = my_d.l_x*g4b.um 
-            device_y = my_d.l_y*g4b.um
+            tz_Si = 0*g4b.um
+            tz_device = 10000*g4b.um+my_d.l_z/2.0*g4b.um
+            self.init_tz_device = 10000
+            tz_pcb2 = 10000*g4b.um-750*g4b.um
+            device_x = (my_f.sx_r-my_f.sx_l)*g4b.um
+            device_y = (my_f.sy_r-my_f.sy_l)*g4b.um
             device_z = my_d.l_z*g4b.um
-        self.create_pcb_board(
-                                name = "pcb1",
-                                sidex = 20000*g4b.um,
-                                sidey = 20000*g4b.um,
-                                sidez = 1500*g4b.um,
-                                translation = [tx_all,ty_all,
-                                               tz_Si-1066.5*g4b.um],
-                                tub_radius = 500*g4b.um,
-                                tub_depth = 1500*g4b.um,
-                                material_Si = "Si",
-                                material_O = "O",
-                                colour = [0,0.5,0.8],   
-                                mother = 'world')
-
-        self.create_sic_box(
-                            name = "Device",
-                            sidex = device_x,
-                            sidey = device_y,
-                            sidez = device_z,
-                            translation = [tx_all,ty_all,tz_device],
-                            material_Si = "Si",
-                            material_c = "C",
-                            colour = [1,0,0],
-                            mother = 'world')
-
-        self.create_pcb_board(
-                                name = "pcb2",
-                                sidex = 20000*g4b.um,
-                                sidey = 20000*g4b.um,
-                                sidez = 1500*g4b.um,
-                                translation = [tx_all,ty_all,tz_pcb2],
-                                tub_radius = 500*g4b.um,
-                                tub_depth = 1500*g4b.um,
-                                material_Si = "Si",
-                                material_O = "O",
-                                colour = [0,0.5,0.8],   
-                                mother = 'world')
-                                
+            # tz_Si = 10000*g4b.um
+            # tz_device = my_d.l_z/2.0*g4b.um
+            # self.init_tz_device = 0
+            # tz_pcb2 = -1100*g4b.um
+            # device_x = my_d.l_x*g4b.um 
+            # device_y = my_d.l_y*g4b.um
+            # device_z = my_d.l_z*g4b.um
         self.create_AlorSi_box(
                                 name = "Al",
                                 sidex = my_d.l_x*g4b.um,
@@ -171,8 +140,43 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                                 material_type = "G4_Si",
                                 colour = [0,0,1],
                                 mother = 'world')
+        self.create_pcb_board(
+                                name = "pcb1",
+                                sidex = 20000*g4b.um,
+                                sidey = 20000*g4b.um,
+                                sidez = 1500*g4b.um,
+                                translation = [tx_all,ty_all,
+                                               tz_Si-1066.5*g4b.um],
+                                tub_radius = 500*g4b.um,
+                                tub_depth = 1500*g4b.um,
+                                material_Si = "Si",
+                                material_O = "O",
+                                colour = [0,0.5,0.8],   
+                                mother = 'world')
+        self.create_sic_box(
+                            name = "Device",
+                            sidex = device_x,
+                            sidey = device_y,
+                            sidez = device_z,
+                            translation = [tx_all,ty_all,tz_device],
+                            material_Si = "Si",
+                            material_c = "C",
+                            colour = [1,0,0],
+                            mother = 'world')
+        self.create_pcb_board(
+                                name = "pcb2",
+                                sidex = 20000*g4b.um,
+                                sidey = 20000*g4b.um,
+                                sidez = 1500*g4b.um,
+                                translation = [tx_all,ty_all,tz_pcb2],
+                                tub_radius = 500*g4b.um,
+                                tub_depth = 1500*g4b.um,
+                                material_Si = "Si",
+                                material_O = "O",
+                                colour = [0,0.5,0.8],   
+                                mother = 'world')
 
-        if "plugin3D" in sensor_model:
+        if "plugin3D" in sensor_model or "planar3D" in sensor_model:
             self.create_sic_box(
                                 name = "SiC_sub",
                                 sidex = my_d.l_x*g4b.um,
