@@ -105,34 +105,6 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
             device_x = my_d.l_x*g4b.um 
             device_y = my_d.l_y*g4b.um
             device_z = my_d.l_z*g4b.um
-        self.create_AlorSi_box(
-                                name = "Al",
-                                sidex = my_d.l_x*g4b.um,
-                                sidey = my_d.l_y*g4b.um,
-                                sidez = 10*g4b.um,
-                                translation = [tx_all,ty_all,15000*g4b.um],
-                                material_type = "G4_Al",
-                                colour = [1,0.1,0.8],
-                                mother = 'world')
-        self.create_AlorSi_box(
-                                name = "Si_main",
-                                sidex = 1300*g4b.um,
-                                sidey = 1300*g4b.um,
-                                sidez = 33*g4b.um,
-                                translation = [tx_all,ty_all,tz_Si],
-                                material_type = "G4_Si",
-                                colour = [1,1,1],
-                                mother = 'world')
-        self.create_AlorSi_box(
-                                name = "Si_sub",
-                                sidex = 1300*g4b.um,
-                                sidey = 1300*g4b.um,
-                                sidez = 300*g4b.um,
-                                translation = [tx_all,ty_all,
-                                               tz_Si-166.5*g4b.um],
-                                material_type = "G4_Si",
-                                colour = [0,0,1],
-                                mother = 'world')
         self.create_pcb_board(
                                 name = "pcb1",
                                 sidex = 20000*g4b.um,
@@ -169,6 +141,35 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                                 material_Si = "Si",
                                 material_O = "O",
                                 colour = [0,0.5,0.8],   
+                                mother = 'world')
+                                
+        self.create_AlorSi_box(
+                                name = "Al",
+                                sidex = my_d.l_x*g4b.um,
+                                sidey = my_d.l_y*g4b.um,
+                                sidez = 10*g4b.um,
+                                translation = [tx_all,ty_all,15000*g4b.um],
+                                material_type = "G4_Al",
+                                colour = [1,0.1,0.8],
+                                mother = 'world')
+        self.create_AlorSi_box(
+                                name = "Si_main",
+                                sidex = 1300*g4b.um,
+                                sidey = 1300*g4b.um,
+                                sidez = 33*g4b.um,
+                                translation = [tx_all,ty_all,tz_Si],
+                                material_type = "G4_Si",
+                                colour = [1,1,1],
+                                mother = 'world')
+        self.create_AlorSi_box(
+                                name = "Si_sub",
+                                sidex = 1300*g4b.um,
+                                sidey = 1300*g4b.um,
+                                sidez = 300*g4b.um,
+                                translation = [tx_all,ty_all,
+                                               tz_Si-166.5*g4b.um],
+                                material_type = "G4_Si",
+                                colour = [0,0,1],
                                 mother = 'world')
 
         if "plugin3D" in sensor_model:
@@ -306,7 +307,6 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
         alpha = particle_table.FindParticle("alpha")
         beam = g4b.G4ParticleGun(1)
         beam.SetParticleEnergy(5.156*g4b.MeV)
-        # beam.SetParticleEnergy(0.546*g4b.MeV)
         beam.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
                                                             par_direction[1],
                                                             par_direction[2]))
@@ -316,11 +316,11 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
                                                    par_in[2]*g4b.um))  
 
         #beam2 = g4b.G4ParticleGun(1)
-        #beam2.SetParticleEnergy(0.546*g4b.MeV)
+        #beam2.SetParticleEnergy(5.486*g4b.MeV)
         #beam2.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
         #                                                     par_direction[1],
         #                                                     par_direction[2]))
-        #beam2.SetParticleDefinition(electron)
+        #beam2.SetParticleDefinition(alpha)
         #beam2.SetParticlePosition(g4b.G4ThreeVector(par_in[0]*g4b.um,
         #                                            par_in[1]*g4b.um,
         #                                            par_in[2]*g4b.um))  
