@@ -196,7 +196,8 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
     def create_world(self,my_d):
 
         self.nist = g4b.G4NistManager.Instance()
-        material = self.nist.FindOrBuildMaterial("G4_AIR")  
+        # material = self.nist.FindOrBuildMaterial("G4_AIR")
+        material = self.nist.FindOrBuildMaterial("Galactic", 1., 1.01*g4b.g/g4b.mole,1.e-25*g4b.g/g4b.cm3, g4b.kStateGas ,0.1*g4b.kelvin, 1.e-19*g4b.pascal)
         self.solid['world'] = g4b.G4Box("world",
                                         25000*g4b.um,
                                         25000*g4b.um,
@@ -456,4 +457,3 @@ class MyActionInitialization(g4b.G4VUserActionInitialization):
         myEA = MyEventAction(myRA_action,self.par_in,self.par_out)
         self.SetUserAction(myEA)
         self.SetUserAction(MySteppingAction(myEA))
-
