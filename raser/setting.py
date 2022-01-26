@@ -38,7 +38,7 @@ class Setting:
         if "laser_model" in self._pardic:
             self.laser_model=self._pardic['laser_model']
             self.append_par(self._pardic['laser_file'])
-        if self.det_model in ("plugin3D","planar3D"):
+        if "plugin3D" in self.det_model or "planar3D" in self.det_model or "lgad3D" in self.det_model:
             self.scan_variation()
 
     def input2dic(self,parameters):
@@ -113,6 +113,13 @@ class Setting:
                         'lz':p['lz'], 'doping':p['doping'], 
                         'voltage':p['voltage'], 'temp':p['temp'], 
                         'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
+                        }
+        if "lgad3D" in self.det_model:
+            detector = {'name':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
+                        'bond1':p['bond1'], 'bond2':p['bond2'], 'doping1':p['doping1'],
+                        'doping2':p['doping2'], 'doping3':p['doping3'], 'part':p['part'], 
+                        'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
+                        'Avalanche':p['Avalanche']
                         }
         return detector
 
