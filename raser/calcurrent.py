@@ -191,16 +191,18 @@ class CalCurrent:
     def delta_p(self):
         """ sstep(1um) split to three position """
         if(self.charg)>0:
+            eorh = 1
             FF=self.list_add(self.e_field,
                              self.cross(self.e_field,self.BB,self.muhh))
         else:
+            eorh =-1
             FF=self.list_sub(self.e_field,
                              self.cross(self.e_field,self.BB,self.muhe))   
         total_ef = self.root_mean_square(FF)
         if(total_ef!=0):
-            self.delta_x=-self.sstep*self.charg*FF[0]/total_ef
-            self.delta_y=-self.sstep*self.charg*FF[1]/total_ef
-            self.delta_z=-self.sstep*self.charg*FF[2]/total_ef
+            self.delta_x=-self.sstep*eorh*FF[0]/total_ef
+            self.delta_y=-self.sstep*eorh*FF[1]/total_ef
+            self.delta_z=-self.sstep*eorh*FF[2]/total_ef
         else:
             self.delta_x=0.0
             self.delta_y=0.0
