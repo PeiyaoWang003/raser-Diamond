@@ -11,7 +11,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="raser",
-    version="2.2.1",
+    version="3.1.0",
     author="Xin Shi",
     author_email="Xin.Shi@outlook.com",
     description="SiC Detector Simulation",
