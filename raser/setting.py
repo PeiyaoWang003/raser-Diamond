@@ -197,33 +197,6 @@ class Setting:
                         }
         return pygeant4
 
-    # @property
-    # def mips(self):
-    #     """
-    #     Description:
-    #         Define mips parameters
-    #     Parameters:
-    #     ---------
-    #     track_entry : list
-    #         Incident particle position
-    #     track_exit : list
-    #         Exit position
-    #     n_div: int
-    #         Divide the track line to n_div points
-    #     @Returns:
-    #     ---------
-    #         A dictionary containing all parameters
-    #     @Modify:
-    #     ---------
-    #         2021/09/07
-    #     """
-    #     p = self.paras
-    #     track_par = {'name':'mips',
-    #                  'track_entry':[25,0],
-    #                  'track_exit':[25,50],
-    #                  'n_div':100}      
-    #     return track_par
-
     @property
     def laser(self):
         """
