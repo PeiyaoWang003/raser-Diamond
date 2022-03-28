@@ -28,7 +28,7 @@ class CalCurrent:
         self.kboltz=8.617385e-5 #eV/K
         self.max_drift_len=1e9 #maximum diftlenght [um]
         self.parameters(my_g4p, my_d, batch)
-        self.ionized_drift(my_g4p,my_f,my_d)
+        self.ionized_drift(my_g4p.init_tz_device,my_f,my_d)
         if (self.det_dic['name'] == "lgad3D"):
             self.ionized_drift_gain(my_f,my_d)
         else:
@@ -69,15 +69,15 @@ class CalCurrent:
                     batch+=1
                     break
             if batch == 0:
-                print("the sensor did have the hit particles")
-                sys.exit()
+                print("the sensor didn't have particles hitted")
+                raise ValueError
         else:
             self.beam_number = batch
             self.tracks_p = my_g4p.p_steps[batch]
             self.tracks_step_edep = my_g4p.energy_steps[batch]
             self.tracks_t_edep = my_g4p.edep_devices[batch]
 
-    def ionized_drift(self,my_g4p,my_f,my_d):
+    def ionized_drift(self,init_tz_device,my_f,my_d):
         """
         Description:
             The drift simulation of all tracks
@@ -91,7 +91,7 @@ class CalCurrent:
                     self.charg=1 #hole
                 if (j==1):
                     self.charg=-1 #electron 
-                self.loop_electon_hole(my_g4p,my_f,my_d,i)
+                self.loop_electon_hole(init_tz_device,my_f,my_d,i)
         self.get_current(my_d)
 
     def ionized_drift_gain(self,my_f,my_d):
@@ -132,7 +132,7 @@ class CalCurrent:
         n_pairs=self.tracks_step_edep[j]*1e6/sic_loss_e
         return n_pairs 
 
-    def loop_electon_hole(self,my_g4p,my_f,my_d,i):
+    def loop_electon_hole(self,init_tz_device,my_f,my_d,i):
         """
         Description:
             Loop and record the induced cuurent of each eletron or holes         
@@ -147,7 +147,7 @@ class CalCurrent:
         self.initial_parameter()
         self.d_x=self.tracks_p[i+1][0]
         self.d_y=self.tracks_p[i+1][1]
-        self.d_z=self.tracks_p[i+1][2] - my_g4p.init_tz_device 
+        self.d_z=self.tracks_p[i+1][2] - init_tz_device 
         while (self.end_cond == 0):
             if self.judge_whether_insensor(my_d,my_f):               
                 pass
@@ -255,19 +255,17 @@ class CalCurrent:
             self.end_cond=9
         else:
             #off when the field gets large enough
-            DiffOffField=100.0  # if the electric field  
+            #DiffOffField=100.0  # if the electric field  
                                 # > 100V/um, the holes will multiplicat             
-            if(te_delta_f < DiffOffField) or (self.det_dic['name'] == "lgad3D"):
-                self.s_time = self.sstep*1e-4/self.v_drift
-                s_sigma = math.sqrt(2.0*self.kboltz*mobility
-                                    *my_d.temperature*self.s_time)
-                self.dif_x=random.gauss(0.0,s_sigma)*1e4
-                self.dif_y=random.gauss(0.0,s_sigma)*1e4
-                self.dif_z=random.gauss(0.0,s_sigma)*1e4
-            else:
-                print("the eletric field is too big, \
-                       the multiplication appear. The system shold end. ")
-                sys.exit(0)
+            #if (te_delta_f > DiffOffField) and (self.det_dic['name'] != "lgad3D"):
+            #    print("the eletric field is too big, \
+            #           the multiplication appear. The result might be unrealistic. ")
+            self.s_time = self.sstep*1e-4/self.v_drift
+            s_sigma = math.sqrt(2.0*self.kboltz*mobility
+                                *my_d.temperature*self.s_time)
+            self.dif_x=random.gauss(0.0,s_sigma)*1e4
+            self.dif_y=random.gauss(0.0,s_sigma)*1e4
+            self.dif_z=random.gauss(0.0,s_sigma)*1e4
 
     def drift_s_step(self,my_d):
         """" Drift distance
@@ -457,7 +455,85 @@ class CalCurrent:
             test_n.Fill(self.d_dic_n["tk_"+str(j+1)][4][i],
                         self.d_dic_n["tk_"+str(j+1)][3][i]/my_d.t_bin*e0)
         return test_p, test_n
-        
+
+class CalCurrentLaser(CalCurrent):
+    def __init__(self, my_d, my_f, my_l, dset):
+        #mobility related with the magnetic field (now silicon useless)
+        self.muhh=1650.0   
+        self.muhe=310.0
+        self.BB=np.array([0,0,0])
+        self.sstep=dset.steplength #drift step
+        print(self.sstep)
+        self.det_dic = dset.detector
+        self.kboltz=8.617385e-5 #eV/K
+        self.max_drift_len=1e9 #maximum diftlenght [um]
+        self.parameters(my_l)
+        if "plugin3D" in dset.detector:
+            init_tz_device = 10000
+        else :
+            init_tz_device = 0
+        self.ionized_drift(init_tz_device,my_f,my_d,my_l)
+        if (self.det_dic['name'] == "lgad3D"):
+            self.ionized_drift_gain(my_f,my_d)
+        else:
+            pass
+
+    def parameters(self, my_l):
+        """" Define the output dictionary """   
+        self.d_dic_n = {}
+        self.d_dic_p = {}
+        self.gain_dic_p = [ [] for n in range(5) ]
+        self.gain_cu_p = {}
+        self.gain_cu_n = {}
+        self.tracks_p = my_l.track_position
+        for n in range(len(self.tracks_p)-1):
+            self.d_dic_n["tk_"+str(n+1)] = [ [] for n in range(5) ]
+            self.d_dic_p["tk_"+str(n+1)] = [ [] for n in range(5) ]
+
+    def ionized_drift(self,init_tz_device,my_f,my_d,my_l):
+        for i in range(len(self.tracks_p)-1):
+            self.n_track=i+1
+            self.ionized_pairs=my_l.ionized_pairs[i]
+            for j in range(2):
+                if (j==0):
+                    self.charg=1 #hole
+                if (j==1):
+                    self.charg=-1 #electron 
+                self.loop_electon_hole(init_tz_device,my_f,my_d,i)
+        self.get_current(my_d,my_l)
+
+    def get_current(self,my_d,my_l):
+        """ Charge distribution to initial current"""
+        self.reset_start(my_d)
+        test_p = ROOT.TH1F("test+","test+",my_d.n_bin,my_d.t_start,my_d.t_end)
+        test_n = ROOT.TH1F("test-","test-",my_d.n_bin,my_d.t_start,my_d.t_end)
+        total_pairs=0
+        for j in range(len(self.tracks_p)-2):
+            test_p,test_n = self.get_trackspn(my_d, test_p, test_n, j)   
+            n_pairs=my_l.ionized_pairs[j]
+            total_pairs+=n_pairs
+            test_p.Scale(n_pairs)
+            test_n.Scale(n_pairs)            
+            my_d.positive_cu.Add(test_p)
+            my_d.negative_cu.Add(test_n)
+            test_p.Reset()
+            test_n.Reset()
+
+        # self.landau_t_pairs = self.tracks_t_edep*1e6/sic_loss_e
+        # print("landau_t_pairs=%s"%self.landau_t_pairs)
+
+        # if total_pairs != 0:
+        #     n_scale = self.landau_t_pairs/total_pairs
+        # else:
+        #     n_scale=0
+        if self.det_dic['name']=="lgad3D":
+            pass
+        else:
+            my_d.sum_cu.Add(my_d.positive_cu)
+            my_d.sum_cu.Add(my_d.negative_cu)
+        # my_d.sum_cu.Scale(n_scale)
+
+
 # # # mobility model
 def sic_mobility(charge,aver_e,my_d,det_dic,z):
     """ SiC mobility model 
