@@ -433,9 +433,9 @@ class CalCurrent:
 
     def meter_choose(self,my_d):
         """ Judge the material of sensor """
-        if (my_d.mater == 1): # silicon carbide
+        if (my_d.material == "SiC"):
             sic_loss_e = 8.4 #ev
-        elif (my_d.mater == 0):   # silicon
+        elif (my_d.material == "Si"):
             sic_loss_e = 3.6 #ev
         return sic_loss_e
 
@@ -560,8 +560,8 @@ def sic_mobility(charge,aver_e,my_d,det_dic,z):
                 Neff = det_dic['doping2']
     else:
         Neff=abs(my_d.d_neff)
-    #silicon
-    if my_d.mater == 0:
+
+    if my_d.material == "Si":
         alpha = 0.72*math.pow(T/300.0,0.065)
         if(charge>0):
             ulp = 460.0 * math.pow(T / 300.0, -2.18)
@@ -579,8 +579,8 @@ def sic_mobility(charge,aver_e,my_d,det_dic,z):
             vsatn = 1.45e7 * math.sqrt(math.tanh(155.0/T))
             lfm = uminn + (uln-uminn)/ (1.0 + math.pow(Neff*1e12 / Crefn, alpha))
             hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatn, betan), 1.0/betan))
-    #silicon carbide
-    elif my_d.mater == 1:
+
+    elif my_d.material == "SiC":
         if(charge>0):
             alpha = 0.34
             ulp = 124.0 * math.pow(T / 300.0, -2.0)
