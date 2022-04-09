@@ -56,7 +56,6 @@ sub_0_1(){
 case $option in 
     0.1.0) echo "Run shell of track"
         track
-        cd raser
         ;; 
     0.1.1) echo "raser planar3D SiC basic information..."
         geant4 
