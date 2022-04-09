@@ -271,9 +271,9 @@ class FenicsCal:
         @Modify:
             2021/08/31
         """
-        if my_d.mater == 0:
+        if my_d.material == 'Si':
             perm_mat = 11.7  
-        elif my_d.mater == 1:
+        elif my_d.material == 'SiC':
             perm_mat = 9.76  
         else:
             print("material is wrong")            
