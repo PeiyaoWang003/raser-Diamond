@@ -27,15 +27,18 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     now = time.strftime("%Y_%m%d_%H%M")
     path = "fig/" + now + "/"
     create_path(path)
-    draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path) 
-    draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
-    draw_ele_field(my_d,my_f,"yz",my_d.det_model,my_d.l_x*0.5,path)
+    #draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path) 
+    #draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
+    #draw_ele_field(my_d,my_f,"yz",my_d.det_model,my_d.l_x*0.5,path)
+    draw_ele_field_1D(my_d,my_f,my_d.l_x*0.5,my_d.l_y*0.5,path)
+    draw_drift_path(my_d,my_f,my_current,path)
     draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d,ele_current.BB_ele,"BB",path)
-    #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
+    draw_plot_gain(my_d,path)
     if my_l!=None :
         draw_nocarrier3D(path,my_l)
-    draw_drift_path(my_d,my_f,my_current,path)
+    else :
+        energy_deposition(my_g4p,path)   # Draw Geant4 depostion distribution
      
 def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     """
@@ -116,6 +119,57 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     c1.SaveAs(path+my_d.det_model+plane+str(depth)+".pdf")
     del c1
 
+def draw_ele_field_1D(my_d,my_f,coord_x,coord_y,path):
+    """
+    @description:
+        Draw eletric field in 1D
+    @param:
+        None     
+    @Returns:
+        None
+    @Modify:
+        2022/05/09
+    """
+    if my_d.det_model == "plugin3D":
+        return
+
+    c1 = ROOT.TCanvas("c", "canvas",2000, 1000)
+    ROOT.gStyle.SetOptStat(ROOT.kFALSE)
+    ROOT.gStyle.SetOptFit()
+    c1.SetLeftMargin(0.12)
+    c1.SetRightMargin(0.2)
+    c1.SetBottomMargin(0.14)
+    c1.SetRightMargin(0.12)
+    c1.Divide(3,2)
+    model = ["Ex","Ey","Ez","P","WP"]
+    i=1
+    c1.cd(i)
+    c1.GetPad(i).SetRightMargin(0.2)
+    e_field1=fill_his_1D(model[i-1],coord_x,coord_y,my_d,my_f)
+    e_field1.Draw("COLZ")
+    i=2
+    c1.cd(i)
+    c1.GetPad(i).SetRightMargin(0.2)
+    e_field2=fill_his_1D(model[i-1],coord_x,coord_y,my_d,my_f)
+    e_field2.Draw("COLZ")
+    i=3
+    c1.cd(i)
+    c1.GetPad(i).SetRightMargin(0.2)
+    e_field3=fill_his_1D(model[i-1],coord_x,coord_y,my_d,my_f)
+    e_field3.Draw("COLZ")
+    i=4
+    c1.cd(i)
+    c1.GetPad(i).SetRightMargin(0.2)
+    e_field4=fill_his_1D(model[i-1],coord_x,coord_y,my_d,my_f)
+    e_field4.Draw("COLZ")
+    i=5
+    c1.cd(i)
+    c1.GetPad(i).SetRightMargin(0.2)
+    e_field5=fill_his_1D(model[i-1],coord_x,coord_y,my_d,my_f)
+    e_field5.Draw("COLZ")
+    c1.SaveAs(path+my_d.det_model+"_"+str(coord_x)+"_"+str(coord_y)+"_1D.pdf")
+    del c1
+
 
 def fill_his(model,depth,my_d,my_f,plane,sensor_model):
     """
@@ -138,7 +192,7 @@ def fill_his(model,depth,my_d,my_f,plane,sensor_model):
             y_v = (j+1)*((d_r[3]-d_r[2])/ny_e)+d_r[2]
             f_v=0.0
             try:
-                f_v,e_v = get_f_v(x_v,y_v,depth,model,my_f,plane,e_v,d_r)
+                f_v,e_v = get_f_v(x_v,y_v,depth,model,my_f,plane,e_v,d_r[4])
                 if model == "E":
                     f_v = math.sqrt(math.pow(f_v[0],2)
                                     +math.pow(f_v[1],2)
@@ -157,8 +211,40 @@ def fill_his(model,depth,my_d,my_f,plane,sensor_model):
         e_v.GetYaxis().SetTitle("z") 
     return e_v
 
+def fill_his_1D(model,coord_x,coord_y,my_d,my_f):
+    """
+    @description:
+        Draw eletric field - Fill histrogram
+    @param:
+        None     
+    @Returns:
+        None
+    @Modify:
+        2021/08/31
+    """
+    nz_e=100
+    e_v = ROOT.TH1F("","",nz_e,0,my_d.l_z)
+    for i in range(nz_e):
+        z_v = (i+1)*((my_d.l_z)/nz_e)
+        f_v=0.0
+        try:
+            f_v,e_v = get_f_v(coord_x,coord_y,z_v,model,my_f,"xy",e_v,"")
+            if model == "Ex":
+                f_v = f_v[0]
+            if model == "Ey":
+                f_v = f_v[1]
+            if model == "Ez":
+                f_v = f_v[2]                          
+        except RuntimeError:
+            f_v = 0.0
+        e_v.SetBinContent(i+1,f_v)
 
-def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
+    e_v.GetXaxis().SetTitle("z")
+    e_v.GetYaxis().SetTitle(model) 
+    return e_v
+
+
+def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,t_name):
     """
     @description:
         Draw eletric field - Get parameters
@@ -183,14 +269,14 @@ def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
         input_x=i_x
         input_y=i_z
         input_z=i_y
-    if model == "E":
-        e_v.SetTitle("electric field "+d_r[4])
+    if "E" in model:
+        e_v.SetTitle("electric field "+t_name)
         f_v=my_f.get_e_field(input_x,input_y,input_z)
     elif model == "P":
-        e_v.SetTitle("potential "+d_r[4])
+        e_v.SetTitle("potential "+t_name)
         f_v=my_f.get_potential(input_x,input_y,input_z)
     elif model =="WP":
-        e_v.SetTitle("weigthing potential "+d_r[4]) 
+        e_v.SetTitle("weigthing potential "+t_name) 
         f_v=my_f.get_w_p(input_x,input_y,input_z)
     return f_v,e_v
 
@@ -217,7 +303,7 @@ def confirm_range(my_d,my_f,plane,sensor_model,depth):
             l_yr = my_d.l_z
         else:
             print("the draw plane is not existing")
-    elif "planar3D" or "lgad3D" in sensor_model or "lgad3D" in sensor_model:
+    elif "planar3D" or "lgad3D" in sensor_model:
         l_xl = 0
         l_yl = 0 
         if plane == "xy":
@@ -275,12 +361,18 @@ def draw_plot(my_d, ele_current, model, path):
     my_d.sum_cu.Draw("HIST")
     my_d.positive_cu.Draw("SAME HIST")
     my_d.negative_cu.Draw("SAME HIST")
+    my_d.gain_positive_cu.Draw("SAME HIST")
+    my_d.gain_negative_cu.Draw("SAME HIST")
     my_d.sum_cu.SetLineColor(3)
     my_d.positive_cu.SetLineColor(2)
     my_d.negative_cu.SetLineColor(4)
+    my_d.gain_positive_cu.SetLineColor(5)
+    my_d.gain_negative_cu.SetLineColor(7)
     my_d.sum_cu.SetLineWidth(2)
     my_d.positive_cu.SetLineWidth(2)
     my_d.negative_cu.SetLineWidth(2)
+    my_d.gain_positive_cu.SetLineWidth(2)
+    my_d.gain_negative_cu.SetLineWidth(2)
     c.Update()
     if ele_current.GetMinimum() < 0:
         rightmax = 1.1*ele_current.GetMinimum()
@@ -313,6 +405,8 @@ def draw_plot(my_d, ele_current, model, path):
     legend = ROOT.TLegend(0.5, 0.3, 0.9, 0.6)
     legend.AddEntry(my_d.negative_cu, "electron", "l")
     legend.AddEntry(my_d.positive_cu, "hole", "l")
+    legend.AddEntry(my_d.gain_negative_cu, "gain electron", "l")
+    legend.AddEntry(my_d.gain_positive_cu, "gain hole", "l")
     legend.AddEntry(my_d.sum_cu, "e+h", "l")
     legend.AddEntry(ele_current, "electronics", "l")
     legend.SetBorderSize(0)
@@ -322,6 +416,48 @@ def draw_plot(my_d, ele_current, model, path):
     c.Update()
     c.SaveAs(path+model+my_d.det_model+"_basic_infor.pdf")
     del c
+
+
+def draw_plot_gain(my_d, path):
+    #temp
+    """
+    @description:
+        Save current in root file
+    @param:
+        None     
+    @Returns:
+        None
+    @Modify:
+        2021/08/31
+    """
+    c=ROOT.TCanvas("c","canvas1",1000,1000)
+    c.cd()
+    c.Update()
+    c.SetLeftMargin(0.12)
+    # c.SetTopMargin(0.12)
+    c.SetBottomMargin(0.14)
+    ROOT.gStyle.SetOptStat(ROOT.kFALSE)
+    ROOT.gStyle.SetOptStat(0)
+
+    my_d.gain_positive_cu.Draw("HIST")
+    my_d.gain_negative_cu.Draw("SAME HIST")
+    my_d.gain_positive_cu.SetLineColor(2)
+    my_d.gain_negative_cu.SetLineColor(4)
+    my_d.gain_positive_cu.SetLineWidth(2)
+    my_d.gain_negative_cu.SetLineWidth(2)
+    c.Update()
+
+    legend = ROOT.TLegend(0.5, 0.3, 0.9, 0.6)
+    legend.AddEntry(my_d.gain_negative_cu, "gain electron", "l")
+    legend.AddEntry(my_d.gain_positive_cu, "gain hole", "l")
+    legend.SetBorderSize(0)
+    legend.SetTextFont(43)
+    legend.SetTextSize(45)
+    legend.Draw("same")
+    c.Update()
+    c.SaveAs(path+my_d.det_model+"_gain_infor.pdf")
+    del c
+
 
 def draw_drift_path(my_d,my_f,my_current,path):
     ROOT.gStyle.SetOptStat(0)
@@ -419,7 +555,7 @@ def draw_drift_path(my_d,my_f,my_current,path):
     c1.SaveAs(path+my_d.det_model+"_drift_path.pdf")
     del c1
 
-def energy_deposition(my_g4v):
+def energy_deposition(my_g4v,path):
     """
     @description:
         Energy_deposition for multi events of Geant4 simulation
@@ -438,8 +574,7 @@ def energy_deposition(my_g4v):
     h1.Fit(g1,"S")
     print("MPV:%s"%g1.GetParameter(1))
     h1.Draw()
-    now = time.strftime("%Y_%m%d_%H%M")
-    c1.SaveAs("fig/dep_SiC"+"_"+now+"_energy.pdf")
+    c1.SaveAs(path+"energy.pdf")
 
 def create_path(path):
     """ If the path does not exit, create the path"""

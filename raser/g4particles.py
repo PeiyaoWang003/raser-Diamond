@@ -370,7 +370,7 @@ class MyEventAction(g4b.G4UserEventAction):
 
     def EndOfEventAction(self, event):
         eventID = event.GetEventID()
-        print("eventID:%s"%eventID)
+        #print("eventID:%s"%eventID)
         if len(self.p_step):
             point_a = [ b-a for a,b in zip(self.point_in,self.point_out)]
             point_b = [ c-a for a,c in zip(self.point_in,self.p_step[-1])]

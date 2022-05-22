@@ -23,7 +23,6 @@ class CalCurrent:
         self.muhe=310.0
         self.BB=np.array([0,0,0])
         self.sstep=dset.steplength #drift step
-        print(self.sstep)
         self.det_dic = dset.detector
         self.kboltz=8.617385e-5 #eV/K
         self.max_drift_len=1e9 #maximum diftlenght [um]
@@ -397,11 +396,8 @@ class CalCurrent:
         #     n_scale = self.landau_t_pairs/total_pairs
         # else:
         #     n_scale=0
-        if self.det_dic['name']=="lgad3D":
-            pass
-        else:
-            my_d.sum_cu.Add(my_d.positive_cu)
-            my_d.sum_cu.Add(my_d.negative_cu)
+        my_d.sum_cu.Add(my_d.positive_cu)
+        my_d.sum_cu.Add(my_d.negative_cu)
         # my_d.sum_cu.Scale(n_scale)
 
     def get_current_gain(self,my_d):
@@ -463,7 +459,6 @@ class CalCurrentLaser(CalCurrent):
         self.muhe=310.0
         self.BB=np.array([0,0,0])
         self.sstep=dset.steplength #drift step
-        print(self.sstep)
         self.det_dic = dset.detector
         self.kboltz=8.617385e-5 #eV/K
         self.max_drift_len=1e9 #maximum diftlenght [um]
