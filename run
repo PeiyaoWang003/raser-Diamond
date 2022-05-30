@@ -60,9 +60,14 @@ case $option in
         ./python/gsignal.py det_model=planar3D parfile=setting.json
         ;;
 
-    0.1.1.1) echo "raser lgad3D SiC basic information..."
+    0.1.1.1) echo "raser SICAR-1 lgad SiC basic information..."
         geant4
-        ./python/gsignal.py det_model=lgad3D parfile=setting.json
+        ./python/gsignal.py det_model=SICAR-1 parfile=setting.json
+        ;;
+
+    0.1.1.2) echo "raser NJU lgad v3 SiC basic information..."
+        geant4
+        ./python/gsignal.py det_model=NJU_lgad_v3 parfile=setting.json
         ;;
 
 	0.1.2) echo "batch model with scanning voltage [-50,-500]"

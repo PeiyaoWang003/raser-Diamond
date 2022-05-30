@@ -34,6 +34,7 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     draw_drift_path(my_d,my_f,my_current,path)
     draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d,ele_current.BB_ele,"BB",path)
+    draw_plot_base(my_d,path)
     draw_plot_gain(my_d,path)
     if my_l!=None :
         draw_nocarrier3D(path,my_l)
@@ -418,6 +419,47 @@ def draw_plot(my_d, ele_current, model, path):
     del c
 
 
+def draw_plot_base(my_d, path):
+    #temp
+    """
+    @description:
+        Save current in root file
+    @param:
+        None     
+    @Returns:
+        None
+    @Modify:
+        2021/08/31
+    """
+    c=ROOT.TCanvas("c","canvas1",1000,1000)
+    c.cd()
+    c.Update()
+    c.SetLeftMargin(0.12)
+    # c.SetTopMargin(0.12)
+    c.SetBottomMargin(0.14)
+    ROOT.gStyle.SetOptStat(ROOT.kFALSE)
+    ROOT.gStyle.SetOptStat(0)
+
+    my_d.negative_cu.Draw("HIST")
+    my_d.positive_cu.Draw("SAME HIST")
+    my_d.negative_cu.SetLineColor(4)
+    my_d.positive_cu.SetLineColor(2)
+    my_d.negative_cu.SetLineWidth(2)
+    my_d.positive_cu.SetLineWidth(2)
+    c.Update()
+
+    legend = ROOT.TLegend(0.5, 0.3, 0.9, 0.6)
+    legend.AddEntry(my_d.negative_cu, "electron", "l")
+    legend.AddEntry(my_d.positive_cu, "hole", "l")
+    legend.SetBorderSize(0)
+    legend.SetTextFont(43)
+    legend.SetTextSize(45)
+    legend.Draw("same")
+    c.Update()
+    c.SaveAs(path+my_d.det_model+"_base_infor.pdf")
+    del c
+
+
 def draw_plot_gain(my_d, path):
     #temp
     """
@@ -439,12 +481,12 @@ def draw_plot_gain(my_d, path):
     ROOT.gStyle.SetOptStat(ROOT.kFALSE)
     ROOT.gStyle.SetOptStat(0)
 
-    my_d.gain_positive_cu.Draw("HIST")
-    my_d.gain_negative_cu.Draw("SAME HIST")
-    my_d.gain_positive_cu.SetLineColor(2)
+    my_d.gain_negative_cu.Draw("HIST")
+    my_d.gain_positive_cu.Draw("SAME HIST")
     my_d.gain_negative_cu.SetLineColor(4)
-    my_d.gain_positive_cu.SetLineWidth(2)
+    my_d.gain_positive_cu.SetLineColor(2)
     my_d.gain_negative_cu.SetLineWidth(2)
+    my_d.gain_positive_cu.SetLineWidth(2)
     c.Update()
 
     legend = ROOT.TLegend(0.5, 0.3, 0.9, 0.6)

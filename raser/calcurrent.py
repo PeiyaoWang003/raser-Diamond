@@ -23,6 +23,7 @@ class CalCurrent:
         self.muhe=310.0
         self.BB=np.array([0,0,0])
         self.sstep=dset.steplength #drift step
+        print(self.sstep)
         self.det_dic = dset.detector
         self.kboltz=8.617385e-5 #eV/K
         self.max_drift_len=1e9 #maximum diftlenght [um]
@@ -396,8 +397,11 @@ class CalCurrent:
         #     n_scale = self.landau_t_pairs/total_pairs
         # else:
         #     n_scale=0
-        my_d.sum_cu.Add(my_d.positive_cu)
-        my_d.sum_cu.Add(my_d.negative_cu)
+        if self.det_dic['name']=="lgad3D":
+            pass
+        else:
+            my_d.sum_cu.Add(my_d.positive_cu)
+            my_d.sum_cu.Add(my_d.negative_cu)
         # my_d.sum_cu.Scale(n_scale)
 
     def get_current_gain(self,my_d):
@@ -429,9 +433,9 @@ class CalCurrent:
 
     def meter_choose(self,my_d):
         """ Judge the material of sensor """
-        if (my_d.material == "SiC"):
+        if (my_d.mater == 1): # silicon carbide
             sic_loss_e = 8.4 #ev
-        elif (my_d.material == "Si"):
+        elif (my_d.mater == 0):   # silicon
             sic_loss_e = 3.6 #ev
         return sic_loss_e
 
@@ -459,6 +463,7 @@ class CalCurrentLaser(CalCurrent):
         self.muhe=310.0
         self.BB=np.array([0,0,0])
         self.sstep=dset.steplength #drift step
+        print(self.sstep)
         self.det_dic = dset.detector
         self.kboltz=8.617385e-5 #eV/K
         self.max_drift_len=1e9 #maximum diftlenght [um]
@@ -555,8 +560,8 @@ def sic_mobility(charge,aver_e,my_d,det_dic,z):
                 Neff = det_dic['doping2']
     else:
         Neff=abs(my_d.d_neff)
-
-    if my_d.material == "Si":
+    #silicon
+    if my_d.mater == 0:
         alpha = 0.72*math.pow(T/300.0,0.065)
         if(charge>0):
             ulp = 460.0 * math.pow(T / 300.0, -2.18)
@@ -574,8 +579,8 @@ def sic_mobility(charge,aver_e,my_d,det_dic,z):
             vsatn = 1.45e7 * math.sqrt(math.tanh(155.0/T))
             lfm = uminn + (uln-uminn)/ (1.0 + math.pow(Neff*1e12 / Crefn, alpha))
             hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatn, betan), 1.0/betan))
-
-    elif my_d.material == "SiC":
+    #silicon carbide
+    elif my_d.mater == 1:
         if(charge>0):
             alpha = 0.34
             ulp = 124.0 * math.pow(T / 300.0, -2.0)

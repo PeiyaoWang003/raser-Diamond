@@ -112,7 +112,6 @@ class Setting:
                         'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
                         'Avalanche':p['Avalanche']
                         }
-        detector['material'] = p.setdefault('material','SiC')
         return detector
 
     def electron_custom(self,electrodes):
@@ -133,24 +132,19 @@ class Setting:
             Mesh precision value, the bigger the higher the accuracy
         xyscale : int
             In plane detector, scale_xy is scaling sensor 50 times at x and 
-            y axis, so the precision can improve 50 times in echo distance
-        zscale : int
-            For LGAD detector, since the avalanche layer is usually thin,
-            scale in depth is able to improve precision of the solution
+            y axis, so the precision can improve 50 times in echo distance 
+
         @Returns:
         ---------
             A dictionary containing all parameters used in fenics  
         @Modify:
         ---------
-            2022/05/15
+            2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model:
+        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
             fenics = {'name':'planar3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
-        if "lgad3D" in self.det_model:
-            fenics = {'name':'lgad3D',
-                      'mesh':p['mesh'], "xyscale":p['xyscale'], "zscale":p['zscale']}
         if "plugin3D" in self.det_model:
             fenics = {'name':'plugin3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
