@@ -397,11 +397,8 @@ class CalCurrent:
         #     n_scale = self.landau_t_pairs/total_pairs
         # else:
         #     n_scale=0
-        if self.det_dic['name']=="lgad3D":
-            pass
-        else:
-            my_d.sum_cu.Add(my_d.positive_cu)
-            my_d.sum_cu.Add(my_d.negative_cu)
+        my_d.sum_cu.Add(my_d.positive_cu)
+        my_d.sum_cu.Add(my_d.negative_cu)
         # my_d.sum_cu.Scale(n_scale)
 
     def get_current_gain(self,my_d):
