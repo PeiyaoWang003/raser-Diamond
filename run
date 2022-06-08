@@ -33,7 +33,7 @@ fi
 
 track(){
     # cd 
-    singularity shell -B /afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-1.1.sif 
+    singularity shell -B /cefs,/afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-1.1.sif 
 }
 
 geant4(){
