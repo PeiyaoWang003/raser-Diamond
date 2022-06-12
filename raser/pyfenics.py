@@ -31,8 +31,7 @@ class FenicsCal:
                 self.bond = self.lgad_dic['bond2']
             else:
                 raise NameError
-            self.fl_z=my_d.l_z
-        self.fl_z_original=my_d.l_z
+        self.fl_z=my_d.l_z
 
         self.tol = 1e-14
         m_sensor_box=self.fenics_space(my_d)
@@ -339,7 +338,7 @@ class FenicsCal:
         else:
             scale_px=px%self.fl_x
             scale_py=py%self.fl_y
-            scale_pz=pz*self.fl_z/self.fl_z_original
+            scale_pz=pz
             try:
                 f_w_p = self.u_w(scale_px,scale_py,scale_pz)
             except RuntimeError:

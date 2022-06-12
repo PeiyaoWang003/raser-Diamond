@@ -106,12 +106,20 @@ class Setting:
                         'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
                         }
         if "lgad3D" in self.det_model:
-            detector = {'name':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
-                        'bond1':p['bond1'], 'bond2':p['bond2'], 'doping1':p['doping1'],
-                        'doping2':p['doping2'], 'doping3':p['doping3'], 'part':p['part'], 
-                        'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
-                        'Avalanche':p['Avalanche']
-                        }
+            if p['part']==2:
+                detector = {'name':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
+                            'part':p['part'], 'bond1':p['bond1'], 
+                            'doping1':p['doping1'], 'doping2':p['doping2'],
+                            'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
+                            'Avalanche':p['Avalanche']
+                            }
+            if p['part']==3:
+                detector = {'name':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
+                            'part':p['part'], 'bond1':p['bond1'], 'bond2':p['bond2'], 
+                            'doping1':p['doping1'],'doping2':p['doping2'], 'doping3':p['doping3'],
+                            'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
+                            'Avalanche':p['Avalanche']
+                            }
         detector['material'] = p.setdefault('material','SiC')
         return detector
 
