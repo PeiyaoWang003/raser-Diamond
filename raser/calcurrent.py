@@ -92,7 +92,7 @@ class CalCurrent:
         n_pairs=self.tracks_step_edep[j]*1e6/sic_loss_e
         return n_pairs 
 
-    def loop_electon_hole(self,init_tz_device,my_f,my_d,i):
+    def loop_electon_hole(self,my_f,my_d,i):
         """
         Description:
             Loop and record the induced cuurent of each eletron or holes         
