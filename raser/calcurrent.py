@@ -20,7 +20,6 @@ class CalCurrent:
         self.BB=np.array([0,0,0])
         self.sstep=dset.steplength #drift step
         self.det_dic = dset.detector
-        self.kboltz=8.617385e-5 #eV/K
         self.max_drift_len=1e9 #maximum diftlenght [um]
         self.parameters(my_g4p, my_d, batch)
         self.ionized_drift(my_f,my_d)
@@ -213,7 +212,8 @@ class CalCurrent:
             #    print("the eletric field is too big, \
             #           the multiplication appear. The result might be unrealistic. ")
             self.s_time = self.sstep*1e-4/self.v_drift
-            s_sigma = math.sqrt(2.0*self.kboltz*mobility
+            kboltz=8.617385e-5 #eV/K
+            s_sigma = math.sqrt(2.0*kboltz*mobility
                                 *my_d.temperature*self.s_time)
             self.dif_x=random.gauss(0.0,s_sigma)*1e4
             self.dif_y=random.gauss(0.0,s_sigma)*1e4
