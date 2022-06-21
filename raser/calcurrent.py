@@ -24,10 +24,6 @@ class CalCurrent:
         self.max_drift_len=1e9 #maximum diftlenght [um]
         self.parameters(my_g4p, my_d, batch)
         self.ionized_drift(my_f,my_d)
-        if (self.det_dic['name'] == "lgad3D"):
-            self.ionized_drift_gain(my_f,my_d)
-        else:
-            pass
             
     def parameters(self,my_g4p, my_d, batch): 
         """" Define the output dictionary """   
