@@ -34,11 +34,8 @@ class Setting:
         self._pardic = {}
         self.input2dic(parameters)
         self.det_model = self._pardic['det_model']
-        if "laser_model" in self._pardic:
-            self.laser_model=self._pardic['laser_model']
         self.read_par(self._pardic['parfile'])
-        if "plugin3D" in self.det_model or "planar3D" in self.det_model or "lgad3D" in self.det_model:
-            self.scan_variation()
+        self.scan_variation()
 
     def input2dic(self,parameters):
         " Transfer input list to dictinary"
@@ -51,7 +48,7 @@ class Setting:
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
-            if dic_par['name'] in self.det_model:
+            if dic_par['name'] in self.name:
                 self.steplength = float(dic_par['steplength'])
                 paras = dic_par
             if "laser_model" in self._pardic\
@@ -105,13 +102,7 @@ class Setting:
                         'voltage':p['voltage'], 'temp':p['temp'], 
                         'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
                         }
-        if "lgad3D" in self.det_model:
-            detector = {'name':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
-                        'bond1':p['bond1'], 'bond2':p['bond2'], 'doping1':p['doping1'],
-                        'doping2':p['doping2'], 'doping3':p['doping3'], 'part':p['part'], 
-                        'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron':p['custom_electron'],
-                        'Avalanche':p['Avalanche']
-                        }
+        detector['material'] = p.setdefault('material','SiC')
         return detector
 
     def electron_custom(self,electrodes):
@@ -142,7 +133,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
+        if "planar3D" in self.det_model:
             fenics = {'name':'planar3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "plugin3D" in self.det_model:

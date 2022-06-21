@@ -25,7 +25,6 @@ class FenicsCal:
         self.fl_y=my_d.l_y/fen_dic['xyscale']
         self.fl_z=my_d.l_z
         self.tol = 1e-14
-        self.det_dic=det_dic
         m_sensor_box=self.fenics_space(my_d)
         self.mesh3D = mshr.generate_mesh(m_sensor_box,fen_dic['mesh'])
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
@@ -122,24 +121,8 @@ class FenicsCal:
 
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
-        if self.det_dic['name']=="lgad3D":
-            if self.det_dic['part']==2:
-                bond = self.det_dic['bond1']
-                doping_avalanche = self.f_value(my_d,self.det_dic['doping1'])
-                doping = self.f_value(my_d,self.det_dic['doping2'])
-                f = fenics.Expression('x[2] < width ? doping1 : doping2', degree=1,width=bond,doping1=doping_avalanche,doping2=doping)
-            elif self.det_dic['part'] == 3:
-                bond1 = self.det_dic['bond1']
-                bond2 = self.det_dic['bond2']
-                doping1 = self.f_value(my_d,self.det_dic['doping1'])
-                doping2 = self.f_value(my_d,self.det_dic['doping2'])
-                doping3 = self.f_value(my_d,self.det_dic['doping3'])
-                f = fenics.Expression('x[2] < bonda ? dopinga : x[2] > bondb ? dopingc : dopingb', degree = 1, 
-                                         bonda = bond1, bondb = bond2, dopinga=doping1, dopingb = doping2, dopingc = doping3)
-            else:
-                print("The structure of lgad is wrong.")
-        else:
-            f = fenics.Constant(self.f_value(my_d))
+
+        f = fenics.Constant(self.f_value(my_d))
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
         L = f*v*fenics.dx
         # Compute solution
@@ -271,18 +254,15 @@ class FenicsCal:
         @Modify:
             2021/08/31
         """
-        if my_d.mater == 0:
+        if my_d.material == 'Si':
             perm_mat = 11.7  
-        elif my_d.mater == 1:
-            perm_mat = 9.76  
+        elif my_d.material == 'SiC':
+            perm_mat = 9.76 
         else:
             print("material is wrong")            
         e0 = 1.60217733e-19
         perm0 = 8.854187817e-12   #F/m
-        if self.det_dic['name']=="lgad3D":
-            f_value = e0*input_doping*1e6/perm0/perm_mat
-        else:
-            f_value = e0*my_d.d_neff*1e6/perm0/perm_mat
+        f_value = e0*my_d.d_neff*1e6/perm0/perm_mat
         return f_value
         
     def get_e_field(self,px,py,pz):

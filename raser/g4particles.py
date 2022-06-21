@@ -66,10 +66,12 @@ class Particles:
         if g4_dic['g4_vis']:  
             ui.SessionStart()
         self.p_steps=s_p_steps
+        self.init_tz_device = my_g4d.init_tz_device
+        self.p_steps_current=[[[single_step[0],single_step[1],single_step[2]-self.init_tz_device]\
+            for single_step in p_step] for p_step in self.p_steps]
         self.energy_steps=s_energy_steps
         self.edep_devices=s_edep_devices
         self.events_angle=s_events_angle
-        self.init_tz_device = my_g4d.init_tz_device
         del s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
         
     def __del__(self):
