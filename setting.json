@@ -11,6 +11,7 @@
         "doping" : 10,  
         "voltage" : -500,
         "temp" : 300.0,
+        "material" : "SiC",
 
         "mesh" : 32,
         "xyscale" : 10,

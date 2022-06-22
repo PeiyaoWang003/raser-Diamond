@@ -89,17 +89,16 @@ class Setting:
         p = self.paras
         if "planar3D" in self.det_model:
             detector = {'name':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 
-                        'lz':p['lz'], 'doping':p['doping'], 
+                        'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
                         'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron': p['custom_electron']
                         }
             
         if "plugin3D" in self.det_model:
             detector = {'name':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 
-                        'lz':p['lz'], 'doping':p['doping'], 
+                        'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
                         'voltage':p['voltage'], 'temp':p['temp'], 
                         'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
                         }
-        detector['material'] = p.setdefault('material','SiC')
         return detector
 
     def electron_custom(self,electrodes):
@@ -162,7 +161,7 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
+        if "planar3D" in self.det_model:
             pygeant4 = {'name':'planar3D',
                         'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                         'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
@@ -177,66 +176,10 @@ class Setting:
         return pygeant4
 
     @property
-    def laser(self):
+    def amplifier(self):
         """
         Description:
-            Define laser parameters
-        Parameters:
-        ---------
-        tech : str
-            Interaction Pattern Between Laser and Detector
-        direction : str
-            Direction of Laser Incidence, Could be "top" "edge" or "bottom"
-
-        alpha : float
-            the Linear Absorption Coefficient of the Bulk of the Device
-        beta_2 : float
-            the Quadratic Absorption Coefficient of the Bulk of the Device
-        refractionIndex :float
-            the Refraction Index of the Bulk of the Device
-
-        wavelength : float
-            the Wavelength of Laser in nm
-        tau : float
-            the Full-width at Half-maximum (FWHM) of the Beam Temporal Profile
-        power : float
-            the Energy per Laser Pulse
-        widthBeamWaist : float
-            the Width of the Beam Waist of the Laser in um
-        l_Rayleigh : float
-            the Rayleigh Width of the Laser Beam
-
-        r_step, h_step : float
-            the Step Length of Block in um,
-            Carriers Generated in the Same Block Have the Same Drift Locus
-        @Returns:
-        ---------
-            A dictionary containing all parameters used in TCTTracks 
-        @Modify:
-        ---------
-            2021/09/08
-        """
-        if hasattr(self,"laser_model"):
-            p = self.paras
-            laser = {'tech':p['tech'],'direction':p['direction'],
-                    'refractionIndex':p['refractionIndex'],
-                    "wavelength":p["wavelength"],"tau":p["tau"],"power":p["power"],"widthBeamWaist":p["widthBeamWaist"],
-                    'r_step':p['r_step'],'h_step':p['h_step'],
-                    'fx_rel':p['fx_rel'],'fy_rel':p['fy_rel'],'fz_rel':p['fz_rel'],
-                    }
-            if p['tech'] == "SPA":
-                laser.update({'alpha':p['alpha']})
-            if p['tech'] == "TPA":
-                laser.update({'beta_2':p['beta_2']})
-            if 'l_Rayleigh' in p:
-                laser.update({'l_Rayleigh':p['l_Rayleigh']})
-        return laser
-
-    @property
-    def amplifer(self):
-        """
-        Description:
-            Define differnet amplifers parameters
+            Define diffrenet amplifiers parameters
         Parameters:
         ---------
         maxstep : float
