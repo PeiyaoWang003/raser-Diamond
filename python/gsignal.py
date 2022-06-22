@@ -43,7 +43,7 @@ def main():
         else:
             print("The electrode model is wrong.")
     my_d = raser.R3dDetector(dset)
-    my_f = raser.FenicsCal(my_d,dset.fenics,dset.detector)
+    my_f = raser.FenicsCal(my_d,dset.fenics)
     my_g4p = raser.Particles(my_d, my_f, dset)
     if "3Dscan" not in dset.det_model:
         my_current = raser.CalCurrent(my_d, my_f, my_g4p, dset)
