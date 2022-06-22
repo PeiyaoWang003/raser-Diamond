@@ -45,7 +45,7 @@ class Particles:
         physics_list.SetVerboseLevel(1)
         physics_list.RegisterPhysics(g4b.G4StepLimiterPhysics())
         gRunManager.SetUserInitialization(physics_list)
-        # define golbal parameter
+        # define global parameter
         global s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
         s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle=[],[],[],[],[]
 

@@ -14,13 +14,13 @@ import math
 #The drift of generated particles
 class CalCurrent:
     def __init__(self, my_d, my_f, my_g4p, dset, batch=0):
-        #mobility related with the magnetic field (now silicon useless)
+        #mobility related with the magnetic field
         self.muhh=1650.0   
         self.muhe=310.0
         self.BB=np.array([0,0,0])
         self.sstep=dset.steplength #drift step
         self.det_dic = dset.detector
-        self.max_drift_len=1e9 #maximum diftlenght [um]
+        self.max_drift_len=1e9 #maximum driftlength [um]
         self.parameters(my_g4p, my_d, batch)
         self.ionized_drift(my_f,my_d)
             
@@ -75,9 +75,9 @@ class CalCurrent:
             self.ionized_pairs=self.energy_deposition(my_d,i)
             for j in range(2):
                 if (j==0):
-                    self.charg=1 #hole
+                    self.eorh=1 #hole
                 if (j==1):
-                    self.charg=-1 #electron 
+                    self.eorh=-1 #electron 
                 self.loop_electon_hole(my_f,my_d,i)
         self.get_current(my_d)
 
@@ -147,7 +147,7 @@ class CalCurrent:
 
     def delta_p(self):
         """ sstep(1um) split to three position """
-        if(self.charg)>0:
+        if(self.eorh)>0:
             eorh = 1
             FF=self.list_add(self.e_field,
                              self.cross(self.e_field,self.BB,self.muhh))
@@ -193,7 +193,7 @@ class CalCurrent:
         aver_e = (self.root_mean_square(self.e_field) 
                   + te_delta_f)/2.0*1e4            # V/cm
 
-        mobility = sic_mobility(self.charg,aver_e,my_d,self.det_dic,self.d_z+self.delta_z)  # mobility cm2/(V s) v : cm/s
+        mobility = sic_mobility(self.eorh,aver_e,my_d,self.det_dic,self.d_z+self.delta_z)  # mobility cm2/(V s) v : cm/s
         self.v_drift = mobility*aver_e 
         #drift part
         if(self.v_drift==0):
@@ -252,7 +252,7 @@ class CalCurrent:
         self.wpot = my_f.get_w_p(self.d_cx,self.d_cy,self.d_cz)
         delta_Uw = (self.wpot 
                     - my_f.get_w_p(self.d_x,self.d_y,self.d_z))
-        self.charge=self.charg*delta_Uw
+        self.charge=self.eorh*delta_Uw
         if(self.v_drift!=0):
             self.d_time=self.d_time+self.sstep*1e-4/self.v_drift
             self.path_len+=self.sstep
@@ -279,7 +279,7 @@ class CalCurrent:
         """ Save the information in the dictionary """
         if(((self.charge<0 and my_d.v_voltage<0)  
              or (self.charge>0 and my_d.v_voltage>0))): 
-            if(self.charg>0):
+            if(self.eorh>0):
                 self.d_dic_p["tk_"+str(self.n_track)][0].append(self.d_x)
                 self.d_dic_p["tk_"+str(self.n_track)][1].append(self.d_y)
                 self.d_dic_p["tk_"+str(self.n_track)][2].append(self.d_z)
