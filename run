@@ -59,7 +59,7 @@ export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
 
 sub_1_1(){
 case $option in 
-    1.1.0) echo "Loadding TRACK into Singularity..."
+    1.1.0) echo "Loading TRACK into Singularity..."
         track 
         ;; 
     1.1.1) echo "NJU-SiC-PIN basic information for RASER simulation ..."
