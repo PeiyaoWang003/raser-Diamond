@@ -31,7 +31,7 @@ class Particles:
             2021/09/02
         """	
         g4_dic = dset.pygeant4
-        my_g4d = MyDetectorConstruction(my_d,my_f,g4_dic['name'],g4_dic['maxstep'])		
+        my_g4d = MyDetectorConstruction(my_d,my_f,g4_dic['det_model'],g4_dic['maxstep'])		
         if g4_dic['g4_vis']: 
             ui = None
             ui = g4b.G4UIExecutive(len(sys.argv), sys.argv)
@@ -45,7 +45,7 @@ class Particles:
         physics_list.SetVerboseLevel(1)
         physics_list.RegisterPhysics(g4b.G4StepLimiterPhysics())
         gRunManager.SetUserInitialization(physics_list)
-        # define golbal parameter
+        # define global parameter
         global s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
         s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle=[],[],[],[],[]
 
@@ -66,10 +66,12 @@ class Particles:
         if g4_dic['g4_vis']:  
             ui.SessionStart()
         self.p_steps=s_p_steps
+        self.init_tz_device = my_g4d.init_tz_device
+        self.p_steps_current=[[[single_step[0],single_step[1],single_step[2]-self.init_tz_device]\
+            for single_step in p_step] for p_step in self.p_steps]
         self.energy_steps=s_energy_steps
         self.edep_devices=s_edep_devices
         self.events_angle=s_events_angle
-        self.init_tz_device = my_g4d.init_tz_device
         del s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
         
     def __del__(self):

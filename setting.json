@@ -3,14 +3,15 @@
     {
         "steplength" : 0.1,
         "total_events" : 1000,
-        "name" : "planar3D",
-        "custom_electron" : "False",
+        "det_model" : "planar3D",
+
         "lx" : 1000,
         "ly" : 1000,
         "lz" : 100,
         "doping" : 10,  
         "voltage" : -500,
         "temp" : 300.0,
+        "material" : "SiC",
 
         "mesh" : 32,
         "xyscale" : 10,
@@ -37,19 +38,22 @@
     {
         "steplength" : 0.2,
         "total_events" : 10000,
-        "name" : "plugin3D",
-        "custom_electron" : "False",
+        "det_model" : "plugin3D",
+        "custom_electrode" : "False",
+
         "lx" : 10000,
         "ly" : 10000,
         "lz" : 350,
         "doping" : 10,
         "voltage" : -500,
         "temp" : 300.0,
+        "material" : "SiC",
         "e_ir" : 50.0,
         "e_gap" : 150.0,
 
         "mesh" : 32,
         "xyscale" : 1,
+        
         "maxstep" : 1,
         "g4_vis" : 0,
         "par_inx" : 5000,
