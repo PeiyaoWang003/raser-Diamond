@@ -27,7 +27,54 @@ python/time_scan.py[循环上程序并得到时间分辨与变化参数的关系
 对每个接下来的模块，提供一个参数字典，尽量让模块需要传入的参数都集中在这个字典里
 目前各类参数出入关系大致如下：
 
-![1](1.PNG)
+```mermaid
+flowchart TD
+
+Setting==参数字典==>Detector & FEniCS & Geant4 & CalCurrent & EleCurrent
+
+subgraph Setting
+end
+
+subgraph Detector
+长宽/温度 & 电流数据
+end
+
+subgraph FEniCS
+电场 & 加权场
+end
+
+subgraph Geant4
+模拟设备 & 粒子路径
+end
+
+subgraph CalCurrent
+载流子路径 & 载流子信号
+end
+
+subgraph EleCurrent
+CSA & BB
+end
+
+长宽/温度--边界条件-->加权场 & 电场 & 模拟设备
+
+长宽/温度--游走规则-->粒子路径
+
+电场--"有效边界条件（3D）"-->模拟设备
+
+模拟设备--能量/游走规则-->粒子路径
+
+粒子路径--载流子表-->载流子路径
+
+电场--欧姆定律-->载流子路径
+
+载流子路径-->载流子信号
+
+加权场--肖克莱-拉莫定理-->载流子信号
+
+载流子信号--储存-->电流数据
+
+电流数据--处理-->CSA & BB
+```
 
 2、Detector类
 包括：
