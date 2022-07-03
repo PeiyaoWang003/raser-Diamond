@@ -57,8 +57,7 @@ class Setting:
             else:
                 paras[x] = paras[x]
         self.paras = paras
-
-
+        
     @property
     def detector(self):
         """
@@ -88,17 +87,32 @@ class Setting:
         """
         p = self.paras
         if "planar3D" in self.det_model:
-            detector = {'det_model':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 
-                        'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
-                        'voltage':p['voltage'], 'temp':p['temp'],
+            detector = {'det_model':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
+                        'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
+                        'doping':p['doping'], 
                         }
             
         if "plugin3D" in self.det_model:
-            detector = {'det_model':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 
-                        'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
-                        'voltage':p['voltage'], 'temp':p['temp'], 
+            detector = {'det_model':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
+                        'material':p['material'],'voltage':p['voltage'], 'temp':p['temp'], 
+                        'doping':p['doping'], 
                         'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electrode': p['custom_electrode']
                         }
+        if "lgad3D" in self.det_model:
+            if p['part']==2:
+                detector = {'det_model':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
+                            'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
+                            'part':p['part'], 'bond1':p['bond1'], 
+                            'doping1':p['doping1'], 'doping2':p['doping2'],
+                            'Avalanche':p['Avalanche']
+                            }
+            if p['part']==3:
+                detector = {'det_model':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
+                            'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
+                            'part':p['part'], 'bond1':p['bond1'], 'bond2':p['bond2'], 
+                            'doping1':p['doping1'],'doping2':p['doping2'], 'doping3':p['doping3'],
+                            'Avalanche':p['Avalanche']
+                            }
         return detector
 
     def electron_custom(self,electrodes):
@@ -119,18 +133,20 @@ class Setting:
             Mesh precision value, the bigger the higher the accuracy
         xyscale : int
             In plane detector, scale_xy is scaling sensor 50 times at x and 
-            y axis, so the precision can improve 50 times in echo distance 
-
+            y axis, so the precision can improve 50 times in echo distance
         @Returns:
         ---------
             A dictionary containing all parameters used in fenics  
         @Modify:
         ---------
-            2021/09/02
+            2022/05/15
         """
         p = self.paras
         if "planar3D" in self.det_model:
             fenics = {'det_model':'planar3D', 
+                      'mesh':p['mesh'], "xyscale":p['xyscale']}
+        if "lgad3D" in self.det_model:
+            fenics = {'det_model':'lgad3D',
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "plugin3D" in self.det_model:
             fenics = {'det_model':'plugin3D', 
@@ -161,20 +177,13 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model:
-            pygeant4 = {'det_model':'planar3D',
-                        'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
-                        'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
-                        "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],
-                        }
-        if "plugin3D" in self.det_model:
-            pygeant4 = {'det_model':'plugin3D', 
-                        'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
-                        'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
-                        "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],
-                        }
+        pygeant4 = {'det_model':self.det_model,
+                    'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
+                    'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
+                    "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],
+                    }
         return pygeant4
-
+       
     @property
     def amplifier(self):
         """

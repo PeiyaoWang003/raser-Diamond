@@ -30,8 +30,11 @@ class R3dDetector:
         self.l_x = det_dic['lx'] 
         self.l_y = det_dic['ly']  
         self.l_z = det_dic['lz'] 
-
-        self.d_neff = det_dic['doping'] 
+        if det_dic['det_model'] == "lgad3D":
+            self.lgad_dic = det_dic
+        else:
+            self.d_neff = det_dic['doping'] 
+        
         self.v_voltage = det_dic['voltage'] 
         self.temperature = det_dic['temp']
         self.material = det_dic['material']
@@ -68,6 +71,10 @@ class R3dDetector:
         self.positive_cu = ROOT.TH1F("charge+", "Positive Current",
                                      self.n_bin, self.t_start, self.t_end)
         self.negative_cu = ROOT.TH1F("charge-", "Negative Current",
+                                     self.n_bin, self.t_start, self.t_end)
+        self.gain_positive_cu = ROOT.TH1F("gain_charge+","Current Contribution",
+                                     self.n_bin, self.t_start, self.t_end)
+        self.gain_negative_cu = ROOT.TH1F("gain_charge-","Gain Negative Current",
                                      self.n_bin, self.t_start, self.t_end)
         self.sum_cu = ROOT.TH1F("charge","Total Current",
                                 self.n_bin, self.t_start, self.t_end)

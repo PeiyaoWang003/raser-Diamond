@@ -13,17 +13,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 from array import array
 
-
 #Calculate the weighting potential and electric field
 class FenicsCal:
-
     def __init__(self,my_d,fen_dic):
         self.p_electric = []
         self.w_p_electric = []
         self.det_model = fen_dic['det_model']
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
         self.fl_y=my_d.l_y/fen_dic['xyscale']
+        if self.det_model == "lgad3D":
+            self.lgad_dic = my_d.lgad_dic
+            if self.lgad_dic['part']==2:
+                self.avalanche_bond = self.bond = self.lgad_dic['bond1']
+            elif self.lgad_dic['part'] == 3:
+                self.avalanche_bond = self.lgad_dic['bond1']
+                self.bond = self.lgad_dic['bond2']
+            else:
+                raise NameError
         self.fl_z=my_d.l_z
+
         self.tol = 1e-14
         m_sensor_box=self.fenics_space(my_d)
         self.mesh3D = mshr.generate_mesh(m_sensor_box,fen_dic['mesh'])
@@ -52,7 +60,7 @@ class FenicsCal:
                                      fenics.Point(e_t_i[0],e_t_i[1],e_t_i[4]),
                                      e_t_i[2],e_t_i[2])
                 m_sensor =m_sensor - elec_n 
-        elif "planar3D" in self.det_model:
+        elif "planar3D" or "lgad3D"in self.det_model:
             m_sensor =  mshr.Box(fenics.Point(0, 0, 0), 
                                  fenics.Point(self.fl_x, self.fl_y, self.fl_z))
         else:
@@ -116,13 +124,30 @@ class FenicsCal:
         if  "plugin3D" in self.det_model:
             bc_l=[]
             bc_l = self.boundary_definition_3D(my_d,"Possion")          
-        elif "planar3D" in self.det_model:
+        elif "planar3D" or "lgad3D" in self.det_model:
             bc_l = self.boundary_definition_2D(my_d,"Possion")
 
         u = fenics.TrialFunction(self.V)
         v = fenics.TestFunction(self.V)
-
-        f = fenics.Constant(self.f_value(my_d))
+        if "lgad3D" in self.det_model:
+            if self.lgad_dic['part']==2:
+                bond = self.lgad_dic['bond1']
+                doping_avalanche = self.f_value(my_d,self.lgad_dic['doping1'])
+                doping = self.f_value(my_d,self.lgad_dic['doping2'])
+                f = fenics.Expression('x[2] < width + tol ? doping1 : doping2',\
+                    degree=1,width=bond,doping1=doping_avalanche,doping2=doping, tol = self.tol)
+            elif self.lgad_dic['part'] == 3:
+                bond1 = self.lgad_dic['bond1']
+                bond2 = self.lgad_dic['bond2']
+                doping1 = self.f_value(my_d,self.lgad_dic['doping1'])
+                doping2 = self.f_value(my_d,self.lgad_dic['doping2'])
+                doping3 = self.f_value(my_d,self.lgad_dic['doping3'])
+                f = fenics.Expression('x[2] < bonda - tol ? dopinga : (x[2] > bondb + tol ? dopingc : dopingb)',\
+                    degree = 1, bonda = bond1, bondb = bond2, dopinga=doping1, dopingb = doping2, dopingc = doping3, tol = self.tol)
+            else:
+                print("The structure of lgad is wrong.")
+        else:
+            f = fenics.Constant(self.f_value(my_d))
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
         L = f*v*fenics.dx
         # Compute solution
@@ -147,7 +172,7 @@ class FenicsCal:
         if  "plugin3D" in self.det_model:
             bc_l = []
             bc_l = self.boundary_definition_3D(my_d,"Laplace")
-        elif "planar3D" in self.det_model:
+        elif "planar3D" or "lgad3D" in self.det_model:
             bc_l = self.boundary_definition_2D(my_d,"Laplace")
         # Define variational problem
         u_w = fenics.TrialFunction(self.V)
@@ -257,18 +282,21 @@ class FenicsCal:
         if my_d.material == 'Si':
             perm_mat = 11.7  
         elif my_d.material == 'SiC':
-            perm_mat = 9.76 
+            perm_mat = 9.76  
         else:
             print("material is wrong")            
         e0 = 1.60217733e-19
         perm0 = 8.854187817e-12   #F/m
-        f_value = e0*my_d.d_neff*1e6/perm0/perm_mat
+        if self.det_model=="lgad3D":
+            f_value = e0*input_doping*1e6/perm0/perm_mat
+        else:
+            f_value = e0*my_d.d_neff*1e6/perm0/perm_mat
         return f_value
         
     def get_e_field(self,px,py,pz):
         """
         @description: 
-            Get eletric field at the px,py,pz position
+            Get eletric field at the px,py,pz position in V/um
         @param:
             out_range -- out_range = False
                       -- Position (x,y,z) don't exit in sensor fenics range
@@ -281,10 +309,12 @@ class FenicsCal:
         if out_range:   
             x_value,y_value,z_value = 0,0,0
         else:
+            E_scale=1
             scale_px=px%self.fl_x
-            scale_py=py%self.fl_y          
+            scale_py=py%self.fl_y
+            scale_pz=pz
             try:
-                x_value,y_value,z_value = self.E_field(scale_px,scale_py,pz)
+                x_value,y_value,z_value = E_scale*self.E_field(scale_px,scale_py,scale_pz)
             except RuntimeError:
                 x_value,y_value,z_value = 0,0,0
         return x_value,y_value,z_value
@@ -306,9 +336,10 @@ class FenicsCal:
             f_w_p = 1.0
         else:
             scale_px=px%self.fl_x
-            scale_py=py%self.fl_y   
+            scale_py=py%self.fl_y
+            scale_pz=pz
             try:
-                f_w_p = self.u_w(scale_px,scale_py,pz)
+                f_w_p = self.u_w(scale_px,scale_py,scale_pz)
             except RuntimeError:
                 f_w_p = 0.0
         return f_w_p
@@ -330,9 +361,10 @@ class FenicsCal:
             f_w_p = 0
         else:
             scale_px=px%self.fl_x
-            scale_py=py%self.fl_y   
+            scale_py=py%self.fl_y
+            scale_pz=pz   
             try:
-                f_w_p = self.u(scale_px,scale_py,pz)
+                f_w_p = self.u(scale_px,scale_py,scale_pz)
             except RuntimeError:
                 f_w_p = 0.0
         return f_w_p
@@ -353,7 +385,7 @@ class FenicsCal:
                 out_range=True
             else:
                 out_range=False
-        elif "planar3D" in self.det_model:
+        elif "planar3D" or "lgad3D" in self.det_model:
             out_range=False
         return out_range
     
