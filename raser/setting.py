@@ -33,7 +33,7 @@ class Setting:
         """
         self._pardic = {}
         self.input2dic(parameters)
-        self.name = self._pardic['det_model']
+        self.det_model = self._pardic['det_model']
         if "laser_model" in self._pardic:
             self.laser_model = self._pardic['laser_model']
         self.read_par(self._pardic['parfile'])
@@ -51,12 +51,9 @@ class Setting:
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
-            if dic_par['name'] in self.name:
+            if dic_par['det_model'] in self.det_model:
                 self.steplength = float(dic_par['steplength'])
                 paras = dic_par
-            if "laser_model" in self._pardic\
-            and dic_par['name'] in self.laser_model:
-                paras.update(dic_par)
         for x in paras: 
             if self.is_number(paras[x]):          
                 paras[x] = float(paras[x])
@@ -94,16 +91,16 @@ class Setting:
         """
         p = self.paras
         if "planar3D" in self.det_model:
-            detector = {'name':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 
-                        'lz':p['lz'], 'doping':p['doping'], 
-                        'voltage':p['voltage'], 'temp':p['temp'], 'custom_electron': p['custom_electron']
+            detector = {'det_model':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 
+                        'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
+                        'voltage':p['voltage'], 'temp':p['temp'],
                         }
             
         if "plugin3D" in self.det_model:
-            detector = {'name':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 
-                        'lz':p['lz'], 'doping':p['doping'], 
+            detector = {'det_model':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 
+                        'lz':p['lz'], 'doping':p['doping'], 'material':p['material'],
                         'voltage':p['voltage'], 'temp':p['temp'], 
-                        'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electron': p['custom_electron']
+                        'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electrode': p['custom_electrode']
                         }
         if "lgad3D" in self.det_model:
             if p['part']==2:
@@ -151,13 +148,13 @@ class Setting:
         """
         p = self.paras
         if "planar3D" in self.det_model:
-            fenics = {'name':'planar3D', 
+            fenics = {'det_model':'planar3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "lgad3D" in self.det_model:
             fenics = {'name':'lgad3D',
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         if "plugin3D" in self.det_model:
-            fenics = {'name':'plugin3D', 
+            fenics = {'det_model':'plugin3D', 
                       'mesh':p['mesh'], "xyscale":p['xyscale']}
         return fenics
 
@@ -185,14 +182,14 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model or "lgad3D" in self.det_model:
-            pygeant4 = {'name':'planar3D',
+        if "planar3D" in self.det_model:
+            pygeant4 = {'det_model':'planar3D',
                         'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                         'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
                         "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],
                         }
         if "plugin3D" in self.det_model:
-            pygeant4 = {'name':'plugin3D', 
+            pygeant4 = {'det_model':'plugin3D', 
                         'maxstep':p['maxstep'], 'g4_vis':p['g4_vis'],
                         'par_in':[p['par_inx'], p['par_iny'], p['par_inz']], 
                         "par_out":[p['par_outx'], p['par_outy'], p['par_outz']],
@@ -254,12 +251,12 @@ class Setting:
             if 'l_Rayleigh' in p:
                 laser.update({'l_Rayleigh':p['l_Rayleigh']})
         return laser
-
+        
     @property
-    def amplifer(self):
+    def amplifier(self):
         """
         Description:
-            Define differnet amplifers parameters
+            Define diffrenet amplifiers parameters
         Parameters:
         ---------
         maxstep : float

@@ -10,22 +10,19 @@ import random
 import numpy as np
 import ROOT
 import math
-import sys
-from array import array
 from raser.model import Mobility
 from raser.model import Avalanche
 
 #The drift of generated particles
 class CalCurrent:
     def __init__(self, my_d, my_f, my_g4p, dset, batch=0):
-        #mobility related with the magnetic field (now silicon useless)
+        #mobility related with the magnetic field
         self.muhh=1650.0   
         self.muhe=310.0
         self.BB=np.array([0,0,0])
         self.sstep=dset.steplength #drift step
         self.det_dic = dset.detector
-        self.kboltz=8.617385e-5 #eV/K
-        self.max_drift_len=1e9 #maximum diftlenght [um]
+        self.max_drift_len=1e9 #maximum driftlength [um]
         self.parameters(my_g4p, my_d, batch)
         self.ionized_drift(my_f,my_d)
         if (self.det_dic['name'] == "lgad3D"):
@@ -87,9 +84,9 @@ class CalCurrent:
             self.ionized_pairs=self.energy_deposition(my_d,i)
             for j in range(2):
                 if (j==0):
-                    self.charg=1 #hole
+                    self.eorh=1 #hole
                 if (j==1):
-                    self.charg=-1 #electron 
+                    self.eorh=-1 #electron 
                 self.loop_electon_hole(my_f,my_d,i)
         self.get_current(my_d)
 
@@ -192,7 +189,7 @@ class CalCurrent:
 
     def delta_p(self):
         """ sstep(1um) split to three position """
-        if(self.charg)>0:
+        if(self.eorh)>0:
             eorh = 1
             FF=self.list_add(self.e_field,
                              self.cross(self.e_field,self.BB,self.muhh))
@@ -260,7 +257,8 @@ class CalCurrent:
             #    print("the eletric field is too big, \
             #           the multiplication appear. The result might be unrealistic. ")
             self.s_time = self.sstep*1e-4/self.v_drift
-            s_sigma = math.sqrt(2.0*self.kboltz*mobility
+            kboltz=8.617385e-5 #eV/K
+            s_sigma = math.sqrt(2.0*kboltz*mobility
                                 *my_d.temperature*self.s_time)
             self.dif_x=random.gauss(0.0,s_sigma)*1e4
             self.dif_y=random.gauss(0.0,s_sigma)*1e4
@@ -299,7 +297,7 @@ class CalCurrent:
         self.wpot = my_f.get_w_p(self.d_cx,self.d_cy,self.d_cz)
         delta_Uw = (self.wpot 
                     - my_f.get_w_p(self.d_x,self.d_y,self.d_z))
-        self.charge=self.charg*delta_Uw
+        self.charge=self.eorh*delta_Uw
         if(self.v_drift!=0):
             self.d_time=self.d_time+self.sstep*1e-4/self.v_drift
             self.path_len+=self.sstep
@@ -323,7 +321,6 @@ class CalCurrent:
         else:
             pass
 
-
     def drift_end_condition(self): 
         """ Judge whether the drift loop should end """
         if(self.wpot>(1-1e-5)):
@@ -343,7 +340,7 @@ class CalCurrent:
         """ Save the information in the dictionary """
         if(((self.charge<0 and my_d.v_voltage<0)  
              or (self.charge>0 and my_d.v_voltage>0))): 
-            if(self.charg>0):
+            if(self.eorh>0):
                 self.d_dic_p["tk_"+str(self.n_track)][0].append(self.d_x)
                 self.d_dic_p["tk_"+str(self.n_track)][1].append(self.d_y)
                 self.d_dic_p["tk_"+str(self.n_track)][2].append(self.d_z)
@@ -396,6 +393,7 @@ class CalCurrent:
         #     n_scale = self.landau_t_pairs/total_pairs
         # else:
         #     n_scale=0
+
         my_d.sum_cu.Add(my_d.positive_cu)
         my_d.sum_cu.Add(my_d.negative_cu)
         # my_d.sum_cu.Scale(n_scale)

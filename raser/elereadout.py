@@ -15,7 +15,7 @@ class Amplifier:
     def __init__(self,my_d,ampl_par,mintstep="50e-12"):
         """
         Description:
-            Get current after CSA and BB amplifer
+            Get current after CSA and BB amplifier
         Parameters:
         ---------
         CSA_par : dic

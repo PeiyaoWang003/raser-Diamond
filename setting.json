@@ -3,15 +3,16 @@
     {
         "steplength" : 0.1,
         "total_events" : 1000,
+        "det_model" : "planar3D",
         "name" : "planar3D",
-        "type" : "planar3D",
-        "custom_electron" : "False",
+
         "lx" : 1000,
         "ly" : 1000,
         "lz" : 100,
         "doping" : 10,  
         "voltage" : -500,
         "temp" : 300.0,
+        "material" : "SiC",
 
         "mesh" : 32,
         "xyscale" : 10,
@@ -39,7 +40,7 @@
         "steplength" : 0.1,
         "total_events" : 10000,
         "name" : "SICAR-1",
-        "type" : "lgad3D",
+        "det_model" : "lgad3D",
         "custom_electron" : "False",
         "lx" : 1000,
         "ly" : 1000,
@@ -78,7 +79,7 @@
         "steplength" : 0.1,
         "total_events" : 10000,
         "name" : "NJU_lgad_v3",
-        "type" : "lgad3D",
+        "det_model" : "lgad3D",
         "custom_electron" : "False",
         "lx" : 1000,
         "ly" : 1000,
@@ -119,7 +120,7 @@
         "steplength" : 0.2,
         "total_events" : 10000,
         "name" : "plugin3D",
-        "type" : "plugin3D",
+        "det_model" : "plugin3D",
         "custom_electron" : "True",
         "lx" : 10000,
         "ly" : 10000,
@@ -133,6 +134,7 @@
 
         "mesh" : 32,
         "xyscale" : 1,
+        
         "maxstep" : 1,
         "g4_vis" : 0,
         "par_inx" : 5000,
