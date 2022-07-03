@@ -250,12 +250,6 @@ class CalCurrent:
             self.dif_z=0.0
             self.end_cond=9
         else:
-            #off when the field gets large enough
-            #DiffOffField=100.0  # if the electric field  
-                                # > 100V/um, the holes will multiplicat             
-            #if (te_delta_f > DiffOffField) and (self.det_dic['det_model'] != "lgad3D"):
-            #    print("the eletric field is too big, \
-            #           the multiplication appear. The result might be unrealistic. ")
             self.s_time = self.sstep*1e-4/self.v_drift
             kboltz=8.617385e-5 #eV/K
             s_sigma = math.sqrt(2.0*kboltz*mobility
@@ -386,17 +380,8 @@ class CalCurrent:
             test_p.Reset()
             test_n.Reset()
 
-        # self.landau_t_pairs = self.tracks_t_edep*1e6/sic_loss_e
-        # print("landau_t_pairs=%s"%self.landau_t_pairs)
-
-        # if total_pairs != 0:
-        #     n_scale = self.landau_t_pairs/total_pairs
-        # else:
-        #     n_scale=0
-
         my_d.sum_cu.Add(my_d.positive_cu)
         my_d.sum_cu.Add(my_d.negative_cu)
-        # my_d.sum_cu.Scale(n_scale)
 
     def get_current_gain(self,my_d):
         """ Charge distribution to gain current"""
