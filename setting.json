@@ -118,7 +118,7 @@
         "total_events" : 10000,
         "name" : "plugin3D",
         "det_model" : "plugin3D",
-        "custom_electron" : "True",
+        "custom_electrode" : "True",
         "lx" : 10000,
         "ly" : 10000,
         "lz" : 350,
