@@ -23,10 +23,9 @@ class Setting:
         _pardic : dictionaries
             Storage the input parameters
         steplength : float
-            The length of  each step for e-h pairs drift
+            The length of single step for e-h pairs to drift
         laser_model : str
-            Define the Laser Absorption Pattern 
-        
+            Define the absorption pattern of laser
         @Modify:
         ---------
             2021/09/02
@@ -47,7 +46,7 @@ class Setting:
             self._pardic[name]=value
 
     def read_par(self,jsonfile):
-        "Read the setting.json file and save the input parametersin paras"
+        "Read the setting.json file and save the input parameters in paras"
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
@@ -62,7 +61,7 @@ class Setting:
         self.paras = paras
 
     def read_par_laser(self,jsonfile):
-        "Read the setting.json file and save the input parametersin paras"
+        "Read the laser_setting.json file and save the input parameters in paras"
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
@@ -79,8 +78,8 @@ class Setting:
     def detector(self):
         """
         Description:
-            Define differnet types detectors parameters. Like:
-            planar3D, plugin3D
+            Define different types detectors parameters. 
+            Like: planar3D, plugin3D, lgad3D
         Parameters:
         ---------
         lx,ly,lz : float
@@ -91,7 +90,7 @@ class Setting:
             -- P-type is negetive (positive volatge applied)
         temp : float
             Tempareture
-        e_ir : float
+        e_r : float
             Radius of electrode in 3D
         e_gap : float
             Spacing between the electrodes in 3D
@@ -113,7 +112,7 @@ class Setting:
             detector = {'det_model':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
                         'material':p['material'],'voltage':p['voltage'], 'temp':p['temp'], 
                         'doping':p['doping'], 
-                        'e_ir':p['e_ir'], 'e_gap':p['e_gap'], 'custom_electrode': p['custom_electrode']
+                        'e_r':p['e_r'], 'e_gap':p['e_gap'], 'custom_electrode': p['custom_electrode']
                         }
         if "lgad3D" in self.det_model:
             if p['part']==2:
@@ -143,7 +142,7 @@ class Setting:
     def fenics(self):
         """
         Description:
-            Define differnet fenics parameters
+            Define different fenics parameters
         Parameters:
         ---------
         mesh : int
@@ -174,7 +173,7 @@ class Setting:
     def pygeant4(self):
         """
         Description:
-            Define differnet geant4 parameters
+            Define different geant4 parameters
         Parameters:
         ---------
         maxstep : float
@@ -206,6 +205,7 @@ class Setting:
         """
         Description:
             Define laser parameters
+        
         Parameters:
         ---------
         tech : str
@@ -234,9 +234,11 @@ class Setting:
         r_step, h_step : float
             the Step Length of Block in um,
             Carriers Generated in the Same Block Have the Same Drift Locus
+        
         @Returns:
         ---------
-            A dictionary containing all parameters used in TCTTracks 
+            A dictionary containing all parameters used in TCTTracks
+        
         @Modify:
         ---------
             2021/09/08
@@ -264,18 +266,20 @@ class Setting:
             Define diffrenet amplifiers parameters
         Parameters:
         ---------
-        maxstep : float
-            Simulate the step size of each step in Geant4
-        par_in : list
-            Incident particle position
-        par_out : list
-            Theoretical position of outgoing particles
-        g4_vis : bool
-            False: Do not display graphical interface of geant4 partivles
-            True: Do not display graphical interface of geant4 partivles
+        t_rise : 
+        t_fall :
+        trans_imp :
+        CDet :
+
+        BBW : 
+        BBGain :
+        BB_imp :
+        OscBW :
+
         @Returns:
         ---------
-            A dictionary containing all parameters used in geant4  
+            Two dictionary containing all parameters used for two types of amplifiers:
+            current sensitive (CSA) and charge sensitive (BB)
         @Modify:
         ---------
             2021/09/02
@@ -303,7 +307,7 @@ class Setting:
             self.g4seed = 0 
 
     def is_number(self,s):
-        "Define whethre the s is a number or not"
+        "Define whether the s is a number or not"
         try:
             float(s)
             return True

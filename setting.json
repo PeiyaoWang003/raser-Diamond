@@ -86,7 +86,7 @@
         "voltage" : -500,
         "temp" : 300.0,
         "material" : "SiC",
-        "e_ir" : 50.0,
+        "e_r" : 50.0,
         "e_gap" : 150.0,
 
         "mesh" : 32,

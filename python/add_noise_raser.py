@@ -5,7 +5,7 @@ author: tanyuhang
 time: 2021.3.8
 Use: 1.Read the data of Raser induced current
      2.Add the noise on induced current
-     3.Get the time resolution with constance CFD   
+     3.Get the time resolution with constant CFD   
 """
 
 from array import array
@@ -69,7 +69,7 @@ h_noise_height.clear()
 
 
 # The judge parameter configuration and read data
-class Settting:
+class NoiseSetting:
     def __init__(self):
         pass
     
@@ -95,7 +95,7 @@ class Settting:
         
     def create_outpath(self,path):
         """
-        @description: If the path is not exit, then create the path
+        @description: If the path is not exit, create the path
          
         @param:
             None
@@ -148,7 +148,6 @@ class Settting:
                     continue
                 list_c.append(line)
 
-
 # Add noise in the wavefroms and save the data in dictionaries
 class AddNoise:
     def __init__(self):
@@ -177,7 +176,7 @@ class AddNoise:
     def add_n(self,list_c):
         """
         @description: 
-            Add gauss noise from data fitting at the waveforms
+            Add Gaussian noise from data fitting at the waveforms
         @param:
             nps -- Noise plus signal
             s -- Signal
@@ -263,7 +262,6 @@ class AddNoise:
 
         self.ampl_paras["noise_height_list"] = self.noise_height_list
 
-
 # Root file init definition and fill
 class RootFile:
     def init_parameter(self):
@@ -289,7 +287,7 @@ class RootFile:
         h_noise_height.clear()
 
     def root_define(self):
-        """ Root tree branceh definition """
+        """ Root tree branch definition """
         self.tree_out=ROOT.TTree('tree','tree')
         self.tree_out.Branch('Events',Events,'Events/I')
         self.tree_out.Branch('h_pulse_time',h_pulse_time)
@@ -361,7 +359,7 @@ class RootFile:
         h_BB_per80_20_time[0]=addNoise.per80_20_time["CSA"]
         addNoise.CSA_Fv=1  
               
-    def fill_verctor(self,rset,addNoise):
+    def fill_vector(self,rset,addNoise):
         """ Fill parameters from CSA and CSA vector """ 
         if (addNoise.BB_Fv==1 or addNoise.CSA_Fv==1):
             for j in range(0,len(addNoise.time_list)):
@@ -371,7 +369,6 @@ class RootFile:
                 h_BB_nps_height.push_back(addNoise.ampl_paras["ampl_BB_nps_list"][j])
                 h_CSA_nps_height.push_back(addNoise.ampl_paras["ampl_CSA_nps_list"][j])
                 h_noise_height.push_back(addNoise.ampl_paras["noise_height_list"][j])
-
 
 def judge_threshold(addNoise,rset,tree_class,model):
     """
@@ -393,7 +390,6 @@ def judge_threshold(addNoise,rset,tree_class,model):
             tree_class.fill_ampl_BB(addNoise,rset,max_height,max_time)
         elif model == "CSA":
             tree_class.fill_ampl_CSA(addNoise,rset,max_height,max_time)
-
 
 def get_CFD_time(addNoise,Ampl_paras,rset,model):
     """
@@ -487,7 +483,6 @@ def noise_from_sensor_capacitance():
     DCap +=50 # fF fixed 
     noise_sen = 2.0*DCap/math.sqrt(1) 
 
-
 def save_waveform_threshold(output_file,event_n,addNoise):
     """ Save waveform in the outputfile """ 
     # print(output_file)
@@ -504,7 +499,6 @@ def save_waveform_threshold(output_file,event_n,addNoise):
     f1.close()
     return event_n+1        
 
-
 def FormatLegend(leg):
     """ ROOT Lengend setting """ 
     leg.SetBorderSize(False)
@@ -514,7 +508,6 @@ def FormatLegend(leg):
     leg.SetFillColor(1)
     leg.SetLineColor(0) 
     leg.SetLineStyle(0)
-
 
 def set_color_marker(color,marker,i,gr):
     """ ROOT color and marker setting """ 
@@ -526,7 +519,6 @@ def set_color_marker(color,marker,i,gr):
     gr.SetLineWidth(2)
     gr.SetMarkerColor(k)
     return gr
-
 
 def fill_legend(leg,gr,name):
     """ Fill graph name in lengend """ 
@@ -550,7 +542,6 @@ def is_number(s):
     except (TypeError, ValueError):
         pass
     return False
-
 
 def draw_2D_CFD_time(CFD_time,out_put,model):
     """
@@ -637,7 +628,6 @@ def fit_data(histo,model):
     fit_func_1.SetLineWidth(2)
     return fit_func_1,sigma,error
 
-
 def th1f_define(histo):
     """ TH1f definition """
     histo.GetXaxis().SetTitle("ToA [ns]")
@@ -654,7 +644,6 @@ def th1f_define(histo):
     histo.GetYaxis().CenterTitle()
     histo.SetLineWidth(2)
     return histo
-
 
 def root_tex(sigma,error,model):
     """　Latex definition """
@@ -673,7 +662,7 @@ def root_set():
     ROOT.gStyle.SetOptStat(0)
     ROOT.gROOT.SetBatch(1)
 
-def save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landua_timing,outnumer):
+def save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landau_timing,outnumer):
     o_ls=input_file.split("/")[:]
     out_file=o_ls[0]+"/"+o_ls[1]+"/time_resolution_scan"+str(outnumer)+".csv"
     in_list = o_ls[2].split("_")
@@ -682,10 +671,10 @@ def save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,effici
         keys = [in_list[i].split("=")[0] for i in range(1,len(in_list))]
         values = [in_list[i].split("=")[1] for i in range(1,len(in_list))]
         f.write(keys[0]+","+keys[1]+","+keys[2]+","+keys[3]+","+keys[4]+","
-                + "CSA,BB,CSA_e,BB_e,efficiency,jitter,landua_timing \n")
+                + "CSA,BB,CSA_e,BB_e,efficiency,jitter,Landau_timing \n")
         f.write(values[0]+","+values[1]+","+values[2]+","+values[3]+","
                 + values[4]+","+str(sigma_CSA)+","+str(sigma_BB)
-                +","+ str(error_CSA) +","+ str(error_BB) +","+ str(efficiency) +","+ str(sigma_jitter) +","+ str(Landua_timing) + "\n")
+                +","+ str(error_CSA) +","+ str(error_BB) +","+ str(efficiency) +","+ str(sigma_jitter) +","+ str(Landau_timing) + "\n")
         print("sigmaBB:%s"%sigma_BB)
         print("temperature:%s"%values[4])
 
@@ -719,7 +708,7 @@ def loop_addNoise(input_file,rset,tree_class,out_file):
 
                         judge_threshold(addNoise,rset,tree_class,"BB") 
                         judge_threshold(addNoise,rset,tree_class,"CSA")
-                        tree_class.fill_verctor(rset,addNoise) 
+                        tree_class.fill_vector(rset,addNoise) 
                         #if (addNoise.CFD_time_r["BB"]>0 or addNoise.CFD_time_r["CSA"]>0):
                         #     rset.i=save_waveform_threshold(out_file,rset.i,addNoise)
                         if addNoise.CFD_time_r["BB"]>0:      
@@ -731,14 +720,13 @@ def loop_addNoise(input_file,rset,tree_class,out_file):
     efficiency = rset.i / Events[0]
     return efficiency
 
-
 if __name__ == '__main__':
     args = sys.argv[1:]
     input_file=args[0]
     outnumer = args[1]
     o_ls=input_file.split("/")[:]
     # Outfilename and init_parameter
-    rset = Settting()
+    rset = NoiseSetting()
     out_file=o_ls[0]+"/"+o_ls[1]+"/"+"outfile:"+o_ls[2]+"/"
     rset.create_outpath(out_file)
     rset.loop_out_p()
@@ -752,10 +740,10 @@ if __name__ == '__main__':
     sigma_BB, error_BB=draw_2D_CFD_time(rset.CFD_BB_time,out_file,"BB")
     sigma_CSA, error_CSA=draw_2D_CFD_time(rset.CFD_CSA_time,out_file,"CSA")
     sigma_jitter, error_jitter=draw_2D_CFD_time(rset.CFD_BB_jitter,out_file,"BBjitter")
-    Landua_timing = math.sqrt(abs(sigma_BB*sigma_BB-sigma_jitter*sigma_jitter))
+    Landau_timing = math.sqrt(abs(sigma_BB*sigma_BB-sigma_jitter*sigma_jitter))
     tree_class.tree_out.Write()
     out_root_f.Close()
     if "plugin3D" in o_ls[1]:
-        save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landua_timing,outnumer)  
+        save_time_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency,sigma_jitter,Landau_timing,outnumer)  
     else:
         save_time_planar_resolution(input_file,sigma_BB,sigma_CSA,error_BB,error_CSA,efficiency) 

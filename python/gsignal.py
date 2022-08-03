@@ -61,14 +61,14 @@ def set_electrodes(det_dic,dset):
     l_y = det_dic['ly']  
     l_z = det_dic['lz'] 
     e_int = det_dic['e_gap']
-    e_ir = det_dic['e_ir']
+    e_r = det_dic['e_r']
     e_t_xy = e_int/math.sqrt(2)
     e_tr=[]
-    e_t_1 = [l_x*0.5           , l_y*0.5         , e_ir,0, l_z,"p"]
-    e_t_2 = [l_x*0.5-e_t_xy    , l_y*0.5-e_t_xy  , e_ir,0, l_z,"n"]
-    e_t_3 = [l_x*0.5-e_t_xy    , l_y*0.5+e_t_xy  , e_ir,0, l_z,"n"]
-    e_t_4 = [l_x*0.5+e_t_xy    , l_y*0.5-e_t_xy  , e_ir,0, l_z,"n"]
-    e_t_5 = [l_x*0.5+e_t_xy    , l_y*0.5+e_t_xy  , e_ir,0, l_z,"n"]
+    e_t_1 = [l_x*0.5           , l_y*0.5         , e_r,0, l_z,"p"]
+    e_t_2 = [l_x*0.5-e_t_xy    , l_y*0.5-e_t_xy  , e_r,0, l_z,"n"]
+    e_t_3 = [l_x*0.5-e_t_xy    , l_y*0.5+e_t_xy  , e_r,0, l_z,"n"]
+    e_t_4 = [l_x*0.5+e_t_xy    , l_y*0.5-e_t_xy  , e_r,0, l_z,"n"]
+    e_t_5 = [l_x*0.5+e_t_xy    , l_y*0.5+e_t_xy  , e_r,0, l_z,"n"]
     for i in range(5):
         n_e = eval('e_t_' + str(i+1))
         e_tr.append(n_e)
