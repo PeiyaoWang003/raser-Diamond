@@ -15,7 +15,7 @@ class R3dDetector:
     def __init__(self,dset):
         """
         Description:
-            Differnet types detectors parameters assignment.
+            Different types detectors parameters assignment.
         Parameters:
         ---------
         det_dic : dictionary
@@ -41,10 +41,10 @@ class R3dDetector:
         self.det_model = dset.det_model
         self.current_define()
         if 'plugin3D' in self.det_model: 
-            self.e_ir = det_dic['e_ir']
+            self.e_r = det_dic['e_r']
             self.e_gap = det_dic['e_gap']
             if det_dic['custom_electrode'] == "False":
-                self.set_3D_electrode(det_dic['e_ir'],det_dic['e_gap'])
+                self.set_3D_electrode(det_dic['e_r'],det_dic['e_gap'])
             elif det_dic['custom_electrode'] == "True":
                 self.e_tr = dset.electron_customs
 
@@ -54,7 +54,6 @@ class R3dDetector:
         @description: 
             Parameter current setting     
         @param:
-            matter -- 0 is silicon, 1 is silicon carbide
             positive_cu -- Current from holes move
             negative_cu -- Current from electrons move
             sum_cu -- Current from e-h move
@@ -79,12 +78,12 @@ class R3dDetector:
         self.sum_cu = ROOT.TH1F("charge","Total Current",
                                 self.n_bin, self.t_start, self.t_end)
 
-    def set_3D_electrode(self,e_ir,e_gap=0):
+    def set_3D_electrode(self,e_r,e_gap=0):
         """
         @description: 
             3D plug-in detector electrodes setting     
         @param:
-            e_ir -- The radius of electrode
+            e_r -- The radius of electrode
             e_gap -- The spacing between the electrodes  
         @Returns:
             None
@@ -92,7 +91,6 @@ class R3dDetector:
             2021/08/31
         """
         self.e_gap = e_gap
-        e_r = e_ir  
         e_int = e_gap 
         e_t_y = self.infor_ele(e_r,e_int)
         self.e_tr=[]
@@ -121,10 +119,10 @@ class R3dDetector:
         """
         e_x_gap = self.l_x - 2*e_r - 2*e_int
         if e_x_gap < 0:
-            print("the electrode at x position is large than sensor length")
+            print("the electrode at x position is larger than sensor length")
             sys.exit(0)
         e_t_y = math.sqrt(e_int*e_int*0.75)
         if 2*e_t_y > self.l_y:
-            print("the electrode at y position is large than sensor length")
+            print("the electrode at y position is larger than sensor length")
             sys.exit(0)            
         return e_t_y

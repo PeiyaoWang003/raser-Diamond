@@ -7,10 +7,10 @@ class TCTTracks():
     """
     Description:
         Transfer Carrier Distribution from Laser Coordinate System 
-        to 2d Detector Coordinate System
+        to Detector Coordinate System
     Parameters:
     ---------
-    my_d : R2dDetector or R3dDetector
+    my_d : R3dDetector
         the Detector
     laser : dict
         the Parameter List of Your Laser

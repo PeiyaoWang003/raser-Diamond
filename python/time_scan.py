@@ -25,6 +25,7 @@ def main():
         draw_scan(args[0],2,args[1],args[2])
     elif args[1] == "draw_thick":
         draw_scan(args[0],4,args[1],args[2])
+
 def time_scan(args):
     """ Time scan add noise for some fiels in one dictionary """
     path_list = []
@@ -46,7 +47,6 @@ def time_scan(args):
         print(command)
         job_sub =  "hep_sub ./" + "job/trash/"+job_name+".sh"
         runcmd(job_sub)
-
 
 def draw_scan(input,index,model,eff):
     o_ls=input.split("/")[:]	

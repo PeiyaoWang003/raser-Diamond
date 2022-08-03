@@ -404,15 +404,15 @@ def save_geant4_events(eventID,edep_device,p_step,energy_step,event_angle):
         s_events_angle.append(event_angle)
 
 def cal_angle(point_a,point_b):
-    "Calculate the anlgle of point a and b"
+    "Calculate the angle between point a and b"
     x=np.array(point_a)
     y=np.array(point_b)
     l_x=np.sqrt(x.dot(x))
     l_y=np.sqrt(y.dot(y))
-    dian=x.dot(y)
+    dot_product=x.dot(y)
     if l_x*l_y > 0:
-        cos_=dian/(l_x*l_y)
-        angle_d=np.arccos(cos_)*180/np.pi
+        cos_angle_d=dot_product/(l_x*l_y)
+        angle_d=np.arccos(cos_angle_d)*180/np.pi
     else:
         angle_d=9999
     return angle_d

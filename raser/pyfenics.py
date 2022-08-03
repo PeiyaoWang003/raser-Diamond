@@ -72,8 +72,8 @@ class FenicsCal:
         """
         @description:
             confirm the sensor range 
-            at x,y axias to avoide the the big sensor size
-            which will lead to the mesh complicate         
+            at x,y axes to avoid the the big sensor size
+            which will lead to complicated mesh
         @param:
             xv_min - fenics sensor x left value
             xv_max - fenics sensor x right value
@@ -117,7 +117,7 @@ class FenicsCal:
     def fenics_p_electric(self,my_d):    
         """
         @description:
-            Solve poisson equation to get potential and electric field
+            Solve Poisson equation to get potential and electric field
         @Modify:
             2021/08/31
         """
@@ -187,7 +187,7 @@ class FenicsCal:
     def boundary_definition_3D(self,my_d,model):
         """
         @description:
-            Get boundary definition of 3D detector with Possion and Laplace
+            Get boundary definition of 3D detector with Possion and Laplace equations
         @Modify:
             2021/08/31
         """
@@ -219,7 +219,7 @@ class FenicsCal:
     def boundary_definition_2D(self,my_d,model):
         """
         @description:
-            Get boundary definition of 2D detector with Possion and Laplace
+            Get boundary definition of 2D detector with Possion and Laplace equations
         @Modify:
             2021/08/31
         """
