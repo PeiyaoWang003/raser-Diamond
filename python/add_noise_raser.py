@@ -620,7 +620,7 @@ def draw_2D_CFD_time(CFD_time,out_put,model):
             if CFD_time[i]>0:
                 histo.Fill(CFD_time[i])
     # Fit data
-    fit_func_1,sigma,error=fit_data(histo,x2_min,x2_max)# in nanosecond
+    fit_func_1,sigma,error=fit_data_normal(histo,x2_min,x2_max)# in nanosecond
     sigma=sigma*1000 # in picosecond
     error=error*1000
     histo=ToA_TH1F_define(histo)
@@ -659,15 +659,17 @@ def draw_max_voltage(max_voltage_list,out_put,model):
     # Define lengend th1f and root gstyle
     leg = ROOT.TLegend(0.25, 0.6, 0.35, 0.8)
     x2_min = min(max_voltage_list)
-    x2_max = max(max_voltage_list)
+    # Exclude data with great deviation
+    x2_max = sorted(max_voltage_list)[int(len(max_voltage_list)*0.95)]
+
     n2_bin = 100
     #test
-    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max/2)
+    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
     for i in range(0,len(max_voltage_list)):
         if max_voltage_list[i]>0:
             histo.Fill(max_voltage_list[i])
     # Fit data
-    fit_func_1,sigma,error=fit_data(histo,x2_min,x2_max/2)
+    fit_func_1,sigma,error=fit_data_normal(histo,x2_min,x2_max)
     histo=max_voltage_TH1F_define(histo)
     # Legend setting
     leg.AddEntry(fit_func_1,"Fit","L")
@@ -704,15 +706,16 @@ def draw_current_integral(current_integral_list,out_put,model):
     # Define lengend th1f and root gstyle
     leg = ROOT.TLegend(0.25, 0.6, 0.35, 0.8)
     x2_min = min(current_integral_list)
-    x2_max = max(current_integral_list)
+    # Exclude data with great deviation
+    x2_max = sorted(current_integral_list)[int(len(current_integral_list)*0.95)]
     n2_bin = 100
     #test
-    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max/2)
+    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
     for i in range(0,len(current_integral_list)):
         if current_integral_list[i]>0:
             histo.Fill(current_integral_list[i])
     # Fit data
-    fit_func_1,sigma,error=fit_data(histo,x2_min,x2_max/2)
+    fit_func_1,sigma,error=fit_data_normal(histo,x2_min,x2_max)
     histo=current_integral_TH1F_define(histo)
     # Legend setting
     leg.AddEntry(fit_func_1,"Fit","L")
@@ -729,7 +732,7 @@ def draw_current_integral(current_integral_list,out_put,model):
     del c1
     return sigma, error    
 
-def fit_data(histo,x_min,x_max):
+def fit_data_normal(histo,x_min,x_max):
     """ Fit data distribution """
     fit_func_1 = ROOT.TF1('fit_func_1','gaus',x_min,x_max)
     histo.Fit("fit_func_1","ROQ+","",x_min,x_max)
