@@ -660,14 +660,14 @@ def draw_max_voltage(max_voltage_list,out_put,model):
     leg = ROOT.TLegend(0.25, 0.6, 0.35, 0.8)
     x2_min = min(max_voltage_list)
     x2_max = max(max_voltage_list)
-    n2_bin = 500
+    n2_bin = 100
     #test
-    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
+    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max/2)
     for i in range(0,len(max_voltage_list)):
         if max_voltage_list[i]>0:
             histo.Fill(max_voltage_list[i])
     # Fit data
-    fit_func_1,sigma,error=fit_data(histo,x2_min,x2_max)
+    fit_func_1,sigma,error=fit_data(histo,x2_min,x2_max/2)
     histo=max_voltage_TH1F_define(histo)
     # Legend setting
     leg.AddEntry(fit_func_1,"Fit","L")
@@ -705,14 +705,14 @@ def draw_current_integral(current_integral_list,out_put,model):
     leg = ROOT.TLegend(0.25, 0.6, 0.35, 0.8)
     x2_min = min(current_integral_list)
     x2_max = max(current_integral_list)
-    n2_bin = 500
+    n2_bin = 100
     #test
-    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
+    histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max/2)
     for i in range(0,len(current_integral_list)):
         if current_integral_list[i]>0:
             histo.Fill(current_integral_list[i])
     # Fit data
-    fit_func_1,sigma,error=fit_data(histo,x2_min,x2_max)
+    fit_func_1,sigma,error=fit_data(histo,x2_min,x2_max/2)
     histo=current_integral_TH1F_define(histo)
     # Legend setting
     leg.AddEntry(fit_func_1,"Fit","L")
