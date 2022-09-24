@@ -22,7 +22,7 @@ class Amplifier:
             All input paramters of CSA in CSA_par
         BB_par : dic
             All input paramters of BB in CSA_par
-        mintsteo : float
+        mintstep : float
             The readout time step (bin width)        
         @Modify:
         ---------

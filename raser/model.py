@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 '''
-Description:  Define physical models for different materiales   
+Description:  Define physical models for different materials   
 @Date       : 2021/09/06 18:46:00
 @Author     : yangtao
 @version    : 1.0
@@ -201,7 +201,8 @@ class Avalanche:
 
         if(self.model_name == 'Hatakeyama'):
             '''
-            The Hatakeyama avalanche model describes the anisotropic behavior in 4H-SiC power devices. The impact ionization coefficient is obtained according to the Chynoweth law.
+            The Hatakeyama avalanche model describes the anisotropic behavior in 4H-SiC power devices. 
+            The impact ionization coefficient is obtained according to the Chynoweth law.
             '''
             hbarOmega = 0.19 # eV
             _theta =1 # 1
