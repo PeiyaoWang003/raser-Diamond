@@ -32,12 +32,15 @@ class Setting:
         """
         self._pardic = {}
         self.input2dic(parameters)
-        self.det_model = self._pardic['det_model']
+        self.det_name = self._pardic['det_name']
         self.read_par(self._pardic['parfile'])
         if "laser_model" in self._pardic:
             self.laser_model = self._pardic['laser_model']
             self.read_par_laser(self._pardic['laser_parfile'])
-        self.scan_variation()
+        
+        p = self.paras
+        self.total_events = int(p['total_events'])
+        self.g4seed = 0 
 
     def input2dic(self,parameters):
         " Transfer input list to dictinary"
@@ -50,7 +53,8 @@ class Setting:
         with open(jsonfile) as f:
             dic_pars = json.load(f)
         for dic_par in dic_pars:
-            if dic_par['det_model'] in self.det_model:
+            if self.det_name == dic_par['det_name']:
+                self.det_model = dic_par['det_model']
                 self.steplength = float(dic_par['steplength'])
                 paras = dic_par
         for x in paras: 
@@ -296,15 +300,10 @@ class Setting:
 
     def scan_variation(self):
         " Define parameters of batch mode"
-        if "3Dscan" in self.det_model:
-            self.total_events = int(self._pardic['total_e'])
-            self.intance_number = int(self._pardic['instan'])
-            self.g4seed = self.intance_number * self.total_events
-            self.output = self._pardic["output"]
-        else:
-            p = self.paras
-            self.total_events = int(p['total_events'])
-            self.g4seed = 0 
+        self.total_events = int(self._pardic['total_e'])
+        self.instance_number = int(self._pardic['instan'])
+        self.g4seed = self.instance_number * self.total_events
+        self.output = self._pardic["output"]
 
     def is_number(self,s):
         "Define whether the s is a number or not"
