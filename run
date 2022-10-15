@@ -232,6 +232,8 @@ case $option in
         sub_3_1 option
         ;;
 
+
+
     3.2) echo "RASER simulate edge-TCT"
         usage_3_2
         echo "Please enter your option: " 
@@ -241,5 +243,6 @@ case $option in
     3.2.*) echo "RASER simulate edge-TCT"
         sub_3_2 option
         ;;
+
 
 		esac
