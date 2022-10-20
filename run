@@ -11,6 +11,7 @@ usage() {
     printf "\n\t%-5s\n" "./run [OPTION]" 
     printf "\nOPTIONS\n"    
 
+    printf "\n\t%-9s  %-40s"  "track"    "Load TRACK" 
     printf "\n\t%-9s  %-40s"  "1.1"       "SiC-PIN"
     printf "\n\t%-9s  %-40s\n"  "1.2"       "SiC-3D"
 
@@ -71,25 +72,25 @@ else
 fi
 
 track(){
-    singularity shell -B /cefs,/afs,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/track-1.2.sif 
+    # apptainer shell --env PS1="\u_TRACK> " -B /cefs,/afs,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/track-1.2.sif 
+    apptainer shell --env PS1="\u_TRACK> " -B /cefs,/afs,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/track/track-dev.sif   
 }
 
+
 geant4(){
+    source /usr/local/share/root_install/bin/thisroot.sh 
     export GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/install
     source $GEANT4_INSTALL/bin/geant4.sh
-    export PYTHONPATH=$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages  
+    export PYTHONPATH=$HOME/raser:$PYTHONPATH:$GEANT4_INSTALL/lib64/python3.6/site-packages  
 }
 
 hepjob(){
-export HepcMyImage=track-1.2.sif
-export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
+    export HepcMyImage=track-1.2.sif
+    export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
 }
 
 sub_1_1(){
 case $option in 
-    1.1.0) echo "Loading TRACK into Singularity..."
-        track 
-        ;; 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..."
         geant4 
         ./python/gsignal.py det_name=NJU-PIN parfile=setting.json
@@ -192,6 +193,10 @@ case $option in
 }
 
 case $option in 
+    track) echo "Loading TRACK..."
+        track 
+        ;; 
+
     1.1) echo "RASER simulate NJU-SiC-PIN"
         usage_1_1
         echo "Please enter your option: " 
