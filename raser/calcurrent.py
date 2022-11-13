@@ -172,12 +172,12 @@ class CalCurrent:
             self.electrons.append(Carrier(track_position[i][0],\
                                           track_position[i][1],\
                                           track_position[i][2],\
-                                          1e-9,\
+                                          track_position[i][3],\
                                           -1*ionized_pairs[i]))
             self.holes.append(Carrier(track_position[i][0],\
                                       track_position[i][1],\
                                       track_position[i][2],\
-                                      1e-9,\
+                                      track_position[i][3],\
                                       ionized_pairs[i]))
         
         self.drifting_loop(my_d, my_f)
@@ -339,7 +339,7 @@ class CarrierListFromG4P:
 
     def batch_def(self,my_g4p,j):
         self.beam_number = j
-        self.track_position = my_g4p.p_steps_current[j]
+        self.track_position = [[single_step[0],single_step[1],single_step[2],1e-9] for single_step in my_g4p.p_steps_current[j]]
         self.tracks_step = my_g4p.energy_steps[j]
         self.tracks_t_energy_deposition = my_g4p.edep_devices[j] #为什么不使用？
         self.ionized_pairs = [step*1e6/self.energy_loss for step in self.tracks_step]

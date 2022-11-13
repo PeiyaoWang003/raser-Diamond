@@ -54,14 +54,15 @@ class TCTTracks():
         #accuracy parameters
         self.r_step=laser["r_step"]#um
         self.h_step=laser["h_step"]#um
+        self.t_step=laser["t_step"]#s
         self.min_carrier=min_carrier
         
-        self.mesh_definition()
+        self.mesh_definition(my_d)
 
-    def mesh_definition(self):
+    def mesh_definition(self,my_d):
         self.r_char=self.widthBeamWaist
         if self.tech == "SPA":
-            self.h_char=float('inf')
+            self.h_char=max(my_d.l_x,my_d.l_y,my_d.l_z)
 
         elif self.tech == "TPA":
             self.h_char=self.l_Rayleigh
@@ -70,17 +71,20 @@ class TCTTracks():
         self.x_min,self.x_max=max(0,self.fx_abs-5*self.x_char),min(self.lx,self.fx_abs+5*self.x_char)
         self.y_min,self.y_max=max(0,self.fy_abs-5*self.y_char),min(self.ly,self.fy_abs+5*self.y_char)
         self.z_min,self.z_max=max(0,self.fz_abs-5*self.z_char),min(self.lz,self.fz_abs+5*self.z_char)
+        self.t_min,self.t_max=1e-9-2*self.tau,1e-9+2*self.tau
         xArray = np.linspace(self.x_min,self.x_max,int((self.x_max-self.x_min)/self.x_step))
         yArray = np.linspace(self.y_min,self.y_max,int((self.y_max-self.y_min)/self.y_step))
         zArray = np.linspace(self.z_min,self.z_max,int((self.z_max-self.z_min)/self.z_step))
+        tArray = np.linspace(self.t_min,self.t_max,int((self.t_max-self.t_min)/self.t_step))
 
-        Y,X,Z=np.meshgrid(yArray,xArray,zArray) #Feature of numpy.meshgrid
-        self.projGrid=self._getCarrierDensity(X,Y,Z)\
-            *self.x_step*self.y_step*self.z_step*1e-18
+        Y,X,Z,T=np.meshgrid(yArray,xArray,zArray,tArray) #Feature of numpy.meshgrid
+        self.projGrid=self._getCarrierDensity(X,Y,Z,T)\
+            *self.x_step*self.y_step*self.z_step*1e-18*self.t_step
         self.track_position = list(np.transpose(np.array([
             list(np.ravel(X)),\
             list(np.ravel(Y)),\
-            list(np.ravel(Z))])))
+            list(np.ravel(Z)),\
+            list(np.ravel(T))])))
         self.ionized_pairs = list(np.ravel(self.projGrid))
         self.ionized_total_pairs = 0
         for i in range(len(self.ionized_pairs)-1,-1,-1):
@@ -100,13 +104,13 @@ class TCTTracks():
             self.x_char=self.y_char=self.r_char
             if self.direction == "top":
                 absorb_depth=self.lz*self.fz_rel
-                def _getCarrierDensity(x,y,z):
-                    return self.getCarrierDensity(z-self.fz_abs,absorb_depth,(x-self.fx_abs)**2+(y-self.fy_abs)**2)
+                def _getCarrierDensity(x,y,z,t):
+                    return self.getCarrierDensity(z-self.fz_abs,absorb_depth,(x-self.fx_abs)**2+(y-self.fy_abs)**2,t-1e-9)
                 self._getCarrierDensity=_getCarrierDensity
             if self.direction == "bottom":
                 absorb_depth=self.lz*(1-self.fz_rel)
-                def _getCarrierDensity(x,y,z):
-                    return self.getCarrierDensity(self.lz-z+self.fz_abs,absorb_depth,(x-self.fx_abs)**2+(y-self.fy_abs)**2)
+                def _getCarrierDensity(x,y,z,t):
+                    return self.getCarrierDensity(self.lz-z+self.fz_abs,absorb_depth,(x-self.fx_abs)**2+(y-self.fy_abs)**2,t-1e-9)
                 self._getCarrierDensity=_getCarrierDensity
 
         elif self.direction == "edge":
@@ -116,25 +120,26 @@ class TCTTracks():
             self.y_char=self.z_char=self.r_char
 
             absorb_depth=self.lx*self.fx_rel
-            def _getCarrierDensity(x,y,z):
-                return self.getCarrierDensity(x-self.fx_abs,absorb_depth,(y-self.fy_abs)**2+(z-self.fz_abs)**2)
+            def _getCarrierDensity(x,y,z,t):
+                return self.getCarrierDensity(x-self.fx_abs,absorb_depth,(y-self.fy_abs)**2+(z-self.fz_abs)**2,t-1e-9)
             self._getCarrierDensity=_getCarrierDensity
         else:
             raise NameError(self.direction)
 
-    def getCarrierDensity(self,h,depth,r2):
+    def getCarrierDensity(self,h,depth,r2,t):
         #return the carrier density of a given point
         #referring to the vertical and horizontal distance from the focus 
         widthSquared=(self.widthBeamWaist**2)*(1+(h/self.l_Rayleigh)**2)
+        intensity = ((self.power)/self.tau)\
+                    *(4*np.log(2)**0.5/(np.pi**1.5*widthSquared*1e-12))\
+                    *np.exp((-2*r2/(widthSquared)))\
+                    *np.exp(-4*np.log(2)*t**2/self.tau**2)
 
         if self.tech=="SPA":
-            intensity = ((2*self.power)/(np.pi*widthSquared*1e-12))*np.exp((-2*r2/(widthSquared)))*np.exp(-self.alpha*(h+depth)*1e-6)
             e0 = 1.60217733e-19
-            return self.alpha*intensity/(3.6*e0)
+            return self.alpha*intensity*np.exp(-self.alpha*(h+depth)*1e-6)/(3.6*e0)
             
         elif self.tech=="TPA":
-            k=(self.power**2)*8*np.log(2)/(self.tau*(np.pi**2.5)*(np.log(4))**0.5)
-            intensity_squared = k*np.exp(-4*r2/widthSquared)/((widthSquared**2)*1e-24)
             h_Planck = 6.626*1e-34
             speedofLight = 2.998*1e8
-            return self.beta_2*self.wavelength*1e-6*intensity_squared/(2*h_Planck*speedofLight)
+            return self.beta_2*self.wavelength*1e-6*intensity**2/(2*h_Planck*speedofLight)
