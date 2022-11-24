@@ -186,7 +186,7 @@ class CalCurrent:
         my_d.negative_cu.Reset()
         self.get_current(my_d, my_d.positive_cu, my_d.negative_cu)
         if my_d.det_model == "lgad3D":
-            gain_current = CalCurrentGain(my_d, my_f, self)
+            self.gain_current = CalCurrentGain(my_d, my_f, self)
 
     def drifting_loop(self, my_d, my_f):
         for electron in self.electrons:
@@ -236,6 +236,12 @@ class CalCurrentGain(CalCurrent):
                                               my_d.avalanche_bond,\
                                               hole.path[-1][3],\
                                               -1*hole.charge*gain_rate))
+                if gain_rate>5:
+                    self.holes.append(Carrier(hole.path[-1][0],\
+                                              hole.path[-1][1],\
+                                              my_d.avalanche_bond,\
+                                              hole.path[-1][3],\
+                                              hole.charge*gain_rate/np.log(gain_rate)))
 
         else : # n layer at d=0, electrons multiplicated into holes
             for electron in my_current.electrons:
@@ -244,6 +250,12 @@ class CalCurrentGain(CalCurrent):
                                           my_d.avalanche_bond,\
                                           electron.path[-1][3],\
                                           -1*electron.charge*gain_rate))
+                if gain_rate>5:
+                    self.electrons.append(Carrier(electron.path[-1][0],\
+                                                  electron.path[-1][1],\
+                                                  my_d.avalanche_bond,\
+                                                  electron.path[-1][3],\
+                                                  electron.charge*gain_rate/np.log(gain_rate)))
 
         self.drifting_loop(my_d, my_f)
         my_d.gain_positive_cu.Reset()
