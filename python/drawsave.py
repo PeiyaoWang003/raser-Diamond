@@ -395,7 +395,6 @@ def draw_plot(my_d, ele_current, model, path):
     my_d.sum_cu.SetLineWidth(2)
     c.Update()
 
-    '''
     if ele_current.GetMinimum() < 0:
         rightmax = 1.1*ele_current.GetMinimum()
     else:
@@ -424,15 +423,14 @@ def draw_plot(my_d, ele_current, model, path):
     axis.SetTitle("Ampl [mV]")
     axis.CenterTitle()
     axis.Draw("SAME HIST")
-    '''
 
-    legend = ROOT.TLegend(0.65, 0.3, 0.95, 0.6)
+    legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
     legend.AddEntry(my_d.negative_cu, "electron", "l")
     legend.AddEntry(my_d.positive_cu, "hole", "l")
     legend.AddEntry(my_d.gain_negative_cu, "gain electron", "l")
     legend.AddEntry(my_d.gain_positive_cu, "gain hole", "l")
     legend.AddEntry(my_d.sum_cu, "e+h", "l")
-    #legend.AddEntry(ele_current, "electronics", "l")
+    legend.AddEntry(ele_current, "electronics", "l")
     legend.SetBorderSize(0)
     legend.SetTextFont(43)
     #legend.SetTextSize(42)
