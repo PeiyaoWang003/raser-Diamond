@@ -61,8 +61,8 @@ class TCTTracks():
 
     def mesh_definition(self,my_d):
         if self.tech == "SPA":
-            self.h_char=max(my_d.l_x,my_d.l_y,my_d.l_z)
             self.r_char=min(my_d.l_x,my_d.l_y,my_d.l_z)
+            self.h_char=max(my_d.l_x,my_d.l_y,my_d.l_z)
 
             self.change_coordinate()
             if self.fx_abs < 0.5 * self.x_char:
@@ -106,10 +106,10 @@ class TCTTracks():
 
         self.t_min,self.t_max=1e-9-2*self.tau,1e-9+2*self.tau
         
-        xArray = np.linspace(self.x_min,self.x_max,int((self.x_max-self.x_min)/self.x_step))
-        yArray = np.linspace(self.y_min,self.y_max,int((self.y_max-self.y_min)/self.y_step))
-        zArray = np.linspace(self.z_min,self.z_max,int((self.z_max-self.z_min)/self.z_step))
-        tArray = np.linspace(self.t_min,self.t_max,int((self.t_max-self.t_min)/self.t_step))
+        xArray = np.linspace(self.x_min,self.x_max,int((self.x_max-self.x_min)/self.x_step)+1)
+        yArray = np.linspace(self.y_min,self.y_max,int((self.y_max-self.y_min)/self.y_step)+1)
+        zArray = np.linspace(self.z_min,self.z_max,int((self.z_max-self.z_min)/self.z_step)+1)
+        tArray = np.linspace(self.t_min,self.t_max,int((self.t_max-self.t_min)/self.t_step)+1)
 
         Y,X,Z,T=np.meshgrid(yArray,xArray,zArray,tArray) #Feature of numpy.meshgrid
         self.projGrid=self._getCarrierDensity(X,Y,Z,T)\
@@ -171,7 +171,6 @@ class TCTTracks():
         if self.tech=="SPA":
             e0 = 1.60217733e-19
             return self.alpha*intensity*np.exp(-self.alpha*(h+depth)*1e-6)/(3.6*e0)
-            
         elif self.tech=="TPA":
             h_Planck = 6.626*1e-34
             speedofLight = 2.998*1e8

@@ -603,6 +603,7 @@ def draw_scat_angle(evnets_angle,angle,model):
     c1.SaveAs("scat_angle"+model+".pdf")
 
 def draw_nocarrier3D(path,my_l):
+    ROOT.gStyle.SetOptStat(0)
     c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
     h = ROOT.TH3D("h","Pairs of carrier generation",\
         int((my_l.x_max-my_l.x_min)/my_l.x_step)+1,my_l.x_min,my_l.x_max,\
@@ -618,6 +619,27 @@ def draw_nocarrier3D(path,my_l):
     h.GetYaxis().SetTitleOffset(2.2)
     h.GetZaxis().SetTitleOffset(1.4)
     c1.SaveAs(path+"nocarrier_"\
+        +str(round(my_l.fx_rel,5))+"_"\
+        +str(round(my_l.fy_rel,5))+"_"\
+        +str(round(my_l.fz_rel,5))+"_"\
+        +str(my_l.min_carrier)+".pdf")  
+
+def draw_nocarrier2D(path,my_l):
+    ROOT.gStyle.SetOptStat(0)
+    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
+    c1.SetLeftMargin(0.12)
+    c1.SetRightMargin(0.2)
+    c1.SetBottomMargin(0.14)
+    c1.SetRightMargin(0.12)
+    h = ROOT.TH2D("h","Light Intensity",\
+        int((my_l.x_max-my_l.x_min)/my_l.x_step),my_l.x_min,my_l.x_max,\
+        int((my_l.z_max-my_l.z_min)/my_l.z_step),my_l.z_min,my_l.z_max)
+    for i in range(len(my_l.track_position)):
+        h.Fill(my_l.track_position[i][0], my_l.track_position[i][2], my_l.ionized_pairs[i])
+    h.Draw("COLZ")
+    h.GetXaxis().SetTitle("Depth [um]")#[μm]
+    h.GetYaxis().SetTitle("Thick [um]")
+    c1.SaveAs(path+"nocarrier2D_"\
         +str(round(my_l.fx_rel,5))+"_"\
         +str(round(my_l.fy_rel,5))+"_"\
         +str(round(my_l.fz_rel,5))+"_"\

@@ -79,12 +79,12 @@
         "wavelength" : 1064,
         "tau" : 350e-12,
         "power" : 1e-11,
-        "widthBeamWaist" : 5,
+        "widthBeamWaist" : 8,
     
         "r_step" : 1,
         "h_step" : 5,
-        "t_step" : 20e-12,
-        "min_carrier" : 1,
+        "t_step" : 50e-12,
+        "min_carrier" : 100,
     
         "fx_rel" : 0.0,
         "fy_rel" : 0.5,
