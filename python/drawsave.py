@@ -426,7 +426,7 @@ def draw_plot(my_d, ele_current, model, path):
     axis.Draw("SAME HIST")
     '''
 
-    legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
+    legend = ROOT.TLegend(0.65, 0.3, 0.95, 0.6)
     legend.AddEntry(my_d.negative_cu, "electron", "l")
     legend.AddEntry(my_d.positive_cu, "hole", "l")
     legend.AddEntry(my_d.gain_negative_cu, "gain electron", "l")
