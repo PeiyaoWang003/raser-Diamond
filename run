@@ -399,7 +399,7 @@ case $option in
         sub_3_2 option
         ;;
 
-    5.1) echo "edge-TCT measurement"
+    5.1) echo "RASER simulate edge-TCT"
         usage_5_1
         echo "Please enter your option: "
         read option

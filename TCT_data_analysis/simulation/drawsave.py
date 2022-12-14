@@ -12,6 +12,7 @@ import ROOT
 import sys
 import os
 import time
+import numpy as np
 
 def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     """
@@ -26,11 +27,11 @@ def drawplot(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     """
     now = time.strftime("%Y_%m%d_%H%M")
     path = "fig/" + now + "/"
-    create_path(path) 
-    if "plugin" in my_d.det_model:
-        draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
-    else:
-        draw_ele_field_1D(my_d,my_f,path)
+    create_path(path)
+    #draw_ele_field(my_d,my_f,"xz",my_d.det_model,my_d.l_y*0.5,path) 
+    #draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
+    #draw_ele_field(my_d,my_f,"yz",my_d.det_model,my_d.l_x*0.5,path)
+    draw_ele_field_1D(my_d,my_f,path)
     draw_plot(my_d,ele_current.CSA_ele,"CSA",path) # Draw current
     draw_plot(my_d,ele_current.BB_ele,"BB",path)
     #energy_deposition(my_g4p)   # Draw Geant4 depostion distribution
@@ -52,45 +53,24 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(my_l,ele_current):
-    L=round(my_l.fz_abs)
-    volt = array('d', [999.])
-    time = array('d', [999.])
-    z = array('d', [999.])
-    fout = ROOT.TFile("sim-TCT"+str(L)+".root", "RECREATE")
-    t_out = ROOT.TTree("tree", "signal")
-    t_out.Branch("volt", volt, "volt/D")
-    t_out.Branch("time", time, "time/D")
-    t_out.Branch("z", z, "z/D")
-#ele_current = raser.Amplifier(my_d, dset.amplifier)
-    for i in range(ele_current.BB_ele.GetNbinsX()):
-          time[0]=i*ele_current.time_unit
-          volt[0]=ele_current.BB_ele[i]
-          z[0]=L
-          t_out.Fill()
-    t_out.Write()
-    fout.Close()
-
 def savedata(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
     if "plugin" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.d_neff) 
-                       + "_v="+str(my_d.voltage)+"_g="+str(my_d.e_gap)
+                       + "_v="+str(my_d.v_voltage)+"_g="+str(my_d.e_gap)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
-                       + "_radius="+str(my_d.e_r) )
+                       + "_radius="+str(my_d.e_ir) )
     elif "planar" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.d_neff) 
-                       + "_v="+str(my_d.voltage)
+                       + "_v="+str(my_d.v_voltage)
                        + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z)
-                       + "_radius=None" )
+                       + "_thick="+str(my_d.l_z) )
     elif "lgad" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.doping1) 
-                       + "_v="+str(my_d.voltage)
+        output_path = (output + "_d="+str(my_d.lgad_dic['doping1']) 
+                       + "_v="+str(my_d.v_voltage)
                        + "_tmp="+str(my_d.temperature) 
-                       + "_thick="+str(my_d.l_z) 
-                       + "_radius=None")
+                       + "_thick="+str(my_d.l_z) )
     
     create_path(output_path)
     save_ele(ele_current,my_g4p,batch_number,start_n,output_path)
@@ -111,6 +91,103 @@ def save_ele(ele_current,my_g4p,number,start_n,output_path="none"):
     print("output_file:%s"%output_file)
     del ele_current.BB_ele
     del ele_current.CSA_ele
+#######
+def save(L,ele_current):
+#    now = time.strftime("%Y_%m%d_%H%M")
+#    path = "fig/" + now + "/"
+#    volt = array('d', [999.])
+#    time = array('d', [999.])
+#time= float(list(filter(None,list_c[j].split(",")))[0])
+    volt = array('d', [999.])
+    time = array('d', [999.])
+    z = array('d',[0.])
+    fout = ROOT.TFile("sim-TCT5.root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("volt", volt, "volt/D")
+    t_out.Branch("time", time, "time/D")
+    t_out.Branch("z", z, "z/D") 
+#ele_current = raser.Amplifier(my_d, dset.amplifier)
+    noise = array('d')
+#          noise[i]=append(gRandom.Gaus(5.22439e-04,7.63179e-05)
+#    z = array('d')
+    RMS=np.array([0.0005111681886505477, 0.00041523317951108247, 0.0006356341473873385, 0.0005055633052607988, 0.00037754395652967403, 0.0005215652764451278, 0.0005260521377753614, 0.0006921865593973796, 0.0004469711489940324, 0.0004466680983159633, 0.000601897253035578, 0.0005470326448868775, 0.0004115809103149677, 0.0004729426826631906, 0.0006111623529723064, 0.000545194547148366, 0.0004277068106327526, 0.0005410002150157415, 0.0005466765588983573, 0.0005199110129204286, 0.0006021927426781035, 0.00048116686911648244, 0.0005619076302806109, 0.0005901776196380901, 0.000540138553990414, 0.00048801760897394835, 0.000496047982184332, 0.0004417076352985532, 0.0006148902958514412, 0.0005304327295744406, 0.00043443451100094217, 0.00048190418679379935, 0.00039295652164776293, 0.0005662377741880497, 0.0004299257436290869, 0.00045427718082112267, 0.0005266829174748466, 0.0004732406529782801, 0.0005507924478182324, 0.00037570301081961795, 0.0005559569463434278, 0.0005373692175560086, 0.0005297248907416775, 0.0005438176680425462, 0.0003650695307290466, 0.0006530022876058681, 0.0005472398334148312, 0.0006297364751812049, 0.0003740071134376142, 0.0006267168740328048, 0.0004929198471765806])
+    Mean=np.array([0.00033243082142857136, 8.824742857142855e-05, 0.0004053836517857144, 0.0010010143348214288, 0.00017645273214285715, 0.00012015875000000006, 5.40438883928572e-05, -0.00021439406249999988, 0.0007968599374999997, 4.5325915178571344e-05, 0.0004891657142857144, 0.0004727932410714284, 0.0004435015803571429, 0.0006440360892857141, 0.00014541913392857145, -2.0991955357142835e-05, -0.00040066849107142866, 0.0005230586250000001, 0.0002712754598214285, 0.0005945093660714286, 0.0004167786964285714, 0.0006453769776785721, 0.0007039226250000003, -0.0005224082098214285, 0.0007585116205357144, 0.0011352242767857141, 0.0002745170267857142, -1.247159821428572e-05, 0.00014448292857142855, -0.00021798845982142832, 0.000944485, -0.00024661204017857136, 0.00014989804910714287, 0.00041829358482142867, 0.0004447483392857146, 0.0002821998169642858, 0.00016303843303571436, -0.00013298333482142868, -7.17371785714286e-05, 6.961174553571425e-05, -0.00013699179464285715, 0.00013765162053571428, 0.00042861579910714284, 0.0010761092410714285, 0.0006653626339285715, 0.00023811177678571415, 8.3904799107143e-05, -0.00027197524553571436, -3.97554017857143e-05, 0.0005225992633928572, 0.0008994781875000003])
+
+    for i in range(ele_current.BB_ele.GetNbinsX()):
+          noise.append(ROOT.gRandom.Gaus(Mean[L],RMS[L]))
+          time[0]=i*ele_current.time_unit
+#          volt[0]=ele_current.BB_ele[i]                    
+          volt[0]=34*ele_current.BB_ele[i] + noise[i]
+          z[0]=20
+#          time.append(i*ele_current.time_unit)
+#          volt.append(34*ele_current.BB_ele[i] + noise[i])   
+          t_out.Fill()
+    t_out.Write()
+    fout.Close()
+
+def resave(L):
+    v1=array("d")
+    t1=array("d")
+    time=array("d",[0.])
+    volt=array("d",[0.])
+    v2=array("d")
+    t2=array("d")
+    z=array("d",[0.])
+    Vmax=array("d",[0.])
+    RiseTime=array('d',[0.])    
+    BlineMean=array('d',[0.])
+    BlineRMS=array('d',[0.])
+    E=array('d',[0.])
+    Qtot=array('d',[0.])
+    e=0
+    myFile = ROOT.TFile("sim-TCT5.root")
+    myt = myFile.tree
+    J=0
+    for entry in myt:
+        v1.append(entry.volt)
+        t1.append(entry.time)
+        J=J+1
+    Vmax[0]=min(v1)
+
+    fout = ROOT.TFile("TCT"+str(L)+".root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("volt", volt, "volt/D")
+    t_out.Branch("time", time, "time/D")
+    t_out.Branch("z", z, "z/D")
+    t_out.Branch("RiseTime", RiseTime, "RiseTime/D")
+    t_out.Branch("Vmax", Vmax, "Vmax/D")
+    t_out.Branch("BlineMean",BlineMean , "BlineMean/D")
+    t_out.Branch("BlineRMS", BlineRMS, "BlineRMS/D")
+    t_out.Branch("Qtot", Qtot,"Qtot/D")
+    t_out.Branch("E", E,"E/D")
+
+#    tmax=0.9*Vmax
+#    tmin=0.1*Vmax
+    z[0]=L
+    RMS=np.array([0.0005111681886505477, 0.00041523317951108247, 0.0006356341473873385, 0.0005055633052607988, 0.00037754395652967403, 0.0005215652764451278, 0.0005260521377753614, 0.0006921865593973796, 0.0004469711489940324, 0.0004466680983159633, 0.000601897253035578, 0.0005470326448868775, 0.0004115809103149677, 0.0004729426826631906, 0.0006111623529723064, 0.000545194547148366, 0.0004277068106327526, 0.0005410002150157415, 0.0005466765588983573, 0.0005199110129204286, 0.0006021927426781035, 0.00048116686911648244, 0.0005619076302806109, 0.0005901776196380901, 0.000540138553990414, 0.00048801760897394835, 0.000496047982184332, 0.0004417076352985532, 0.0006148902958514412, 0.0005304327295744406, 0.00043443451100094217, 0.00048190418679379935, 0.00039295652164776293, 0.0005662377741880497, 0.0004299257436290869, 0.00045427718082112267, 0.0005266829174748466, 0.0004732406529782801, 0.0005507924478182324, 0.00037570301081961795, 0.0005559569463434278, 0.0005373692175560086, 0.0005297248907416775, 0.0005438176680425462, 0.0003650695307290466, 0.0006530022876058681, 0.0005472398334148312, 0.0006297364751812049, 0.0003740071134376142, 0.0006267168740328048, 0.0004929198471765806])
+    Mean=np.array([0.00033243082142857136, 8.824742857142855e-05, 0.0004053836517857144, 0.0010010143348214288, 0.00017645273214285715, 0.00012015875000000006, 5.40438883928572e-05, -0.00021439406249999988, 0.0007968599374999997, 4.5325915178571344e-05, 0.0004891657142857144, 0.0004727932410714284, 0.0004435015803571429, 0.0006440360892857141, 0.00014541913392857145, -2.0991955357142835e-05, -0.00040066849107142866, 0.0005230586250000001, 0.0002712754598214285, 0.0005945093660714286, 0.0004167786964285714, 0.0006453769776785721, 0.0007039226250000003, -0.0005224082098214285, 0.0007585116205357144, 0.0011352242767857141, 0.0002745170267857142, -1.247159821428572e-05, 0.00014448292857142855, -0.00021798845982142832, 0.000944485, -0.00024661204017857136, 0.00014989804910714287, 0.00041829358482142867, 0.0004447483392857146, 0.0002821998169642858, 0.00016303843303571436, -0.00013298333482142868, -7.17371785714286e-05, 6.961174553571425e-05, -0.00013699179464285715, 0.00013765162053571428, 0.00042861579910714284, 0.0010761092410714285, 0.0006653626339285715, 0.00023811177678571415, 8.3904799107143e-05, -0.00027197524553571436, -3.97554017857143e-05, 0.0005225992633928572, 0.0008994781875000003])
+    BlineMean[0]=Mean[L]
+    BlineRMS[0]=RMS[L]
+
+    a=np.true_divide(v1[27],Vmax)
+    b=np.true_divide(v1[23],Vmax)
+    RiseTime[0]=1000000000*(t1[27]-t1[23])/(a-b)
+    E[0]=v1[23]*(t1[23]*1000000000+10.9)+v1[24]*(t1[24]*1000000000+10.9)+v1[25]*(t1[25]*1000000000+10.9)+v1[26]*(t1[26]*1000000000+10.9)+v1[27]*(t1[27]*1000000000+10.9)
+    for m in range(J):
+        e=e+v1[m]*(t1[m]*1000000000+10.9)
+    Qtot[0]=e
+    t_out.Fill()
+    for i in range(J):
+        time[0]=t1[i]
+        volt[0]=v1[i]
+        t_out.Fill()
+    t_out.Write()
+    fout.Close()
+    print(L)
+
+
+
+
 
 def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     """
@@ -125,6 +202,7 @@ def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     """
     c1 = ROOT.TCanvas("c", "canvas",1000, 1000)
     ROOT.gStyle.SetOptStat(ROOT.kFALSE)
+    ROOT.gStyle.SetOptFit()
     ROOT.gStyle.SetOptFit()
     c1.SetLeftMargin(0.12)
     c1.SetRightMargin(0.2)
@@ -246,7 +324,7 @@ def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
     @param:
         "E" -- electric
         "P" -- potential
-        "WP" -- weighting potential    
+        "WP" -- weigthing potential    
     @Returns:
         None
     @Modify:
@@ -271,7 +349,7 @@ def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r):
         e_v.SetTitle("potential "+d_r[4])
         f_v=my_f.get_potential(input_x,input_y,input_z)
     elif model =="WP":
-        e_v.SetTitle("weighting potential "+d_r[4]) 
+        e_v.SetTitle("weigthing potential "+d_r[4]) 
         f_v=my_f.get_w_p(input_x,input_y,input_z)
     return f_v,e_v
 
@@ -286,7 +364,7 @@ def get_f_v_1D(i_x,i_y,i_z,model,my_f,e_v,d_r):
         e_v.SetTitle("potential "+d_r[2])
         f_v=my_f.get_potential(input_x,input_y,input_z)
     elif model =="WP":
-        e_v.SetTitle("weighting potential "+d_r[2]) 
+        e_v.SetTitle("weigthing potential "+d_r[2]) 
         f_v=my_f.get_w_p(input_x,input_y,input_z)
     return f_v,e_v
 
@@ -356,44 +434,37 @@ def draw_plot(my_d, ele_current, model, path):
     c.Update()
     c.SetLeftMargin(0.12)
     # c.SetTopMargin(0.12)
-    c.SetRightMargin(0.12)
     c.SetBottomMargin(0.14)
     ROOT.gStyle.SetOptStat(ROOT.kFALSE)
     ROOT.gStyle.SetOptStat(0)
 
-    #my_d.sum_cu.GetXaxis().SetTitleOffset(1.2)
-    #my_d.sum_cu.GetXaxis().SetTitleSize(0.05)
-    #my_d.sum_cu.GetXaxis().SetLabelSize(0.04)
+    my_d.sum_cu.GetXaxis().SetTitleOffset(1.2)
+    my_d.sum_cu.GetXaxis().SetTitleSize(0.05)
+    my_d.sum_cu.GetXaxis().SetLabelSize(0.04)
     my_d.sum_cu.GetXaxis().SetNdivisions(510)
-    #my_d.sum_cu.GetYaxis().SetTitleOffset(1.1)
-    #my_d.sum_cu.GetYaxis().SetTitleSize(0.05)
-    #my_d.sum_cu.GetYaxis().SetLabelSize(0.04)
+    my_d.sum_cu.GetYaxis().SetTitleOffset(1.1)
+    my_d.sum_cu.GetYaxis().SetTitleSize(0.05)
+    my_d.sum_cu.GetYaxis().SetLabelSize(0.04)
     my_d.sum_cu.GetYaxis().SetNdivisions(505)
-    #my_d.sum_cu.GetXaxis().CenterTitle()
-    #my_d.sum_cu.GetYaxis().CenterTitle() 
+    my_d.sum_cu.GetXaxis().CenterTitle()
     my_d.sum_cu.GetXaxis().SetTitle("Time [s]")
     my_d.sum_cu.GetYaxis().SetTitle("Current [A]")
-
     my_d.sum_cu.Draw("HIST")
     my_d.positive_cu.Draw("SAME HIST")
     my_d.negative_cu.Draw("SAME HIST")
     my_d.gain_positive_cu.Draw("SAME HIST")
     my_d.gain_negative_cu.Draw("SAME HIST")
-    my_d.sum_cu.Draw("SAME HIST")
-
-    my_d.positive_cu.SetLineColor(877)#kViolet-3
-    my_d.negative_cu.SetLineColor(600)#kBlue
-    my_d.gain_positive_cu.SetLineColor(617)#kMagneta+1
-    my_d.gain_negative_cu.SetLineColor(867)#kAzure+7
-    my_d.sum_cu.SetLineColor(418)#kGreen+2
-
+    my_d.sum_cu.SetLineColor(3)
+    my_d.positive_cu.SetLineColor(2)
+    my_d.negative_cu.SetLineColor(4)
+    my_d.gain_positive_cu.SetLineColor(2)
+    my_d.gain_negative_cu.SetLineColor(4)
+    my_d.sum_cu.SetLineWidth(2)
     my_d.positive_cu.SetLineWidth(2)
     my_d.negative_cu.SetLineWidth(2)
-    my_d.gain_positive_cu.SetLineWidth(2)
-    my_d.gain_negative_cu.SetLineWidth(2)
-    my_d.sum_cu.SetLineWidth(2)
+    my_d.gain_positive_cu.SetLineWidth(4)
+    my_d.gain_negative_cu.SetLineWidth(4)
     c.Update()
-
     if ele_current.GetMinimum() < 0:
         rightmax = 1.1*ele_current.GetMinimum()
     else:
@@ -407,23 +478,22 @@ def draw_plot(my_d, ele_current, model, path):
     ele_current.Scale(n_scale)
     ele_current.Draw("SAME HIST")
     ele_current.SetLineWidth(2)   
-    ele_current.SetLineColor(8)
-    ele_current.SetLineColor(2)
+    ele_current.SetLineColor(6)
     c.Update()
 
     axis = ROOT.TGaxis(ROOT.gPad.GetUxmax(), ROOT.gPad.GetUymin(), 
                        ROOT.gPad.GetUxmax(), ROOT.gPad.GetUymax(), 
-                       min(0,rightmax), max(0,rightmax), 510, "+L")
-    axis.SetLineColor(2)
-    axis.SetTextColor(2)
-    axis.SetTextSize(0.035)
-    axis.SetLabelColor(2)
-    axis.SetLabelSize(0.03)
+                       rightmax, 0, 510, "+L")
+    axis.SetLineColor(6)
+    axis.SetTextColor(6)
+    axis.SetTextSize(0.02)
+    axis.SetLabelColor(6)
+    axis.SetLabelSize(0.02)
     axis.SetTitle("Ampl [mV]")
-    #axis.CenterTitle()
-    axis.Draw("SAME HIST")
+    axis.CenterTitle()
+    axis.Draw("same")
 
-    legend = ROOT.TLegend(0.5, 0.3, 0.8, 0.6)
+    legend = ROOT.TLegend(0.5, 0.3, 0.9, 0.6)
     legend.AddEntry(my_d.negative_cu, "electron", "l")
     legend.AddEntry(my_d.positive_cu, "hole", "l")
     legend.AddEntry(my_d.gain_negative_cu, "gain electron", "l")
@@ -432,11 +502,12 @@ def draw_plot(my_d, ele_current, model, path):
     legend.AddEntry(ele_current, "electronics", "l")
     legend.SetBorderSize(0)
     legend.SetTextFont(43)
-    #legend.SetTextSize(42)
+    legend.SetTextSize(45)
     legend.Draw("same")
     c.Update()
     c.SaveAs(path+model+my_d.det_model+"_basic_infor.pdf")
-    c.SaveAs(path+model+my_d.det_model+"_basic_infor.root")
+#    c.SaveAs(path+model+my_d.det_model+"_basic_infor.root")
+ 
     del c
 
 def draw_drift_path(my_d,my_f,my_current,path):
@@ -470,6 +541,7 @@ def draw_drift_path(my_d,my_f,my_current,path):
                     z_v = (k+1)*(my_d.l_z/n_bin[2])
                 try:
                     x_value,y_value,z_value = my_f.get_e_field(x_v,y_v,z_v)
+                    x_value,y_value,z_value = my_f.get_e_field(x_v,y_v,z_v)
                     if x_value==0 and y_value==0 and z_value ==0:
                         structure.SetBinContent(i+1,j+1,k+1,1)
                     else:                       
@@ -477,9 +549,9 @@ def draw_drift_path(my_d,my_f,my_current,path):
                 except RuntimeError:
                     structure.SetBinContent(i+1,j+1,k+1,1)
     structure.SetFillColor(1)
-    structure.GetXaxis().SetTitle("x axis")
-    structure.GetYaxis().SetTitle("y axis")
-    structure.GetZaxis().SetTitle("z axis")
+    structure.GetXaxis().SetTitle("x aixs")
+    structure.GetYaxis().SetTitle("y aixs")
+    structure.GetZaxis().SetTitle("z aixs")
     structure.GetXaxis().CenterTitle()
     structure.GetYaxis().CenterTitle() 
     structure.GetZaxis().CenterTitle() 
@@ -492,12 +564,12 @@ def draw_drift_path(my_d,my_f,my_current,path):
     x_array=array('f')
     y_array=array('f')
     z_array=array('f')
-    for hole in my_current.holes:
-        n=len(hole.path)
+    for i in range(len(my_current.d_dic_p)):
+        n=len(my_current.d_dic_p["tk_"+str(i+1)][0])
         if(n>0):
-            x_array.extend([step[0] for step in hole.path])
-            y_array.extend([step[1] for step in hole.path]) 
-            z_array.extend([step[2] for step in hole.path])              
+            x_array.extend(my_current.d_dic_p["tk_"+str(i+1)][0])
+            y_array.extend(my_current.d_dic_p["tk_"+str(i+1)][1]) 
+            z_array.extend(my_current.d_dic_p["tk_"+str(i+1)][2])              
             gr_p = ROOT.TPolyLine3D(n,x_array,y_array,z_array)
             gr_p.SetLineColor(2)
             gr_p.SetLineStyle(1)
@@ -510,12 +582,12 @@ def draw_drift_path(my_d,my_f,my_current,path):
             del x_array[:]
             del y_array[:]
             del z_array[:]
-    for electron in my_current.electrons:
-        m=len(electron.path)
+    for j in range(len(my_current.d_dic_n)):
+        m=len(my_current.d_dic_n["tk_"+str(j+1)][0])
         if(m>0):
-            x_array.extend([step[0] for step in electron.path])
-            y_array.extend([step[1] for step in electron.path])
-            z_array.extend([step[2] for step in electron.path])                
+            x_array.extend(my_current.d_dic_n["tk_"+str(j+1)][0])
+            y_array.extend(my_current.d_dic_n["tk_"+str(j+1)][1])
+            z_array.extend(my_current.d_dic_n["tk_"+str(j+1)][2])                
             gr_n = ROOT.TPolyLine3D(m,x_array,y_array,z_array)
             gr_n.SetLineColor(4)
             gr_n.SetLineStyle(1)
@@ -530,8 +602,8 @@ def draw_drift_path(my_d,my_f,my_current,path):
             del z_array[:]
     c1.cd(2)
     mg.Draw("APL")
-    mg.GetXaxis().SetTitle("x axis")
-    mg.GetYaxis().SetTitle("z axis")
+    mg.GetXaxis().SetTitle("x aixs")
+    mg.GetYaxis().SetTitle("z aixs")
     c1.SaveAs(path+my_d.det_model+"_drift_path.pdf")
     c1.SaveAs(path+my_d.det_model+"_drift_path.root")
     del c1
@@ -570,7 +642,6 @@ def draw_scat_angle(evnets_angle,angle,model):
     c1=ROOT.TCanvas("c1","canvas1",1000,1000)
     c1.Divide(1,2)
     c1.cd(1)
-    n=len(evnets_angle)
     ROOT.gStyle.SetOptStat(0)
     h1 = ROOT.TH1F("event angle", "Source Angle = "+str(angle), n, 0., n)
     for i in range(n):
@@ -600,43 +671,18 @@ def draw_scat_angle(evnets_angle,angle,model):
     c1.SaveAs("scat_angle"+model+".pdf")
 
 def draw_nocarrier3D(path,my_l):
-    ROOT.gStyle.SetOptStat(0)
     c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    h = ROOT.TH3D("h","Pairs of carrier generation",\
-        int((my_l.x_max-my_l.x_min)/my_l.x_step)+1,my_l.x_min,my_l.x_max,\
-        int((my_l.y_max-my_l.y_min)/my_l.y_step)+1,my_l.y_min,my_l.y_max,\
-        int((my_l.z_max-my_l.z_min)/my_l.z_step)+1,my_l.z_min,my_l.z_max)
+    h = ROOT.TH3D("h","pairs of carrier generation",\
+        int((my_l.x_max-my_l.x_min)/my_l.x_step)+1,my_l.x_min-0.5*my_l.x_step,my_l.x_max+0.5*my_l.x_step,\
+        int((my_l.y_max-my_l.y_min)/my_l.y_step)+1,my_l.y_min-0.5*my_l.y_step,my_l.y_max+0.5*my_l.y_step,\
+        int((my_l.z_max-my_l.z_min)/my_l.z_step)+1,my_l.z_min-0.5*my_l.z_step,my_l.z_max+0.5*my_l.z_step)
     for i in range(len(my_l.track_position)):
         h.Fill(my_l.track_position[i][0], my_l.track_position[i][1], my_l.track_position[i][2], my_l.ionized_pairs[i])
     h.Draw()
-    h.GetXaxis().SetTitle("Depth [um]")#[μm]
-    h.GetYaxis().SetTitle("Width [um]")
-    h.GetZaxis().SetTitle("Thick [um]")
-    h.GetXaxis().SetTitleOffset(1.8)
-    h.GetYaxis().SetTitleOffset(2.2)
-    h.GetZaxis().SetTitleOffset(1.4)
+    h.GetXaxis().SetTitle("Depth [μm]")
+    h.GetYaxis().SetTitle("Width [μm]")
+    h.GetZaxis().SetTitle("Thick [μm]")
     c1.SaveAs(path+"nocarrier_"\
-        +str(round(my_l.fx_rel,5))+"_"\
-        +str(round(my_l.fy_rel,5))+"_"\
-        +str(round(my_l.fz_rel,5))+"_"\
-        +str(my_l.min_carrier)+".pdf")  
-
-def draw_nocarrier2D(path,my_l):
-    ROOT.gStyle.SetOptStat(0)
-    c1 = ROOT.TCanvas("c1","canvas2",200,10,1000,1000)
-    c1.SetLeftMargin(0.12)
-    c1.SetRightMargin(0.2)
-    c1.SetBottomMargin(0.14)
-    c1.SetRightMargin(0.12)
-    h = ROOT.TH2D("h","Light Intensity",\
-        int((my_l.x_max-my_l.x_min)/my_l.x_step),my_l.x_min,my_l.x_max,\
-        int((my_l.z_max-my_l.z_min)/my_l.z_step),my_l.z_min,my_l.z_max)
-    for i in range(len(my_l.track_position)):
-        h.Fill(my_l.track_position[i][0], my_l.track_position[i][2], my_l.ionized_pairs[i])
-    h.Draw("COLZ")
-    h.GetXaxis().SetTitle("Depth [um]")#[μm]
-    h.GetYaxis().SetTitle("Thick [um]")
-    c1.SaveAs(path+"nocarrier2D_"\
         +str(round(my_l.fx_rel,5))+"_"\
         +str(round(my_l.fy_rel,5))+"_"\
         +str(round(my_l.fz_rel,5))+"_"\
