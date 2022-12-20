@@ -68,7 +68,8 @@ class TCTTracks():
             raise NameError(self.tech)
 
         self.change_coordinate()
-        x_min = self.fx_abs - 1 * self.x_char
+        #x_min = self.fx_abs - 1 * self.x_char
+        x_min = 0
         x_max = self.fx_abs + 1 * self.x_char
         y_min = self.fy_abs - 1 * self.y_char
         y_max = self.fy_abs + 1 * self.y_char
@@ -94,10 +95,10 @@ class TCTTracks():
         zCenter = (zArray[:-1] + zArray[1:]) / 2
         tCenter = (tArray[:-1] + tArray[1:]) / 2
 
-        xDiff = (xArray[:-1] - xArray[1:]) / 2
-        yDiff = (yArray[:-1] - yArray[1:]) / 2
-        zDiff = (zArray[:-1] - zArray[1:]) / 2
-        tDiff = (tArray[:-1] - tArray[1:]) / 2
+        xDiff = (xArray[:-1] - xArray[1:])
+        yDiff = (yArray[:-1] - yArray[1:])
+        zDiff = (zArray[:-1] - zArray[1:])
+        tDiff = (tArray[:-1] - tArray[1:])
 
         YC, XC, ZC, TC = np.meshgrid(yCenter, xCenter, zCenter, tCenter) #Feature of numpy.meshgrid
         YD, XD, ZD, TD = np.meshgrid(yDiff, xDiff, zDiff, tDiff)
