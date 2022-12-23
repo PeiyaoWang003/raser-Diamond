@@ -71,7 +71,7 @@ def run_job(job_name):
         for file in files:
             if ".sh" in file:
                 path = os.path.join(job_name, file)
-                job_command = "hep_sub "+ path +" -image track-1.2.sif -wn bws0765.ihep.ac.cn"
+                job_command = "hep_sub "+ path +" -image raser-1.2.sif -wn bws0765.ihep.ac.cn"
                 print(job_command)
                 runcmd(job_command)
 
