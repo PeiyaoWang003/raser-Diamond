@@ -297,9 +297,7 @@ case $option in
         track
         ;;
     5.1.1) echo "Si-PIN edge-TCT basic information ..."
-        geant4
-        ./python/TCTtest.py det_name=HPK-Si-PIN parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
-        ;;
+        raser "./python/TCTtest.py det_name=HPK-Si-PIN parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json"        ;;
     5.1.2) echo "Si-LGAD edge-TCT basic information ..."
         geant4
         ./python/TCTtest.py det_name=HPK-Si-LGAD parfile=setting.json laser_model=edge_TCT_Si laser_parfile=laser_setting.json
