@@ -84,9 +84,12 @@ else
 	input_para=$* 
 fi
 
+imagename=raser-1.2.sif
+
 raser(){
     #apptainer shell --env PS1="\u_RASER> " -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif 
-    apptainer exec --env-file env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif $1 
+    # apptainer exec --env-file env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif $1 
+    apptainer exec --env-file env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/$imagename $1 
 }
 
 
@@ -107,7 +110,8 @@ devsim(){
 
 
 hepjob(){
-    export HepcMyImage=raser-1.2.sif
+    # export HepcMyImage=raser-1.2.sif
+    export HepcMyImage=$imagename
     export PATH=$PATH:/afs/.ihep.ac.cn/soft/common/sysgroup/hepjob-4.0-dev/bin/
 }
 
