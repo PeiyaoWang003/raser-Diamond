@@ -85,7 +85,8 @@ else
 fi
 
 raser(){
-    apptainer shell --env PS1="\u_RASER> " -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif 
+    #apptainer shell --env PS1="\u_RASER> " -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif 
+    apptainer exec --env-file env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif $1 
 }
 
 
@@ -114,7 +115,8 @@ sub_1_1(){
 case $option in 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..." 
         # need to ./run raser first 
-        apptainer exec --env-file env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif ./python/gsignal.py det_name=NJU-PIN parfile=setting.json 
+        #apptainer exec --env-file env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/raser-1.2.sif ./python/gsignal.py det_name=NJU-PIN parfile=setting.json 
+        raser "./python/gsignal.py det_name=NJU-PIN parfile=setting.json" 
         # geant4 
         # ./python/gsignal.py det_name=NJU-PIN parfile=setting.json
         ;;
