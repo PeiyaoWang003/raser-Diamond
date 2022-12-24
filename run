@@ -34,8 +34,7 @@ usage_1_1() {
 }
 usage_1_2() { 
 	printf "\n\t%-5s  %-40s\n"  "1.2.1"    "3D-SiC basic information for RASER simulation ..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.2.T"  "pre-run 3D-SiC batch model with total number, split with step number ..." 
-	printf "\n\t%-5s  %-40s\n"  "1.2.2"    "run 3D-SiC batch model with total number, split with step number ..." 
+	printf "\n\t%-5s  %-40s\n"  "1.2.2"    "3D-SiC batch model with total number, split with step number ..." 
 	printf "\n\t%-5s  %-40s\n"  "1.2.3"    "get time resolution 3D-SiC multi points voltage [-50,-500] ..." 
 	printf "\n\t%-5s  %-40s\n"  "1.2.4"    "get time resolution vs draw voltage ..." 
     printf "\n"
@@ -74,8 +73,8 @@ usage_3_1() {
 }
 
 usage_3_2() { 
-    printf "\n\t%-5s  %-40s\n"  "3.2.1"    "SiC-PIN edge-TCT basic information ..."
-    printf "\n\t%-5s  %-40s\n"  "3.2.2"    "SiC-LGAD edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "3.2.1"    "Si-PIN edge-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "3.2.2"    "Si-LGAD edge-TCT basic information ..."
     printf "\n"
 }
 
@@ -109,10 +108,10 @@ case $option in
 	1.1.2) echo "batch model with total number, split with step number"
 		step=100000
 		for ((i=1;i<=20;i++))
-            do
-                ./python/run_batchjob.py pin3D/NJU-PIN \
-                    "gsignal.py det_name=NJU-PIN parfile=setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/"
-            done
+        do
+            ./python/run_batchjob.py pin3D/NJU-PIN \
+                "gsignal.py det_name=NJU-PIN parfile=setting.json scan=True total_e=$step instan=$i output=output/pin3D/NJU-PIN/"
+        done
         ;;
 
     1.1.3) echo "get time resolution for SiC-PIN"
@@ -126,10 +125,10 @@ case $option in
     1.1.5) echo "batch model with total number, split with step number"
 		step=10000
 		for ((i=1;i<=20;i++))
-            do
-                ./python/run_batchjob.py pin3D/HPK-Si-PIN \
-                    "gsignal.py det_name=HPK-Si-PIN parfile=setting.json scan=True total_e=$step instan=$i output=output/pin3D/HPK-Si-PIN/"
-            done
+        do
+            ./python/run_batchjob.py pin3D/HPK-Si-PIN \
+                "gsignal.py det_name=HPK-Si-PIN parfile=setting.json scan=True total_e=$step instan=$i output=output/pin3D/HPK-Si-PIN/"
+        done
         ;;
 
     1.1.6) echo "get time resolution for Si-PIN"
@@ -142,30 +141,37 @@ sub_1_2(){
 case $option in 
     1.2.1) echo "3D-SiC basic information for RASER simulation ..."
         raser "./python/gsignal.py det_name=plugin3D parfile=setting.json"
+		;;
+
+    1.2.2) echo "run 3D-SiC batch model with total number, split with step number ..."
+        step=10000
+		for ((i=1;i<=2;i++))
+        do
+            for ((j=1;j<=10;j++))
+            do
+                ./python/run_batchjob.py plugin3D/plugin3D \
+                "gsignal.py det_name=plugin3D parfile=setting.json scan=True total_e=$step instan=$i output=output/plugin3D/plugin3D/ parameter_alter=true voltage=$[-500+j*50]"
+                # doping=$[10+j*10]
+                # temp=$[300+j*30]
+                # lz=$[150.0+j*30]
+                # e_gap=$[140.0+j*20]
+            done
+        done
         ;;
 
-    1.2.2.T) echo "pre-run 3D-SiC batch model with total number, split with step number ..."
-        hepjob
-		./python/run_batchjob.py det_name=plugin3D step=200 total=400  \
-							 instance=0 output=out/plugin3D/plugin3D/ batch=True para_name=scan_voltage para_number=10
-		;; 
-    1.2.2) echo "run 3D-SiC batch model with total number, split with step number ..."
-        hepjob
-		./python/run_batchjob.py det_name=plugin3D step=20000 total=40000  \
-							 instance=0 output=out/plugin3D/plugin3D/ batch=True para_name=scan_voltage para_number=10 
-        ;;
 	1.2.3) echo "get time resolution 3D-SiC multi points voltage [-50,-500]"
-        ./python/time_scan.py  out/plugin3D/plugin3D/ scan
-			;;
+        hepjob
+        ./python/time_scan.py  output/plugin3D/plugin3D/ scan
+		;;
+
 	1.2.4) echo "get time resolution vs draw voltage"
-		./python/time_scan.py  out/plugin3D/plugin3D/time_resolution_scan.csv draw_voltage 0
-			;;
+		./python/time_scan.py  output/plugin3D/plugin3D/time_resolution_scan.csv draw_voltage 0
+		;;
         esac
 }
 
 sub_1_3(){
 case $option in 
-
     1.3.1) echo "Initial DataBase of DEVSIM ..."
         raser "./python/gen_devsim_db.py"
         ;;
@@ -193,9 +199,7 @@ case $option in
     1.3.7) echo "Simulate 1D SICAR1 LGAD C-V ..."
         ./python/run_batchjob.py devsim "solve_cv_lgad.py"
         ;;
-
         esac
-
 }
 
 sub_2_1(){
@@ -205,19 +209,25 @@ case $option in
         ;;
 
 	2.1.2) echo "batch model with total number, split with step number"
-		hepjob
-		./python/run_batchjob.py det_name=SICAR-1  step=50000 total=200000 \
-							 instance=0 output=out/lgad3D/SICAR-1/ batch=True para_name=scan_voltage para_number=10
+        step=50000
+		for ((i=1;i<=4;i++))
+        do
+            for ((j=1;j<=10;j++))
+            do
+                ./python/run_batchjob.py lgad3D/SICAR-1 \
+                "gsignal.py det_name=SICAR-1 parfile=setting.json scan=True total_e=$step instan=$i output=output/lgad3D/SICAR-1/ parameter_alter=true voltage=$[-400-j*10]"
+            done
+        done
         ;;
 
     2.1.3) echo "get time resolution for SiC-LGAD, multi points voltage [200,250]"
         hepjob
-        ./python/time_scan.py  out/lgad3D/SICAR-1 scan
+        ./python/time_scan.py  output/lgad3D/SICAR-1 scan
         ;;
 
     2.1.4) echo "get time resolution and gain efficiency vs avalanche doping"
-		./python/time_scan.py  out/lgad3D/SICAR-1/time_resolution_scan.csv draw_voltage 0
-        ./python/time_scan.py  out/lgad3D/SICAR-1/gain_efficiency_scan.csv gain_voltage 0
+		./python/time_scan.py  output/lgad3D/SICAR-1/time_resolution_scan.csv draw_voltage 0
+        ./python/time_scan.py  output/lgad3D/SICAR-1/gain_efficiency_scan.csv gain_voltage 0
 		;;
     esac
 }
@@ -228,10 +238,17 @@ case $option in
     2.2.1) echo "Si-LGAD basic information for RASER simulation ..."
         raser "./python/gsignal.py det_name=HPK-Si-LGAD parfile=setting.json"
         ;;
+
     2.2.2) echo "batch model with total number, split with step number"
-		hepjob
-		./python/run_batchjob.py det_name=HPK-Si-LGAD step=50000 total=200000 \
-							 instance=0 output=out/lgad3D/HPK-Si-LGAD/ batch=True para_name=scan_voltage para_number=6
+        step=50000
+		for ((i=1;i<=4;i++))
+        do
+            for ((j=1;j<=5;j++))
+            do
+                ./python/run_batchjob.py lgad3D/HPK-Si-LGAD \
+                "gsignal.py det_name=HPK-Si-LGAD parfile=setting.json scan=True total_e=$step instan=$i output=output/lgad3D/HPK-Si-LGAD/ parameter_alter=true voltage=$[200+j*10]"
+            done
+        done
         ;;
 
     2.2.3) echo "get time resolution for Si-LGAD, multi points voltage [200,250]"
