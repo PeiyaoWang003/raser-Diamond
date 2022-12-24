@@ -133,7 +133,7 @@ case $option in
         ;;
 
     1.1.6) echo "get time resolution for Si-PIN"
-        ./python/add_noise_raser.py out/pin3D/HPK-Si-PIN/_d=-1.0_v=200.0_tmp=300.0_thick=50.0_radius=None 1
+        ./python/add_noise_raser.py output/pin3D/HPK-Si-PIN/_d=-1.0_v=200.0_tmp=300.0_thick=50.0_radius=None 1
         ;;
         esac
 }
