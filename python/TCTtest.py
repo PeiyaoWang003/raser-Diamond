@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
-import raser
+import os
 import sys
+#sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import raser
 import time
 import drawsave
 
 args = sys.argv[1:]
 start = time.time()
 dset = raser.Setting(args)
+if "parameter_alter=True" in args:
+        # need to put the changed value at the end of the parameter list
+        key,_,value=args[-1].rpartition('=')
+        value=float(value)
+        dset.laser_paras.update({key:value})
 my_d = raser.R3dDetector(dset)
 my_f = raser.FenicsCal(my_d, dset.fenics)
 my_l = raser.TCTTracks(my_d, dset.laser)
