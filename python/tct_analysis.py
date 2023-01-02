@@ -134,7 +134,7 @@ def get_risetime(volt,time,J,mean):
     risetime=np.true_divide((e2-e1),0.6)
     return risetime
 
-def draw_graphs(array1,Z,name):
+def draw_graphs(array1,Z,name,path):
     n=len(array1)
     g = ROOT.TCanvas('g', '', 800, 600)
     g.SetFillColor(0)
