@@ -39,7 +39,7 @@ def gen_job(jobfile_name,run_code):
 def submit_job(jobfile_name,destination_subfolder,group):
     print("Submit job file: ", jobfile_name)
     runcmd("chmod u+x {}".format(jobfile_name))
-    runcmd("hep_sub -o ./output/{}/jobs -e ./output/{}/jobs {} -g {}"\
+    runcmd("hep_sub -o ./output/{}/jobs -e ./output/{}/jobs {} -g {} –mem 1000"\
         .format(destination_subfolder,destination_subfolder,jobfile_name,group))
 
 def create_path(path):
