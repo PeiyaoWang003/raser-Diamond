@@ -291,7 +291,7 @@ case $option in
 
     3.2.2) echo "Si-LGAD edge-TCT basic information ..."
         raser "./python/TCTtest.py det_name=HPK-Si-LGAD parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json"       
-       ;;
+        ;;
 
     3.2.3) echo "get volt-time for Si-PIN edge-TCT, multi points z [0,50]"
         step=1
