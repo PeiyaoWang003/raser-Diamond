@@ -56,9 +56,9 @@ def main():
         my_g4p = raser.Beammonitor(my_d, my_f, dset)
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = raser.Amplifier(my_d, dset.amplifier)
-        
-    else:
-        my_g4p = raser.Particles(my_d, my_f, dset)
+        drawsave.get_beam_number(my_g4p,ele_current)
+        return
+    my_g4p = raser.Particles(my_d, my_f, dset)
     if "scan=True" not in args:
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         #if "lgad" in dset.det_model:
