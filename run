@@ -141,11 +141,15 @@ case $option in
         ./python/time_scan.py  output/pin3D/NJU-PIN/ scan
 		;;
 
-    1.1.4) echo "Si-PIN basic information for RASER simulation ..."
+    1.1.4S) echo "get time resolution vs draw voltage"
+		./python/time_scan.py  output/pin3D/NJU-PIN/time_resolution_scan.csv draw_voltage 0
+		;;
+
+    1.1.1A) echo "Si-PIN basic information for RASER simulation ..."
         raser "./python/gsignal.py det_name=HPK-Si-PIN parfile=paras/setting.json"
         ;;
 
-    1.1.5) echo "batch model with total number, split with step number"
+    1.1.2A) echo "batch model with total number, split with step number"
 		step=10000
 		for ((i=0;i<20;i++))
         do
@@ -154,7 +158,7 @@ case $option in
         done
         ;;
 
-    1.1.6) echo "get time resolution for Si-PIN"
+    1.1.3A) echo "get time resolution for Si-PIN"
         ./python/add_noise_raser.py output/pin3D/HPK-Si-PIN/_d=-1.0_v=200.0_tmp=300.0_thick=50.0_radius=None 1
         ;;
 
