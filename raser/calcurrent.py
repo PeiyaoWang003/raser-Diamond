@@ -358,16 +358,6 @@ class CalCurrentG4P(CalCurrent):
 
 class CalCurrentLaser(CalCurrent):
     def __init__(self, my_d, my_f, my_l):
-        delta_pulse_positive_cu = ROOT.TH1F("delta_pulse_charge+", "Delta Pulse Positive Current",
-                                     my_d.n_bin, my_d.t_start, my_d.t_end)
-        delta_pulse_negative_cu = ROOT.TH1F("delta_pulse_charge-", "Delta Pulse  Current",
-                                     my_d.n_bin, my_d.t_start, my_d.t_end)
-        delta_pulse_gain_positive_cu = ROOT.TH1F("delta_pulse_gain_charge+","Delta Pulse Gain Positive Current",
-                                     my_d.n_bin, my_d.t_start, my_d.t_end)
-        delta_pulse_gain_negative_cu = ROOT.TH1F("delta_pulse_gain_charge-","Delta Pulse Gain Negative Current",
-                                     my_d.n_bin, my_d.t_start, my_d.t_end)
-        delta_pulse_sum_cu = ROOT.TH1F("delta_pulse_charge","Delta Pulse Total Current",
-                                my_d.n_bin, my_d.t_start, my_d.t_end)
         super().__init__(my_d, my_f, my_l.ionized_pairs, my_l.track_position)
 
 class CarrierListFromG4P:
