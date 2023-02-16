@@ -41,9 +41,9 @@ def save_experiment_data(z_init,t_init,myt,out):
         del t_out
         print(out+str(j)+".root Saved")
 
-myPinFile = ROOT.TFile("python/readdata/edge_voltage_2019_10_24_15_12_57_HPK-EPI-W2-200-DS-SE5PINNM-01.txt.root")
+myPinFile = ROOT.TFile("/afs/ihep.ac.cn/users/f/fuchenxi/disk/1/edge_voltage_2019_10_24_15_12_57_HPK-EPI-W2-200-DS-SE5PINNM-01.txt.root")
 myPinTree = myPinFile.Get("edge")
-myLgadFile = ROOT.TFile("python/readdata/edge_voltage_2019_10_09_12_26_57_HPK-EPI-W2-200-DS-SE5-04.txt.root")
+myLgadFile = ROOT.TFile("/afs/ihep.ac.cn/users/f/fuchenxi/disk/1/edge_voltage_2019_10_09_12_26_57_HPK-EPI-W2-200-DS-SE5-04.txt.root")
 myLgadTree = myLgadFile.Get("edge")
 # myPinTree.Show(17) # checkout the members
 
