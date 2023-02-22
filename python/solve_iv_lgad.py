@@ -44,7 +44,7 @@ E_t11=-0.67*1.6e-19 #J
 E_t12=-2.56*1.6e-19
 n_11=N_c*math.exp(E_t11/(k*T0))
 p_11=N_v*math.exp(E_t12/(k*T0))
-devsim.set_parameter(device=device,region=region,name="N_t1",value=2e15)#density of Z1/2,4.1e13 from paper
+devsim.set_parameter(device=device,region=region,name="N_t1",value=0)#density of Z1/2,4.1e13 from paper
 devsim.set_parameter(device=device,region=region,name="r_n1",value=2e-7)#electron capture constant of Z1/2
 devsim.set_parameter(device=device,region=region,name="r_p1",value=3e-7)#hole capture constant of Z1/2
 devsim.set_parameter(device=device,region=region,name="E_t11",value=E_t11)#Z1/2 Et-Ec
