@@ -279,7 +279,7 @@
         "xyscale" : 1,
 
         "e_r_inner" : 50,
-        "e_r_outer" : 200,
+        "e_r_outer" : 225,
 
         "maxstep" : 2,
         "g4_vis" : 0,

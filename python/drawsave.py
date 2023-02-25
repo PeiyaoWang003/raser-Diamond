@@ -54,27 +54,26 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
     create_path("fig/")
     draw_plot(my_d,ele_current.CSA_ele,unit_test=True) # Draw current
 
-def save(dset,my_d,my_l,ele_current):
-    if "planar3D" in my_d.det_model:
+def save(dset,my_d,my_l,ele_current,key):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = "output/" + "pintct/" + dset.det_name + "/"
-    elif "planarRing" in my_d.det_model:
-        path = "output/" + "pintct_ring/" + dset.det_name + "/"
     elif "lgad3D" in my_d.det_model:
         path = "output/" + "lgadtct/" + dset.det_name + "/"
     create_path(path) 
-    L=round(my_l.fz_abs)
+    L=eval("round({}.{})".format(my_l,key))
+    #L is defined by different keys
     volt = array('d', [999.])
     time = array('d', [999.])
-    z = array('d', [999.])
+    variation = array('d', [999.])
     fout = ROOT.TFile(path+"sim-TCT"+str(L)+".root", "RECREATE")
     t_out = ROOT.TTree("tree", "signal")
     t_out.Branch("volt", volt, "volt/D")
     t_out.Branch("time", time, "time/D")
-    t_out.Branch("z", z, "z/D")
+    t_out.Branch(key, variation, "{}/D".format(key))
     for i in range(ele_current.BB_ele.GetNbinsX()):
           time[0]=i*ele_current.time_unit
           volt[0]=ele_current.BB_ele[i]
-          z[0]=L
+          variation[0]=L
           t_out.Fill()
     t_out.Write()
     fout.Close()
