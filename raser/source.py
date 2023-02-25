@@ -69,12 +69,12 @@ class TCTTracks():
             raise NameError(self.tech)
 
         self.change_coordinate()
-        x_min = max(0,self.fx_abs - 1 * self.x_char)
-        x_max = min(my_d.l_x,self.fx_abs + 1 * self.x_char)
-        y_min = max(0,self.fy_abs - 1 * self.y_char)
-        y_max = min(my_d.l_y,self.fy_abs + 1 * self.y_char)
-        z_min = max(0,self.fz_abs - 1 * self.z_char)
-        z_max = min(my_d.l_z,self.fz_abs + 1 * self.z_char)
+        x_min = max(0,self.fx_abs - 3 * self.x_char)
+        x_max = min(my_d.l_x,self.fx_abs + 3 * self.x_char)
+        y_min = max(0,self.fy_abs - 3 * self.y_char)
+        y_max = min(my_d.l_y,self.fy_abs + 3 * self.y_char)
+        z_min = max(0,self.fz_abs - 3 * self.z_char)
+        z_max = min(my_d.l_z,self.fz_abs + 3 * self.z_char)
 
         self.x_left_most, self.x_right_most = self.window(x_min, x_max, 0, my_d.l_x)
         self.y_left_most, self.y_right_most = self.window(y_min, y_max, 0, my_d.l_y)

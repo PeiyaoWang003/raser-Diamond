@@ -51,7 +51,7 @@ class FenicsCal:
                 m_sensor = m_sensor - elec_n 
             self.mesh3D = mshr.generate_mesh(m_sensor,mesh_number)
 
-        elif "planar3D" or "planarRing" in self.det_model:
+        elif "planar3D" in self.det_model or "planarRing" in self.det_model:
             m_sensor = mshr.Box(fenics.Point(0, 0, 0), 
                                 fenics.Point(self.fl_x, self.fl_y, self.fl_z))
             self.mesh3D = mshr.generate_mesh(m_sensor,mesh_number)
