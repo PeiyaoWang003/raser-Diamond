@@ -55,8 +55,12 @@ class Beammonitor:
         self.hittotal=hittotal      #count the numver of hit particles
 
         number=0
+        total_steps=0
         for step in s_p_steps:
-            if(len(step)>50 and len(step)<80):
+            total_steps=len(step)+total_steps
+        average_steps=total_steps/len(s_p_steps)
+        for step in s_p_steps:
+            if(len(step)>average_steps):
                 break
             number=number+1
         newtype_step=s_p_steps[number]      #new particle's step
@@ -95,19 +99,9 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
         #2D source order: beta->Si->SiC
         tx_all = my_d.l_x/2.0*g4b.um
         ty_all = my_d.l_y/2.0*g4b.um
-        if "plugin3D" in sensor_model:
-            tz_Si = 0*g4b.um
-            tz_device = 10000*g4b.um+my_d.l_z/2.0*g4b.um
-            self.init_tz_device = 10000
-            tz_pcb2 = 10000*g4b.um-750*g4b.um
-            device_x = (my_f.sx_r-my_f.sx_l)*g4b.um 
-            device_y = (my_f.sy_r-my_f.sy_l)*g4b.um
-            device_z = my_d.l_z*g4b.um
-        elif "planar3D" or "lgad3D" in sensor_model:
-            tz_Si = 10000*g4b.um
+        if "planar3D" or "lgad3D" in sensor_model:
             tz_device = my_d.l_z/2.0*g4b.um
             self.init_tz_device = 0
-            tz_pcb2 = -1100*g4b.um
             device_x = my_d.l_x*g4b.um 
             device_y = my_d.l_y*g4b.um
             device_z = my_d.l_z*g4b.um
