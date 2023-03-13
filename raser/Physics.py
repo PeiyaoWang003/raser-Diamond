@@ -158,7 +158,7 @@ def CreateSRH2(device, region):
     '''
     sigma_n_HS6=2e-12
     sigma_p_HS6=3e-17
-    N_t_HS6=1e13
+    N_t_HS6=0
     v_T=1e7
     devsim.add_db_entry(material="global",   parameter="sigma_n_HS6",     value=sigma_n_HS6,   unit="s/cm^2",     description="sigma_n_HS6")
     devsim.add_db_entry(material="global",   parameter="sigma_p_HS6",     value=sigma_p_HS6,   unit="s/cm^2",     description="sigma_p_HS6")
@@ -300,8 +300,8 @@ def CreateNetGeneration(device, region):
     #Gn = "-q * (USRH - 1e18*x*x)"
     #Gp = "+q * (USRH - 1e18*x*x)"
 
-    Gn = "-q * (USRH+R_z+R_h6)"
-    Gp = "+q * (USRH+R_z+R_h6)"
+    Gn = "-q * (USRH+R_z+R_h6-1e12)"
+    Gp = "+q * (USRH+R_z+R_h6-1e12)"
 
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
