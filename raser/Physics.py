@@ -139,9 +139,9 @@ def CreateSRH1(device, region):
     '''
     Add defect Z 1 / 2
     '''
-    sigma_n=3e-16
+    sigma_n=3e-12
     sigma_p=2e-12
-    N_t=0
+    N_t=1e12
     v_T=1e7
     devsim.add_db_entry(material="global",   parameter="sigma_n",     value=sigma_n,   unit="s/cm^2",     description="sigma_n")
     devsim.add_db_entry(material="global",   parameter="sigma_p",     value=sigma_p,   unit="s/cm^2",     description="sigma_p")
