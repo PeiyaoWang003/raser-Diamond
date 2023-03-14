@@ -33,17 +33,17 @@ def main():
     ---------
         2021/09/02
     """
-    args = sys.argv[1:]
+    args = sys.argv[1:]     #[det_name=NJU-PIN, parfile=paras/setting.json]
     dset = raser.Setting(args)
-    if "scan=True" in args:
-        dset.scan_variation()
-    if "parameter_alter=True" in args:
+    if "scan=True" in args:#f
+         dset.scan_variation()
+    if "parameter_alter=True" in args:#f
         # need to put the changed value at the end of the parameter list
         key,_,value=args[-1].rpartition('=')
         value=float(value)
         dset.paras.update({key:value})
-    det_dic = dset.detector
-    if "plugin3D" in det_dic['det_model']:
+    det_dic = dset.detector#{'det_model': 'planar3D', 'lx': 1000.0, 'ly': 1000.0, 'lz': 100.0, 'material': 'SiC', 'voltage': -500.0, 'temp': 300.0, 'doping': 10.0, 'steplength': 0.1}
+    if "plugin3D" in det_dic['det_model']:#t
         if det_dic['custom_electrode'] == "False":
             pass
         elif det_dic['custom_electrode'] == "True":

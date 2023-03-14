@@ -29,7 +29,7 @@ class Setting:
             2021/09/02
         """
         self._pardic = {}
-        self.input2dic(parameters)
+        self.input2dic(parameters)#[det_name, =, NJU-PIN, parfile, =, paras/setting.json]
         self.det_name = self._pardic['det_name']
         self.read_par(self._pardic['parfile'])
         if "laser_model" in self._pardic:
@@ -42,8 +42,8 @@ class Setting:
 
     def input2dic(self,parameters):
         " Transfer input list to dictinary"
-        for par in parameters:
-            name,_,value=par.rpartition('=')
+        for par in parameters:#[det_name=NJU-PIN, parfile=paras/setting.json]
+            name,_,value=par.rpartition('=')#[det_name, =, NJU-PIN, parfile, =, paras/setting.json]
             self._pardic[name]=value
 
     def read_par(self,jsonfile):
