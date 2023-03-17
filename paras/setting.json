@@ -81,7 +81,7 @@
         "lz" : 50,
         "part" : 2,
         "doping1" : 1.85e5,
-        "doping2" : -100,
+        "doping2" : 100,
         "avalanche_bond" : 1.0,
         "voltage" : -500,
         "temp" : 300.0,
