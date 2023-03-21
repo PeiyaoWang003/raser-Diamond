@@ -88,8 +88,8 @@ class Carrier:
         # get diffution from mobility and temperature
         delta_t = step*1e-4/velocity
         kboltz=8.617385e-5 #eV/K
-        # diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
-        diffusion = 0.0
+        diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
+        #diffusion = 0.0
         dif_x=random.gauss(0.0,diffusion)*1e4
         dif_y=random.gauss(0.0,diffusion)*1e4
         dif_z=random.gauss(0.0,diffusion)*1e4
