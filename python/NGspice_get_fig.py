@@ -26,6 +26,7 @@ def main():
     time,volt = read_file(file_path,file_name)
     length = len(time)
 
+    ROOT.gROOT.SetBatch()    
     c = ROOT.TCanvas('c','c',700,600)
     f1 = ROOT.TGraph(length,time,volt)
     f1.SetTitle(' ')
