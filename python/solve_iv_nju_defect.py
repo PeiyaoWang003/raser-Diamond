@@ -96,7 +96,7 @@ if (i<=3):
     devsim.add_db_entry(material="global",   parameter="N_t",     value=N_t,   unit="cm^(-3)",     description="N_t")
 elif (i>=4&i<=8):
     N_t=sys.argv[2]
-    sigma_n=list_Nt[i-4]
+    sigma_n=list_sigman[i-4]
     sigma_p=sys.argv[3]
     devsim.add_db_entry(material="global",   parameter="sigma_n",     value=sigma_n,   unit="s/cm^2",     description="sigma_n")
     devsim.add_db_entry(material="global",   parameter="sigma_p",     value=sigma_p,   unit="s/cm^2",     description="sigma_p")
@@ -109,7 +109,7 @@ elif (i>=9&i<=13):
     devsim.add_db_entry(material="global",   parameter="sigma_p_HS6",     value=sigma_p_HS6,   unit="s/cm^2",     description="sigma_p_HS6")
     devsim.add_db_entry(material="global",   parameter="N_t_HS6",     value=N_t_HS6,   unit="cm^(-3)",     description="N_t_HS6")
 else :
-    N_t_HS6=sys.argv[3]
+    N_t_HS6=list_sigman[3]
     sigma_n_HS6=list_Nt[i-14]
     sigma_p_HS6=sys.argv[2]
     devsim.add_db_entry(material="global",   parameter="sigma_n_HS6",     value=sigma_n_HS6,   unit="s/cm^2",     description="sigma_n_HS6")
