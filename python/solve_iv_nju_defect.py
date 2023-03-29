@@ -74,11 +74,11 @@ devsim.set_parameter(name = "extended_equation", value=True)
 
 # Initial DC solution
 Initial.InitialSolution(device, region)
-devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-5, maximum_iterations=50)
+devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=30)
 
 ### Drift diffusion simulation at equilibrium
 Initial.DriftDiffusionInitialSolution(device, region)
-devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=50)
+devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
 
 #set paramater of Nt and sigma
 list_Nt = [1e12, 1e13, 1e14, 1e15, 1e16, 1e17]
@@ -135,7 +135,7 @@ writer.writerow(header)
 
 while reverse_v < 800.0:
     devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
-    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=50)
+    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
     Physics.PrintCurrents(device, "top")
     Physics.PrintCurrents(device, "bot")
     reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
