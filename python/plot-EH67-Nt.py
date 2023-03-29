@@ -92,4 +92,4 @@ c.SetLogy()
 mg.Draw("ALP")
 legend.Draw("SAME")
 
-c.SaveAs("./EH67-Nt.pdf")
+c.SaveAs("./output/devsim/EH67-Nt.pdf")
