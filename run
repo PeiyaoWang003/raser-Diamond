@@ -263,6 +263,11 @@ case $option in
         raser "./python/plot-EH67-sigma.py"
         raser "./python/plot-EH67-sigma.py"
         ;;
+        
+
+    1.3.10) echo "Simulate 3D NJU-PIN I-V"
+        ./python/run_batchjob.py devsim "pin_3d_iv.py"
+        ;;
         esac
 }
 
