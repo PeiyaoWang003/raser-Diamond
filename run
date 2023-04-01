@@ -266,7 +266,7 @@ case $option in
         
 
     1.3.10) echo "Simulate 3D NJU-PIN I-V"
-        ./python/run_batchjob.py devsim "pin_3d_iv.py"
+        raser "./python/pin_3d_iv.py"
         ;;
         esac
 }
