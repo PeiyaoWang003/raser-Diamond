@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import math
 
-class Beammonitor:
+class reactor:
     def __init__(self, my_d, my_f, dset):
 
         g4_dic = dset.pygeant4
@@ -47,38 +47,8 @@ class Beammonitor:
             for single_step in p_step] for p_step in self.p_steps]
         self.edep_devices=s_edep_devices
         self.events_angle=s_events_angle
-
-        hittotal=0
-        for particleenergy in s_edep_devices:
-            if(particleenergy>0):
-                hittotal=hittotal+1
-        self.hittotal=hittotal      #count the numver of hit particles
-
-        number=0
-        total_steps=0
-        for step in s_p_steps:
-            total_steps=len(step)+total_steps
-        average_steps=total_steps/len(s_p_steps)
-        for step in s_p_steps:
-            if(len(step)>average_steps):
-                break
-            number=number+1
-        newtype_step=s_p_steps[number]      #new particle's step
-        self.p_steps_current=[[[single_step[0],single_step[1],single_step[2]-self.init_tz_device]\
-            for single_step in newtype_step]]
-        '''
-        p1,p2,c1,c2=0.3487,0.4488,0.1322,1.8162    #Irradiation damage
-        total_irradiation=0
-        c=total_irradiation/1e16
-        I=1-p1*(1-math.exp(-c/c1))-p2*(1-math.exp(-c/c2))
-        '''
-        newtype_energy=[0 for i in range(len(newtype_step))]
-        for energy in s_energy_steps:
-            for i in range(len(newtype_step)):
-                if(len(energy)>i):
-                    newtype_energy[i]+=energy[i]
-        self.energy_steps=[newtype_energy]      #new particle's every step' energy
-        'self.energy_steps=[newtype_energy*I]'
+        self.energy_steps=s_energy_steps
+        
 
         del s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
         
@@ -105,6 +75,17 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
             device_x = my_d.l_x*g4b.um 
             device_y = my_d.l_y*g4b.um
             device_z = my_d.l_z*g4b.um
+
+        self.create_Ni_box(
+                                name = "Ni",
+                                sidex = device_x,
+                                sidey = device_y,
+                                sidez = 0.1*g4b.um,
+                                translation = [tx_all,ty_all,30.05*g4b.um],
+                                material_type = "G4_Ni",
+                                colour = [1,0.1,0.8],
+                                mother = 'world')
+        
         self.create_sic_box(
                             name = "Device",
                             sidex = device_x,
@@ -118,6 +99,30 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
         self.maxStep = maxStep*g4b.um
         self.fStepLimit = g4b.G4UserLimits(self.maxStep)
         self.logical["Device"].SetUserLimits(self.fStepLimit)
+
+    def create_Ni_box(self, **kwargs):
+        name = kwargs['name']
+        material_type = self.nist.FindOrBuildMaterial(kwargs['material_type'],
+                                                      False)
+
+        translation = g4b.G4ThreeVector(*kwargs['translation'])
+        visual = g4b.G4VisAttributes(g4b.G4Color(*kwargs['colour']))
+        mother = self.physical[kwargs['mother']]
+        sidex = kwargs['sidex']
+        sidey = kwargs['sidey']
+        sidez = kwargs['sidez']
+
+        self.solid[name] = g4b.G4Box(name, sidex/2., sidey/2., sidez/2.)
+        
+        self.logical[name] = g4b.G4LogicalVolume(self.solid[name], 
+                                                 material_type, 
+                                                 name)
+        self.physical[name] = g4b.G4PVPlacement(None,translation,                                                
+                                                name,self.logical[name],
+                                                mother, False, 
+                                                0,self.checkOverlaps)
+        self.logical[name].SetVisAttributes(visual)     
+
 
     def create_world(self,my_d):
 
@@ -178,14 +183,13 @@ class MyPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
         g4b.G4VUserPrimaryGeneratorAction.__init__(self)
         par_direction = [ par_out[i] - par_in[i] for i in range(3) ]  
         particle_table = g4b.G4ParticleTable.GetParticleTable()
-        electron = particle_table.FindParticle("proton") # define the proton
+        particle = particle_table.FindParticle("gamma") # define the proton
         beam = g4b.G4ParticleGun(1)
-        beam.SetParticleEnergy(1600*g4b.MeV)
-        # beam.SetParticleEnergy(1600*g4b.MeV)
+        beam.SetParticleEnergy(1.33*g4b.MeV)
         beam.SetParticleMomentumDirection(g4b.G4ThreeVector(par_direction[0],
                                                             par_direction[1],
                                                             par_direction[2]))
-        beam.SetParticleDefinition(electron)
+        beam.SetParticleDefinition(particle)
         beam.SetParticlePosition(g4b.G4ThreeVector(par_in[0]*g4b.um,
                                                    par_in[1]*g4b.um,
                                                    par_in[2]*g4b.um))  

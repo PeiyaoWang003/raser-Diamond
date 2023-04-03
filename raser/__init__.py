@@ -10,4 +10,8 @@ from raser.model import Material
 from raser.model import Avalanche
 from raser.source import TCTTracks
 from raser.g4beam_monitor import Beammonitor
+<<<<<<< HEAD
 from raser.g4SiITk import SiITk
+=======
+from raser.g4reactor import reactor
+>>>>>>> upstream/main

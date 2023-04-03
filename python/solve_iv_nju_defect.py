@@ -3,8 +3,9 @@
 
 import devsim 
 import os
-import sys
 import math
+import sys
+sys.path.append("..")
 
 from raser import Physics
 from raser import Node
@@ -13,26 +14,28 @@ from raser import Initial
 import matplotlib
 import matplotlib.pyplot
 import csv
+import numpy as np
 
 
-import sicar1_lgad_mesh
+import nju_pin_5mm_5mm_mesh
 
 if not (os.path.exists("./output/devsim")):
-    os.makedirs("./output/devsim")
+    os.makedir("./output/devsim")
 
-device="1D_SICAR1_LGAD"
-region="1D_SICAR1_LGAD"
+device="1D_NJU_PIN"
+region="1D_NJU_PIN"
 
 # Area factor
 # 1D 1cm*1cm
 # DUT 5mm* 5mm
 area_factor = 4.0
 
-sicar1_lgad_mesh.CreateMesh(device=device, region=region)
-sicar1_lgad_mesh.SetDoping(device=device, region=region)
-sicar1_lgad_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/sicar1_lgad_doping.png")
+nju_pin_5mm_5mm_mesh.Create1DMesh(device=device, region=region)
+nju_pin_5mm_5mm_mesh.SetDoping(device=device, region=region)
+nju_pin_5mm_5mm_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/nju_pin_doping.png")
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
+
 
 #add defect parameters
 N_c=3.25e15 #effective density of states in conduction band
@@ -65,7 +68,6 @@ devsim.set_parameter(device=device,region=region,name="n_12",value=n_12)#n1 of E
 devsim.set_parameter(device=device,region=region,name="p_12",value=p_12)#p1 of EH6/7
 
 # Extended precision
-# devsim.set_parameter(name='direct_solver', value='superlu')
 devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
@@ -78,29 +80,60 @@ devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterat
 Initial.DriftDiffusionInitialSolution(device, region)
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
 
-#### Ramp the bias to Reverse
+#set paramater of Nt and sigma
+list_Nt = [1e12, 1e13, 1e14, 1e15, 1e16, 1e17]
+list_sigman = [3e-12, 3e-13, 3e-14, 3e-15, 3e-16, 3e-17]
+#list_sigmap = [2e-12, 2e-13, 2e-14, 2e-15, 2e-16, 2e-17]
+
+i = int(sys.argv[1])
+print(i)
+if (i<=3):
+    N_t=list_Nt[i+1]
+    sigma_n=3e-12
+    sigma_p=2e-12
+    devsim.add_db_entry(material="global",   parameter="sigma_n",     value=sigma_n,   unit="s/cm^2",     description="sigma_n")
+    devsim.add_db_entry(material="global",   parameter="sigma_p",     value=sigma_p,   unit="s/cm^2",     description="sigma_p")
+    devsim.add_db_entry(material="global",   parameter="N_t",     value=N_t,   unit="cm^(-3)",     description="N_t")
+elif (3<i<9):
+    N_t=1e12
+    sigma_n=list_sigman[i-4]
+    sigma_p=2e-12
+    devsim.add_db_entry(material="global",   parameter="sigma_n",     value=sigma_n,   unit="s/cm^2",     description="sigma_n")
+    devsim.add_db_entry(material="global",   parameter="sigma_p",     value=sigma_p,   unit="s/cm^2",     description="sigma_p")
+    devsim.add_db_entry(material="global",   parameter="N_t",     value=N_t,   unit="cm^(-3)",     description="N_t")
+elif (8<i<14):
+    N_t_HS6=list_Nt[i-8]
+    sigma_n_HS6=2e-17
+    sigma_p_HS6=3e-17
+    devsim.add_db_entry(material="global",   parameter="sigma_n_HS6",     value=sigma_n_HS6,   unit="s/cm^2",     description="sigma_n_HS6")
+    devsim.add_db_entry(material="global",   parameter="sigma_p_HS6",     value=sigma_p_HS6,   unit="s/cm^2",     description="sigma_p_HS6")
+    devsim.add_db_entry(material="global",   parameter="N_t_HS6",     value=N_t_HS6,   unit="cm^(-3)",     description="N_t_HS6")
+else :
+    N_t_HS6=1e13
+    sigma_n_HS6=list_sigman[i-14]
+    sigma_p_HS6=2e-16
+    devsim.add_db_entry(material="global",   parameter="sigma_n_HS6",     value=sigma_n_HS6,   unit="s/cm^2",     description="sigma_n_HS6")
+    devsim.add_db_entry(material="global",   parameter="sigma_p_HS6",     value=sigma_p_HS6,   unit="s/cm^2",     description="sigma_p_HS6")
+    devsim.add_db_entry(material="global",   parameter="N_t_HS6",     value=N_t_HS6,   unit="cm^(-3)",     description="N_t_HS6")
+
+
 reverse_v = 0.0
-n = 0
 reverse_voltage = []
-reverse_top_current = []
+reverse_top_current = []    
 reverse_bot_current = []
 
 reverse_voltage.append(0.)
 reverse_top_current.append(0.)
 
-f = open("./output/devsim/sicar1_lgad_reverse_iv.csv", "w")
+#devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
+#devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
+
+f = open("./output/devsim/nju_pin_reverse_iv%d.csv"%i, "w" )
 header = ["Voltage","Current"]
 writer = csv.writer(f)
 writer.writerow(header)
 
-#devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
-#devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
-
-fig1=matplotlib.pyplot.figure()
-ax1 = fig1.add_subplot(111)
-
-while reverse_v < 1500.0:
-
+while reverse_v < 800.0:
     devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=30)
     Physics.PrintCurrents(device, "top")
@@ -112,36 +145,33 @@ while reverse_v < 1500.0:
     reverse_top_current.append(abs(reverse_top_total_current))
     writer.writerow([0-reverse_v,abs(reverse_top_total_current/area_factor)])
 
-    if(reverse_v%100.0==0 and reverse_v<1001):
+    if(reverse_v%100.0==0):
         devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
-        x = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values 
+        x = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values
         y = devsim.get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
         matplotlib.pyplot.plot(x,y,label="%s"%(str(reverse_v)))
-
-
+        #break
     reverse_v += 1
-
-    # breakdown
-    if( abs(reverse_top_total_current/area_factor) > 1e3): break
-
+f.close()
+'''
+fig1=matplotlib.pyplot.figure()
+ax1 = fig1.add_subplot(111)
 matplotlib.pyplot.xlabel('Depth [cm]')
 matplotlib.pyplot.ylabel('E (V/cm)')
 matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 ax1.legend(loc='upper right')
-ax1.set_xlim(0,5e-4)
 fig1.show()
-fig1.savefig("./output/devsim/sicar1_lgad_reverse_electricfield.png")
-
-f.close()
-devsim.close_db()
-
+fig1.savefig("./output/devsim/nju_pin_reverse_electricfield%d.png"%i)
+'''
 print(reverse_voltage)
 print(reverse_top_current)
-
+'''
 fig2=matplotlib.pyplot.figure()
 ax2 = fig2.add_subplot(111)
 matplotlib.pyplot.semilogy(reverse_voltage, reverse_top_current)
 matplotlib.pyplot.xlabel('Voltage (V)')
 matplotlib.pyplot.ylabel('Current (A)')
-#matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
-fig2.savefig("./output/devsim/sicar1_lgad_reverse_iv.png")
+matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
+fig2.savefig("./output/devsim/nju_pin_reverse_iv%d.png"%i)
+'''
+devsim.close_db() 

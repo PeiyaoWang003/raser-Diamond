@@ -47,7 +47,7 @@ Initial.InitialSolution(device, region)
 devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
 ### Drift diffusion simulation at equilibrium
-Initial.DriftDiffusionInitialSolution(device, region)
+Initial.DriftDiffusionInitialSolutionIrradiated(device, region)
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
 
 #### Ramp the bias to Reverse
@@ -59,7 +59,7 @@ reverse_bot_current = []
 reverse_voltage.append(0.)
 reverse_top_current.append(0.)
 
-f = open("./output/devsim/nju_pin_reverse_iv.csv", "w")
+f = open("./output/devsim/irr_pin_reverse_iv.csv", "w")
 header = ["Voltage","Current"]
 writer = csv.writer(f)
 writer.writerow(header)
@@ -74,7 +74,7 @@ while reverse_v < 800.0:
 
     devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
     try:
-        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
+        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=50)
     except devsim.error as msg:
         if msg=="Convergence failure!":
             raise
@@ -102,7 +102,7 @@ matplotlib.pyplot.ylabel('E (V/cm)')
 matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
 ax1.legend(loc='upper right')
 fig1.show()
-fig1.savefig("./output/devsim/nju_pin_reverse_electricfield.png")
+fig1.savefig("./output/devsim/irr_pin_reverse_electricfield.png")
 
 f.close()
 devsim.close_db()
@@ -116,4 +116,4 @@ matplotlib.pyplot.semilogy(reverse_voltage, reverse_top_current)
 matplotlib.pyplot.xlabel('Voltage (V)')
 matplotlib.pyplot.ylabel('Current (A)')
 #matplotlib.pyplot.axis([min(reverse_voltage), max(reverse_voltage), 1e-9, 1e-2])
-fig2.savefig("./output/devsim/nju_pin_reverse_iv.png")
+fig2.savefig("./output/devsim/irr_pin_reverse_iv.png")
