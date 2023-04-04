@@ -33,6 +33,8 @@ def SetTrapParameters(device,region):
     #add defect parameters
     N_c=3.25e15 #effective density of states in conduction band
     N_v=4.8e15 #effective density of states in valence band
+    devsim.set_parameter(device=device,region=region,name="N_c",value=N_c)
+    devsim.set_parameter(device=device,region=region,name="N_v",value=N_v)
     k=1.3806503e-23 
     T0=300
     #Z1/2

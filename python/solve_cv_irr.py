@@ -45,8 +45,11 @@ Initial.InitialSolution(device, region, circuit_contacts="top")
 devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
 ### Drift diffusion simulation at equilibrium
-Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts=["top"])
+Initial.DriftDiffusionInitialSolution(device, region)
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
+
+Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts=["top"])
+devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=200)
 
 #### Ramp the bias to Reverse
 reverse_v=0.0
@@ -58,9 +61,9 @@ header = ["Voltage","Capacitance"]
 writer = csv.writer(f)
 writer.writerow(header)
 
-while reverse_v < 400.0: 
+while reverse_v < 401.0: 
     devsim.circuit_alter(name="V1", value=0-reverse_v)
-    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=50)
+    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
     #TODO: get out circuit information
     Physics.PrintCurrents(device, "bot")
     devsim.solve(type="ac", frequency=1.0)
