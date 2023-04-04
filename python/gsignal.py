@@ -9,7 +9,7 @@
 import sys
 import os
 import time
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+#sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import raser
 import drawsave
 import math
@@ -66,11 +66,9 @@ def main():
         ele_current = raser.Amplifier(my_current, dset.amplifier)
         drawsave.get1_beam_number(my_g4p,ele_current)
         return
-<<<<<<< HEAD
 
 
 
-=======
     
     if "reactor" in args:
         my_g4p = raser.reactor(my_d, my_f, dset)
@@ -79,7 +77,6 @@ def main():
         drawsave.drawplot(my_d,ele_current,my_f,my_g4p,my_current)'''
         return
     
->>>>>>> upstream/main
     my_g4p = raser.Particles(my_d, my_f, dset)
     if "scan=True" not in args:
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)

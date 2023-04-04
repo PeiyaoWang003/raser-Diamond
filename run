@@ -127,14 +127,12 @@ usage_4_1() {
     printf "\n"
 }
 
-<<<<<<< HEAD
 usage_7_1() { 
 	printf "\n\t%-5s  %-40s\n"  "7.1.1"    "Si sensor Energy deposition"  
 
     printf "\n"
 }
 
-=======
 usage_5_1() {
     printf "\n\t%-5s  %-40s\n"  "5.1.1"    "T1 circuit simulation and get raw data..." 
     printf "\n\t%-5s  %-40s\n"  "5.1.2"    "get T1 circuit simulation result figure ..." 
@@ -142,7 +140,6 @@ usage_5_1() {
 }
 
 
->>>>>>> upstream/main
 if [[ $# -eq 0 ]]; then
     usage
     echo "Please enter your option: "
@@ -157,7 +154,7 @@ imagename=raser-1.2.sif
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 raser(){
-    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 /cvmfs/container.ihep.ac.cn/userimages/$imagename $1 
+    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /cvmfs/container.ihep.ac.cn/userimages/$imagename $1 
 }
 
 sub_1_1(){
@@ -504,13 +501,15 @@ case $option in
         esac
 }
 
-<<<<<<< HEAD
 sub_7_1(){
 case $option in 
 
     7.1.1) echo "Si sensor energy deposition" 
         raser "./python/gsignal.py det_name=ITk-Si-strip parfile=paras/setting.json proton-irrad" 
-=======
+        ;;
+        esac
+}
+
 sub_5_1(){
 case $option in 
     5.1.1) echo "T1 circuit simulation and get raw data ..."
@@ -520,15 +519,11 @@ case $option in
 
     5.1.2) echo "get T1 circuit simulation result figure ..."
         ./python/NGspice_get_fig.py t1.raw
->>>>>>> upstream/main
         ;;
         esac
 }
 
-<<<<<<< HEAD
-=======
 
->>>>>>> upstream/main
 case $option in 
     1.1) echo "RASER simulate NJU-SiC-PIN"
         usage_1_1
@@ -640,7 +635,6 @@ case $option in
         sub_3_3 option
         ;;
 
-<<<<<<< HEAD
     7.1) echo "RASER simulate ITk-Si-strip"
         usage_7_1
         echo "Please enter your option: " 
@@ -651,7 +645,6 @@ case $option in
         sub_7_1 option
         ;;
 
-=======
     4.1) echo "RASER simulate 3D-SiC"
         usage_4_1
         echo "Please enter your option: " 
@@ -671,5 +664,4 @@ case $option in
     5.1.*) echo "NGspice simulation"
         sub_5_1 option
         ;;
->>>>>>> upstream/main
 		esac
