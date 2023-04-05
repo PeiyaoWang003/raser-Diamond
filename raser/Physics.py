@@ -291,8 +291,17 @@ def CreateAnisoImpactGeneration(device, region):
 
 
 def CreateNetGeneration(device, region):
-    Gn = "-q * (USRH+R_z+R_h6)"
-    Gp = "+q * (USRH+R_z+R_h6)"
+    #Gn = "-q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
+    #Gp = "+q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
+
+    #Gn = "-q * (USRH - 1e12)"
+    #Gp = "+q * (USRH - 1e12)"
+
+    #Gn = "-q * (USRH - 1e18*x*x)"
+    #Gp = "+q * (USRH - 1e18*x*x)"
+
+    Gn = "-q * (USRH+R_z+R_h6-1e12)"
+    Gp = "+q * (USRH+R_z+R_h6-1e12)"
 
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
