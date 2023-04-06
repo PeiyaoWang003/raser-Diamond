@@ -298,6 +298,17 @@ def CreateTunnelingAndAvalanche(device,region)
     ImpactGen_n = "+q*(%s+R_BTBT)"%(Ion_coeff_rate)
     ImpactGen_p = "-q*(%s+R_BTBT)"%(Ion_coeff_rate)
 
+def CreateInitialNetGeneration(device, region):
+
+    Gn = "-q * USRH"
+    Gp = "+q * USRH"
+
+    CreateNodeModel(device, region, "ElectronGeneration", Gn)
+    CreateNodeModel(device, region, "HoleGeneration", Gp)
+
+    for i in ("Electrons", "Holes"):
+        CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
+        CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
 
 def CreateNetGeneration(device, region):
 
@@ -397,6 +408,38 @@ def CreateMobility(device, region):
 
 
 
+def CreateECE(device, region, mu_n):
+    CreateElectronCurrent(device, region, mu_n)
+
+    NCharge = "-q * Electrons"
+    CreateNodeModel(device, region, "NCharge", NCharge)
+    CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
+
+    #CreateImpactGeneration(device, region)
+    CreateAnisoImpactGeneration(device, region)
+    devsim.equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
+             time_node_model = "NCharge",
+             edge_model="ElectronCurrent", variable_update="positive", 
+             node_model="ElectronGeneration", 
+             edge_volume_model="ImpactGen_n"
+             )
+
+
+def CreateHCE(device, region, mu_p):
+    CreateHoleCurrent(device, region, mu_p)
+    PCharge = "q * Holes"
+    CreateNodeModel(device, region, "PCharge", PCharge)
+    CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
+    
+    #CreateImpactGeneration(device, region)
+    CreateAnisoImpactGeneration(device, region)
+    devsim.equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
+             time_node_model = "PCharge",
+             edge_model="HoleCurrent", variable_update="positive", 
+             node_model="HoleGeneration", 
+             edge_volume_model="ImpactGen_p"
+             )
+
 def CreateECE_improved(device, region, mu_n):
     CreateElectronCurrent(device, region, mu_n)
 
@@ -413,39 +456,15 @@ def CreateECE_improved(device, region, mu_n):
              edge_volume_model="ImpactGen_n"
              )
 
-####
-    #### drift diffusion solution variables
-    ####
-    CreateSolution(device, region, "Electrons")
-    CreateSolution(device, region, "Holes")
 
-    ####
-    #### create initial guess from dc only solution
-    ####
-    devsim.set_node_values(device=device, region=region, name="Electrons", init_from="IntrinsicElectrons")
-    devsim.set_node_values(device=device, region=region, name="Holes",     init_from="IntrinsicHoles")
-    #devsim.set_node_values(device=device, region=region, name="Electrons", init_from="InitialElectron")
-    #devsim.set_node_values(device=device, region=region, name="Holes",     init_from="InitialHole")
-
-    ###
-    ### Set up equations
-    ###
-    CreateSiliconDriftDiffusion(device, region)
-    for i in devsim.get_contact_list(device=device):
-        if circuit_contacts and i in circuit_contacts:
-            CreateSiliconDriftDiffusionAtContact(device, region, i, True)
-        else:
-            CreateSiliconDriftDiffusionAtContact(device, region, i)
-
-
-def CreateHCE(device, region, mu_p):
+def CreateHCE_improved(device, region, mu_p):
     CreateHoleCurrent(device, region, mu_p)
     PCharge = "q * Holes"
     CreateNodeModel(device, region, "PCharge", PCharge)
     CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
     
     #CreateImpactGeneration(device, region)
-    CreateAnisoImpactGeneration(device, region)
+    CreateTunnelingAndAvalanche(device, region)
     devsim.equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
              time_node_model = "PCharge",
              edge_model="HoleCurrent", variable_update="positive", 
