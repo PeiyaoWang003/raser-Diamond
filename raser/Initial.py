@@ -16,6 +16,8 @@ def InitialSolution(device, region, circuit_contacts=None):
     
     CreateNodeModel(device, region, "InitialElectron", "abs(NetDoping)")
     CreateNodeModel(device, region, "InitialHole", "abs(NetDoping)")
+    devsim.edge_from_node_model(device=device,region=region,node_model="InitialElectron")
+    devsim.edge_from_node_model(device=device,region=region,node_model="InitialHole")
     
     # Create potential only physical models
     CreateSiliconPotentialOnly(device, region)

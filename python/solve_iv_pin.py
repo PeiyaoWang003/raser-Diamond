@@ -48,7 +48,7 @@ devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterat
 
 ### Drift diffusion simulation at equilibrium
 Initial.DriftDiffusionInitialSolution(device, region)
-devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
+devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-8, maximum_iterations=100)
 
 #### Ramp the bias to Reverse
 reverse_v = 0.0

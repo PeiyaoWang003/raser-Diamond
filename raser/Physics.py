@@ -168,6 +168,7 @@ def CreateSRH2(device, region):
     CreateNodeModel(device, region, "R_h6", R_h6)
     for i in ("Electrons", "Holes"):
         CreateNodeModelDerivative(device, region, "R_h6", R_h6, i)
+          
 
 def CreateImpactGeneration(device, region):
     
@@ -194,7 +195,8 @@ def CreateImpactGeneration(device, region):
     #CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Holes")
     #CreateEdgeModel(device, region, "Ion_coeff_rate", Ion_coeff_rate)
     #CreateEdgeModelDerivatives(device, region, "Ion_coeff_rate", Ion_coeff_rate, "Potential")
- 
+    
+    
     ImpactGen_n = "+q*%s"%(Ion_coeff_rate)
     ImpactGen_p = "-q*%s"%(Ion_coeff_rate)
 
@@ -289,10 +291,27 @@ def CreateAnisoImpactGeneration(device, region):
     #devsim.edge_model(device=device,region=region,name="ImpactGen_p:Potential",equation="-ImpactGen_n:Potential")
 
 
+def CreateTunnelingAndAvalanche(device,region)
+    R_BTBT="1e2*abs(ElectricField)^2.5"#*exp(-ElectricField/1e10)
+    CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
+    CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")
+    ImpactGen_n = "+q*(%s+R_BTBT)"%(Ion_coeff_rate)
+    ImpactGen_p = "-q*(%s+R_BTBT)"%(Ion_coeff_rate)
+
 
 def CreateNetGeneration(device, region):
-    Gn = "-q * (USRH+R_z+R_h6)"
-    Gp = "+q * (USRH+R_z+R_h6)"
+
+    #Gn = "-q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
+    #Gp = "+q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
+
+    #Gn = "-q * (USRH - 1e12)"
+    #Gp = "+q * (USRH - 1e12)"
+
+    #Gn = "-q * (USRH - 1e18*x*x)"
+    #Gp = "+q * (USRH - 1e18*x*x)"
+
+    Gn = "-q * (USRH+R_z+R_h6-1e12)"
+    Gp = "+q * (USRH+R_z+R_h6-1e12)"
 
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
