@@ -168,18 +168,7 @@ def CreateSRH2(device, region):
     CreateNodeModel(device, region, "R_h6", R_h6)
     for i in ("Electrons", "Holes"):
         CreateNodeModelDerivative(device, region, "R_h6", R_h6, i)
-      
-
-def CreateR_BTBT(device,region):
-    
-    #band to band tunneling enhanced SRH
-    CreateNodeModel(device,region,"Ele","diff(potential,x)")
-    R_BTBT="-Ele^2.5"
-    #R_BTBT="-0.01*Ele^2.5*exp(-Ele/1e10)"
-    CreateNodeModel(device,region,"R_BTBT",R_BTBT)
-    CreateNodeModelDerivative(device,region,"R_BTBT",R_BTBT,"Ele")
-
-    
+          
 
 def CreateImpactGeneration(device, region):
     
@@ -208,8 +197,8 @@ def CreateImpactGeneration(device, region):
     #CreateEdgeModelDerivatives(device, region, "Ion_coeff_rate", Ion_coeff_rate, "Potential")
     
     
-    ImpactGen_n = "+q*(%s)+q*R_BTBT"%(Ion_coeff_rate)
-    ImpactGen_p = "-q*(%s+R_BTBT)"%(Ion_coeff_rate)
+    ImpactGen_n = "+q*%s"%(Ion_coeff_rate)
+    ImpactGen_p = "-q*%s"%(Ion_coeff_rate)
 
     CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
     CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
@@ -287,11 +276,8 @@ def CreateAnisoImpactGeneration(device, region):
     #CreateEdgeModel(device, region, "Ion_coeff_rate", Ion_coeff_rate)
     #CreateEdgeModelDerivatives(device, region, "Ion_coeff_rate", Ion_coeff_rate, "Potential")
  
-    R_BTBT="1e2*abs(ElectricField)^2.5"#*exp(-ElectricField/1e10)
-    CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
-    CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")
-    ImpactGen_n = "+q*(%s+R_BTBT)"%(Ion_coeff_rate)
-    ImpactGen_p = "-q*(%s+R_BTBT)"%(Ion_coeff_rate)
+    ImpactGen_n = "+q*%s"%(Ion_coeff_rate)
+    ImpactGen_p = "-q*%s"%(Ion_coeff_rate)
 
     CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
     CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
@@ -304,6 +290,13 @@ def CreateAnisoImpactGeneration(device, region):
     CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
     #devsim.edge_model(device=device,region=region,name="ImpactGen_p:Potential",equation="-ImpactGen_n:Potential")
 
+
+def CreateTunnelingAndAvalanche(device,region)
+    R_BTBT="1e2*abs(ElectricField)^2.5"#*exp(-ElectricField/1e10)
+    CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
+    CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")
+    ImpactGen_n = "+q*(%s+R_BTBT)"%(Ion_coeff_rate)
+    ImpactGen_p = "-q*(%s+R_BTBT)"%(Ion_coeff_rate)
 
 
 def CreateNetGeneration(device, region):
@@ -465,10 +458,8 @@ def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateSRH(device, region)
     CreateSRH1(device, region)
     CreateSRH2(device, region)
-    #CreateR_BTBT(device,region)
     CreateNetGeneration(device, region)
     #CreateMobility(device, region)
-    CreateTrappingEffect(device,region)
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
 
