@@ -1,6 +1,10 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
+
 import sys
 sys.path.append("..")
-from sicar import Node
+from raser import Node
 import matplotlib
 import os
 import devsim
