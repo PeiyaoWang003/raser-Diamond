@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- encoding: utf-8 -*-
+
 import devsim 
 import os
 import sys
@@ -6,9 +9,9 @@ sys.path.append("..")
 import math
 from array import array
 
-from sicar import Physics
-from sicar import Node
-from sicar import Initial
+from raser import Physics
+from raser import Node
+from raser import Initial
 
 
 import csv
