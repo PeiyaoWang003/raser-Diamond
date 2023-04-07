@@ -167,9 +167,6 @@ def solve_cv(device,region,v_max,para_dict):
     reverse_voltage = []
     ssac_top_cap = []
 
-    # For converge
-    devsim.set_parameter(name = "n_i", value=1e10)
-
     f_cv = open("./output/devsim/{}_reverse_cv.csv".format(device+condition), "w")
     header_cv = ["Voltage","Capacitance"]
     writer_cv = csv.writer(f_cv)
