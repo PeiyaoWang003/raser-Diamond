@@ -292,11 +292,53 @@ def CreateAnisoImpactGeneration(device, region):
 
 
 def CreateTunnelingAndAvalanche(device,region)
-    R_BTBT="1e2*abs(ElectricField)^2.5"#*exp(-ElectricField/1e10)
+    cutoff_angle = 4 #degree
+    sin_cutoff_angle = math.sin(math.radians(cutoff_angle))
+    cos_cutoff_angle = math.cos(math.radians(cutoff_angle))
+    if not InEdgeModelList(device, region, "ElectricField_0001"):
+        CreateEdgeModel(device, region, "ElectricField_0001", "abs(ElectricField+1)*{0}".format(cos_cutoff_angle))
+    if not InEdgeModelList(device, region, "ElectricField_1120"):
+        CreateEdgeModel(device, region, "ElectricField_1120", "abs(ElectricField+1)*{0}".format(sin_cutoff_angle))
+    if not InEdgeModelList(device, region, "n_B"):
+        CreateEdgeModel(device, region, "n_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/n_b_1120 , 2) + pow( ElectricField_0001/n_b_0001 , 2) , 0.5)")
+    if not InEdgeModelList(device, region, "p_B"):
+        CreateEdgeModel(device, region, "p_B", "abs(ElectricField+1) / pow( pow( ElectricField_1120/p_b_1120 , 2) + pow( ElectricField_0001/p_b_0001 , 2) , 0.5)")
+    if not InEdgeModelList(device, region, "n_a_aniso"):
+        CreateEdgeModel(device, region, "n_a_aniso", "pow( n_a_1120, pow( n_B*ElectricField_1120/n_b_1120/abs(ElectricField+1), 2) ) * pow( n_a_0001, pow( n_B*ElectricField_0001/n_b_0001/abs(ElectricField+1), 2) )")
+    if not InEdgeModelList(device, region, "p_a_aniso"):
+        CreateEdgeModel(device, region, "p_a_aniso", "pow( p_a_1120, pow( p_B*ElectricField_1120/p_b_1120/abs(ElectricField+1), 2) ) * pow( p_a_0001, pow( p_B*ElectricField_0001/p_b_0001/abs(ElectricField+1), 2) )")
+    if not InEdgeModelList(device, region, "n_A"):
+        CreateEdgeModel(device, region, "n_A", "log(n_a_0001/n_b_1120)")
+    if not InEdgeModelList(device, region, "p_A"):
+        CreateEdgeModel(device, region, "p_A", "log(p_a_0001/p_b_1120)")
+    if not InEdgeModelList(device, region, "n_b_aniso"):
+        CreateEdgeModel(device, region, "n_b_aniso", "n_B * pow( 1-pow(n_A,2)* pow( (n_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*n_b_1120*n_b_0001), 2), 0.5)")
+    if not InEdgeModelList(device, region, "p_b_aniso"):
+        CreateEdgeModel(device, region, "p_b_aniso", "p_B * pow( 1-pow(p_A,2)* pow( (p_B*ElectricField_1120*ElectricField_0001)/(abs(ElectricField+1)*p_b_1120*p_b_0001), 2), 0.5)")
+    gamma_str = "tanh(0.19/(2*0.0257))/tanh(0.19/(2*0.0257*T/T0))"
+    Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, {0} * n_a_aniso * exp( - {1} * n_b_aniso / (abs(ElectricField)+1)), 1)".format(gamma_str,gamma_str)
+    Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, {0} * p_a_aniso * exp( - {1} * p_b_aniso / (abs(ElectricField)+1)), 1)".format(gamma_str,gamma_str)
+    Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/q"
+    CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
+    CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
+    CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
+    CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
+    
+    R_BTBT="1e2*abs(ElectricField)^2.5"*exp(abs(ElectricField)/1e10)
     CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
     CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")
     ImpactGen_n = "+q*(%s+R_BTBT)"%(Ion_coeff_rate)
     ImpactGen_p = "-q*(%s+R_BTBT)"%(Ion_coeff_rate)
+
+    CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
+    CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
+    CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Electrons")
+    CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Holes")
+    
+    CreateEdgeModel(device, region, "ImpactGen_p", ImpactGen_p)
+    CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Potential")
+    CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
+    CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
 
 def CreateInitialNetGeneration(device, region):
 
