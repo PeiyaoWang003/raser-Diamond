@@ -84,11 +84,11 @@ def initial_solution(device,region,para_dict):
     devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
     ### Drift diffusion simulation at equilibrium
-    Initial.DriftDiffusionInitialSolution(device, region)
+    Initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
 
     if "irradiation" in para_dict:
-        Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts=["top"])
+        Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts="top")
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
 
 def set_defect(paras):
