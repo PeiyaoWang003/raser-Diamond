@@ -108,7 +108,7 @@ def solve_iv(device,region,v_max,para_dict):
     if "defect" in para_dict:
         condition += "_defect"
         for key in ["N_t","sigma_n","sigma_p","N_t_HS6","sigma_n_HS6","sigma_p_HS6"]:
-            condition += "{}={}".format(key,para_dict[key])
+            condition += "_{}={}".format(key,para_dict[key])
     reverse_v = 0.0
     reverse_voltage = []
     reverse_top_current = []
@@ -162,7 +162,7 @@ def solve_cv(device,region,v_max,para_dict):
     if "defect" in para_dict:
         condition += "_defect"
         for key in ["N_t","sigma_n","sigma_p","N_t_HS6","sigma_n_HS6","sigma_p_HS6"]:
-            condition += "{}={}".format(key,para_dict[key])
+            condition += "_{}={}".format(key,para_dict[key])
     reverse_v = 0.0
     reverse_voltage = []
     ssac_top_cap = []
