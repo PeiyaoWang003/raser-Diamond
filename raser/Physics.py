@@ -143,10 +143,10 @@ def CreateSRH1(device, region):
     sigma_p=2e-12
     N_t=0
     v_T=1e7
-    devsim.add_db_entry(material="global",   parameter="sigma_n",     value=sigma_n,   unit="s/cm^2",     description="sigma_n")
-    devsim.add_db_entry(material="global",   parameter="sigma_p",     value=sigma_p,   unit="s/cm^2",     description="sigma_p")
-    devsim.add_db_entry(material="global",   parameter="N_t",     value=N_t,   unit="cm^(-3)",     description="N_t")
-    devsim.add_db_entry(material="global",   parameter="v_T",     value=v_T,   unit="cm/s",     description="v_T")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="sigma_n",     value=sigma_n,   unit="s/cm^2",     description="sigma_n")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="sigma_p",     value=sigma_p,   unit="s/cm^2",     description="sigma_p")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="N_t",     value=N_t,   unit="cm^(-3)",     description="N_t")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="v_T",     value=v_T,   unit="cm/s",     description="v_T")
     R_z="(sigma_n*sigma_p*v_T*N_t*(Electrons*Holes - n_i^2))/(sigma_n*(Electrons - n1*exp(1.6e-19/(k_T0))) + sigma_p*(Holes + p1*exp(1.6e-19/(k_T0))))"
     CreateNodeModel(device, region, "R_z", R_z)
     for i in ("Electrons", "Holes"):
@@ -160,10 +160,10 @@ def CreateSRH2(device, region):
     sigma_p_HS6=3e-17
     N_t_HS6=0
     v_T=1e7
-    devsim.add_db_entry(material="global",   parameter="sigma_n_HS6",     value=sigma_n_HS6,   unit="s/cm^2",     description="sigma_n_HS6")
-    devsim.add_db_entry(material="global",   parameter="sigma_p_HS6",     value=sigma_p_HS6,   unit="s/cm^2",     description="sigma_p_HS6")
-    devsim.add_db_entry(material="global",   parameter="N_t_HS6",     value=N_t_HS6,   unit="cm^(-3)",     description="N_t_HS6")
-    devsim.add_db_entry(material="global",   parameter="v_T",     value=v_T,   unit="cm/s",     description="v_T")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="sigma_n_HS6",     value=sigma_n_HS6,   unit="s/cm^2",     description="sigma_n_HS6")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="sigma_p_HS6",     value=sigma_p_HS6,   unit="s/cm^2",     description="sigma_p_HS6")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="N_t_HS6",     value=N_t_HS6,   unit="cm^(-3)",     description="N_t_HS6")
+    devsim.add_db_entry(material="SiliconCarbide",   parameter="v_T",     value=v_T,   unit="cm/s",     description="v_T")
     R_h6="(sigma_n_HS6*sigma_p_HS6*v_T*N_t_HS6*(Electrons*Holes - n_i^2))/(sigma_n_HS6*(Electrons - n1*exp(4.8e-22/(k_T0))) + sigma_p_HS6*(Holes + p1*exp(4.8e-22/(k_T0))))"
     CreateNodeModel(device, region, "R_h6", R_h6)
     for i in ("Electrons", "Holes"):
@@ -373,8 +373,13 @@ def CreateNetGeneration(device, region):
     #Gn = "-q * (USRH - 1e18*x*x)"
     #Gp = "+q * (USRH - 1e18*x*x)"
 
-    Gn = "-q * (USRH+R_z+R_h6-1e12)"
-    Gp = "+q * (USRH+R_z+R_h6-1e12)"
+    if devsim.get_material(device=device, region=region) == "SiliconCarbide":
+        Gn = "-q * (USRH+R_z+R_h6-1e12)"
+        Gp = "+q * (USRH+R_z+R_h6-1e12)"
+
+    else:
+        Gn = "-q * (USRH-1e12)"
+        Gp = "+q * (USRH-1e12)"
 
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
