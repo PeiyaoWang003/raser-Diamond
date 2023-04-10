@@ -51,7 +51,7 @@ def main():
     if "IV" in para_dict:
         solve_iv(device,region,v_max,para_dict)
     if "CV" in para_dict:
-        solve_cv(device,region,v_max,para_dict)
+        solve_cv(device,region,v_max,para_dict,frequency=1e3)
 
 def set_para(para_list):
     para_dict={}
@@ -158,7 +158,7 @@ def solve_iv(device,region,v_max,para_dict):
     draw_iv(reverse_voltage, reverse_top_current, device, condition)
     draw_ele_field(device, positions,intensities, bias_voltages,condition)
 
-def solve_cv(device,region,v_max,para_dict):
+def solve_cv(device,region,v_max,para_dict,frequency):
     condition = ""
     if "irradiation" in para_dict:
         condition += "_irradiation"
@@ -176,7 +176,7 @@ def solve_cv(device,region,v_max,para_dict):
     writer_cv.writerow(header_cv)
 
     while reverse_v < v_max:
-        capacitance = solve_cv_single_point(device,region,reverse_v)
+        capacitance = solve_cv_single_point(device,region,reverse_v,frequency)
         ssac_top_cap.append(capacitance*(1e12)/area_factor)
 
         writer_cv.writerow([0-reverse_v,capacitance*(1e12)/area_factor])
@@ -198,12 +198,12 @@ def solve_iv_single_point(device,region,reverse_v):
 
     return reverse_top_total_current
 
-def solve_cv_single_point(device,region,reverse_v):
+def solve_cv_single_point(device,region,reverse_v,frequency):
     devsim.circuit_alter(name="V1", value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
     Physics.PrintCurrents(device, "bot")
-    devsim.solve(type="ac", frequency=1.0)
-    cap=devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*math.pi)
+    devsim.solve(type="ac", frequency=frequency)
+    cap=devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*math.pi*frequency)
     print("capacitance {0} {1}".format(reverse_v, cap))
     return cap
 
