@@ -139,7 +139,6 @@ class Carrier:
                 dU_w = U_w_2 - U_w_1
                 self.signal[j].append(q*dU_w)
         
-
     def drift_end(self,my_f):
         e_field = my_f.get_e_field(self.d_x,self.d_y,self.d_z)
         '''wpot = my_f.get_w_p(self.d_x,self.d_y,self.d_z) # after position check to avoid illegal input'''
