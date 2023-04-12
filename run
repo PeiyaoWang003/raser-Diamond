@@ -518,7 +518,7 @@ case $option in
 sub_5_1(){
 case $option in 
     5.1.1) echo "T1 circuit simulation and get raw data ..."
-        apptainer exec -B /afs ~shixin/raser/raser-1.3.sif ngspice -b -r t1.raw paras/T1.cir
+        apptainer exec -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs ~shixin/raser/raser-1.3.sif ngspice -b -r t1.raw paras/T1.cir
         echo "raw data file t1.raw has been saved in fig/t1.raw"
         ;;
 
