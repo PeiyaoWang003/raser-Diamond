@@ -5,8 +5,9 @@ import ROOT
 import math
 from array import array
 
-g_sim = ROOT.TGraph("./output/devsim/nju_pin_reverse_iv.csv","%lf,%lf")
-g_data = ROOT.TGraph("/afs/ihep.ac.cn/users/l/lizaiyi/data/nju_pin_iv_r.csv","%lf,%lf")
+g_sim = ROOT.TGraph("./output/devsim/nju_pin_reverse_iv.csv","-%lf,%lf")
+#g_data = ROOT.TGraph("./output/nju_pin_iv_r.csv","%lf,%lf")
+g_data = ROOT.TGraph("./output/NJU-4H-SiC-PIN-8-IV-R.csv","%lf,%*lf,%lf")
 mg=ROOT.TMultiGraph()
 
 g_data.SetNameTitle("")
@@ -18,8 +19,11 @@ g_data.SetMarkerSize(4)
 g_sim.SetLineWidth(4)
 g_sim.SetLineStyle(ROOT.kDashed)
 
-mg.add(g_data)
-mg.add(g_sim)
+mg.Add(g_sim)
+mg.Add(g_data)
+
+'''mg.Add(g_data)
+#mg.Add(g_sim)
 
 mg.GetXaxis().SetLimits(450,800)
 mg.GetXaxis().SetTitle("Reverse Bias Voltage [V]")
@@ -34,22 +38,28 @@ mg.GetYaxis().SetTitle("Current [A]")
 mg.GetYaxis().CenterTitle()
 mg.GetYaxis().SetTitleOffset(1.8)
 mg.GetYaxis().SetTitleSize(0.05)
-mg.GetYaxis().SetLabelSize(0.05)
+mg.GetYaxis().SetLabelSize(0.05)'''
 
 c = ROOT.TCanvas("c","c",500,500)
 c.SetLeftMargin(0.22)
 c.SetBottomMargin(0.16)
-legend = ROOT.TLegend(0.27,0.62,0.60,0.75)
+'''c1 = ROOT.TCanvas("c","c",500,500)
+g_data.Draw()
+c2 = ROOT.TCanvas("c","c",500,500)
+g_sim.Draw()'''
+#legend = ROOT.TLegend(0.27,0.62,0.60,0.75)
 
 
-legend.SetTextSize(0.04)
-legend.AddEntry(g_data,"measurement")
-legend.AddEntry(g_sim,"simulation")
+#legend.SetTextSize(0.04)
+#legend.AddEntry(g_data,"measurement")
+#legend.AddEntry(g_sim,"simulation")
 
 c.cd()
 #c.SetLogy()
-#g_data.Draw()
-mg.Draw()
-legend.Draw("SAME")
+g_data.Draw("AC*")
+g_sim.Draw("CP")
+
+#mg.Draw("ALP")
+#legend.Draw("SAME")
 
 c.SaveAs("./output/nju_pin_iv_improved.pdf")
