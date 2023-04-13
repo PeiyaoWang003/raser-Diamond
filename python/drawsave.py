@@ -57,9 +57,9 @@ def draw_unittest(my_d,ele_current,my_f,my_g4p,my_current):
 
 def save(dset,my_d,my_l,ele_current,my_f,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = "output/" + "pintct/" + dset.det_name + "/"
+        path = os.path.join("output", "pintct", dset.det_name, )
     elif "lgad3D" in my_d.det_model:
-        path = "output/" + "lgadtct/" + dset.det_name + "/"
+        path = os.path.join("output", "lgadtct", dset.det_name, )
     create_path(path) 
     L=eval("round(my_l.{})".format(key))
     #L is defined by different keys
