@@ -68,9 +68,9 @@ def save(dset,my_d,my_l,ele_current,my_f,key):
         time = array('d', [999.])
         variation = array('d', [999.])
         if my_f.tol_elenumber==1:
-            fout = ROOT.TFile(path+"sim-TCT"+str(L)+".root", "RECREATE")
+            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(L) + ".root", "RECREATE")
         else:
-            fout = ROOT.TFile(path+"sim-TCT"+str(L)+"No_"+str(j)+".root", "RECREATE")
+            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(L)+"No_"+str(j)+".root", "RECREATE")
         t_out = ROOT.TTree("tree", "signal")
         t_out.Branch("volt", volt, "volt/D")
         t_out.Branch("time", time, "time/D")
@@ -736,9 +736,9 @@ def cce(my_d,my_f,my_current):
 
 def save_current(dset,my_d,my_l,my_current,my_f,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join('output', 'pintct', str(dset.det_name),'' )
+        path = os.path.join('output', 'pintct', dset.det_name, )
     elif "lgad3D" in my_d.det_model:
-        path = os.path.join('output', 'lgadtct', str(dset.det_name),'' )
+        path = os.path.join('output', 'lgadtct', dset.det_name, )
     create_path(path) 
     L = eval("round(my_l.{})".format(key))
     #L is defined by different keys
