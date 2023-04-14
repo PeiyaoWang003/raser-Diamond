@@ -117,7 +117,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
     def create_world(self,my_d):
 
         self.nist = g4b.G4NistManager.Instance()
-        material = self.nist.FindOrBuildMaterial("G4_AIR")  
+        material = self.nist.FindOrBuildMaterial("G4_Galactic")  
         self.solid['world'] = g4b.G4Box("world",
                                         25000*g4b.um,
                                         25000*g4b.um,
