@@ -17,6 +17,7 @@ usage() {
     printf "\n\t%-9s  %-40s"    "1.5"       "TOKAMAK"
     printf "\n\t%-9s  %-40s\n"  "1.6"       "Ring-PIN"
     printf "\n\t%-9s  %-40s\n"  "1.7"       "Si_Strip"
+    printf "\n\t%-9s  %-40s\n"  "1.8"       "ITk MD8"
 
     printf "\n\t%-9s  %-40s"    "2.1"       "SiC-LGAD"
     printf "\n\t%-9s  %-40s\n"  "2.2"       "Si-LGAD"
@@ -83,6 +84,12 @@ usage_1_6() {
 
 usage_1_7() { 
     printf "\n\t%-5s  %-40s\n"  "1.7.1"    "Si strip for RASER simulation ..." 
+    printf "\n"
+}
+
+usage_1_8() { 
+    printf "\n\t%-5s  %-40s\n"  "1.8.1"    "Initial DataBase of DEVSIM" 
+    printf "\n\t%-5s  %-40s\n"  "1.8.2"    "Build 1D ITk MD8 structure"
     printf "\n"
 }
 
@@ -392,6 +399,22 @@ case $option in
 esac
 }
 
+sub_1_8(){
+case $option in 
+    1.8.1) echo "Initial DataBase of DEVSIM ..."
+        raser "./python/gen_devsim_db.py"
+        ;;
+
+    1.8.2) echo "Build 1D ITk MD8 structure ..."
+        raser "./python/itk_md8_mesh.py"
+        ;;
+
+    1.8.3) echo "Simulate 1D ITk MD8 C-V ..."
+        raser "./python/solve_itk_md8_cv.py"
+        ;;
+esac
+}
+
 sub_2_1(){
 case $option in 
     2.1.1) echo "SiC-LGAD basic information for RASER simulation ..."
@@ -664,6 +687,15 @@ case $option in
         sub_1_7 option 
         ;;
     1.7.*) echo "RASER simulate Si_Strip"
+        sub_1_7 option
+        ;;
+    1.8) echo "ITk MD8 simulation"
+        usage_1_7
+        echo "Please enter your option: " 
+        read option 
+        sub_1_7 option 
+        ;;
+    1.8.*) echo "ITk MD8 simulation"
         sub_1_7 option
         ;;
 
