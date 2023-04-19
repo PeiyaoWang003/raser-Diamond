@@ -133,6 +133,15 @@ usage_7_1() {
     printf "\n"
 }
 
+usage_7_2() { 
+    printf "\n\t%-5s  %-40s\n"  "7.2.1"    "Initial DataBase of DEVSIM" 
+    printf "\n\t%-5s  %-40s\n"  "7.2.2"    "Build 1D itk structure"
+    printf "\n\t%-5s  %-40s\n"  "7.2.3"    "Simulate 1D itk I-V"
+
+    printf "\n"
+}
+
+
 usage_5_1() {
     printf "\n\t%-5s  %-40s\n"  "5.1.1"    "T1 circuit simulation and get raw data..." 
     printf "\n\t%-5s  %-40s\n"  "5.1.2"    "get T1 circuit simulation result figure ..." 
@@ -508,6 +517,26 @@ case $option in
         raser "./python/gsignal.py det_name=ITk-Si-strip parfile=paras/setting.json proton-irrad" 
         ;;
         esac
+    
+
+}
+
+sub_7_2(){
+case $option in 
+
+    7.2.1) echo "Initial DataBase of DEVSIM ..."
+        raser "./python/gen_devsim_db.py"
+        ;;
+
+    7.2.2) echo "Build 1D itk structure ..."
+        raser "./python/nju_pin_5mm_5mm_mesh.py"
+        ;;
+
+    7.2.3) echo "Simulate 1D itk I-V ..."
+        ./python/run_batchjob.py devsim "solve_iv_pin.py"
+        ;;
+        esac
+    
 }
 
 sub_5_1(){
@@ -643,6 +672,15 @@ case $option in
         ;;
     7.1.*) echo "RASER simulate ITk-Si-strip"
         sub_7_1 option
+        ;;
+    7.2) echo "DEVSIM"
+        usage_7_2
+        echo "Please enter your option: " 
+        read option 
+        sub_7_2 option 
+        ;;
+    7.2.*) echo "DEVSIM"
+        sub_7_2 option
         ;;
 
     4.1) echo "RASER simulate 3D-SiC"

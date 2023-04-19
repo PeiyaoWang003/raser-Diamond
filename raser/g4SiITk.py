@@ -1,7 +1,10 @@
 import geant4_pybind as g4b
 import sys
+import os
+import ROOT
 import numpy as np
 import math
+import time
 
 class SiITk:
     def __init__(self, my_d, my_f, dset):
@@ -22,9 +25,14 @@ class SiITk:
         physics_list.RegisterPhysics(g4b.G4StepLimiterPhysics())
         gRunManager.SetUserInitialization(physics_list)
         # define global parameter
-        global s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
-        s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle=[],[],[],[],[]
-
+        global s_eventIDs,s_edep_devices,s_edep_devices1,s_p_steps,s_energy_steps,s_events_angle
+        s_eventIDs,s_edep_devices,s_edep_devices1,s_p_steps,s_energy_steps,s_events_angle=[],[],[],[],[],[]
+        
+        global hitsdata_EvID,hitsdata_dirx,hitsdata_diry,hitsdata_dirz,hitsdata_edep1,hitsdata_edep2
+        hitsdata_EvID,hitsdata_dirx,hitsdata_diry,hitsdata_dirz,hitsdata_edep1,hitsdata_edep2=0,0,0,0,0,0
+        
+        print('\n\n\n'+str(hitsdata_edep1)+'\n\n\n')
+        
         #define action
         gRunManager.SetUserInitialization(MyActionInitialization(
                                           g4_dic['par_in'],
@@ -38,14 +46,17 @@ class SiITk:
             UImanager = g4b.G4UImanager.GetUIpointer()
             UImanager.ApplyCommand('/run/initialize')
             
-        gRunManager.BeamOn(int(dset.total_events))     #s_p_steps problems is in this line
+        gRunManager.BeamOn(int(dset.total_events))
+        
         if g4_dic['g4_vis']:  
             ui.SessionStart()
         self.p_steps=s_p_steps
+        #print(s_p_steps)
         self.init_tz_device = my_g4d.init_tz_device
         self.p_steps_current=[[[single_step[0],single_step[1],single_step[2]-self.init_tz_device]\
             for single_step in p_step] for p_step in self.p_steps]
         self.edep_devices=s_edep_devices
+        self.edep_devices1=s_edep_devices1
         self.events_angle=s_events_angle
 
         hittotal=0
@@ -73,11 +84,92 @@ class SiITk:
                 if(len(energy)>i):
                     newtype_energy[i]+=energy[i]
         self.energy_steps=[newtype_energy]      #new particle's every step' energy
+        
 
-        del s_eventIDs,s_edep_devices,s_p_steps,s_energy_steps,s_events_angle
+        del s_eventIDs,s_edep_devices,s_edep_devices1,s_p_steps,s_energy_steps,s_events_angle
+        del hitsdata_EvID,hitsdata_dirx,hitsdata_diry,hitsdata_dirz,hitsdata_edep1,hitsdata_edep2
         
     def __del__(self):
         pass
+
+
+# #my adding 3
+# class MyTrackerHit(g4b.G4VHit):
+
+#     def __init__(self, trackID, chamberNb, edep, pos):
+#         super().__init__()
+#         self.fTrackID = trackID
+#         self.fChamberNb = chamberNb
+#         self.fEdep = edep
+#         self.fPos = pos
+
+#     def Draw(self):
+#         vVisManager = G4VVisManager.GetConcreteInstance()
+#         if vVisManager != None:
+#             circle = G4Circle(self.fPos)
+#             circle.SetScreenSize(4)
+#             circle.SetFillStyle(G4Circle.filled)
+#             colour = G4Colour(1, 0, 0)
+#             attribs = G4VisAttributes(colour)
+#             circle.SetVisAttributes(attribs)
+#             vVisManager.Draw(circle)
+
+#     def Print(self):
+#         print("trackID:", self.fTrackID, "chamberNb:", self.fChamberNb, "Edep:", end=" ")
+#         print(G4BestUnit(self.fEdep, "Energy"), "Position:", G4BestUnit(self.fPos, "Length"))
+
+
+# #my adding 1
+# class MyHitsCollection(g4b.G4VHitsCollection):
+#     def __init__(self, detName, colNam):
+#         super().__init__(detName, colNam)
+#         self.collection = []
+
+#     def __getitem__(self, i):
+#         return self.collection[i]
+
+#     def insert(self, item):
+#         self.collection.append(item)
+
+#     def GetHit(self, i):
+#         return self.collection[i]
+
+#     def GetSize(self):
+#         return len(self.collection)
+
+
+# #my adding 2
+# class MyTrackerSD(g4b.G4VSensitiveDetector):
+
+#     def __init__(self, name, hitsCollectionName):
+#         super().__init__(name)
+#         self.collectionName.insert(hitsCollectionName)
+
+#     def Initialize(self, hce):
+#         # Create hits collection
+#         #self.fHitsCollection = None
+#         self.fHitsCollection = MyHitsCollection(
+#             self.SensitiveDetectorName, self.collectionName[0])
+
+#         # Add this collection in hce
+#         hcID = g4b.G4SDManager.GetSDMpointer().GetCollectionID(self.collectionName[0])
+#         hce.AddHitsCollection(hcID, self.fHitsCollection)
+
+#     def ProcessHits(self, aStep, rOhist):
+#         # energy deposit
+#         edep = aStep.GetTotalEnergyDeposit()
+#         if edep == 0:
+#             return False
+
+#         newHit = MyTrackerHit(aStep.GetTrack().GetTrackID(),
+#                               aStep.GetPreStepPoint().GetTouchable().GetCopyNumber(),
+#                               edep,
+#                               aStep.GetPostStepPoint().GetPosition())
+
+#         self.fHitsCollection.insert(newHit)
+#         # newHit.Print()
+#         return True
+
 
 
 class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):                
@@ -110,7 +202,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
                             mother = 'world')
         
         self.create_si_box(
-                            name = "Device2",
+                            name = "Device1",
                             sidex = device_x,
                             sidey = device_y,
                             sidez = device_z,
@@ -139,7 +231,7 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
         self.solid['world'] = g4b.G4Box("world",
                                         25000*g4b.um,
                                         25000*g4b.um,
-                                        50000*g4b.um)
+                                        25000*g4b.um)
         self.logical['world'] = g4b.G4LogicalVolume(self.solid['world'], 
                                                     material, 
                                                     "world")
@@ -198,6 +290,24 @@ class MyDetectorConstruction(g4b.G4VUserDetectorConstruction):
     def Construct(self): # return the world volume
         self.fStepLimit.SetMaxAllowedStep(self.maxStep)
         return self.physical['world']
+
+# #my adding 4
+#     def ConstructSDandField(self):
+#         # Sensitive detectors
+#         trackerChamberSDname = "B2/TrackerChamberSD"
+#         self.aTrackerSD = MyTrackerSD(trackerChamberSDname, "TrackerHitsCollection")
+#         g4b.G4SDManager.GetSDMpointer().AddNewDetector(self.aTrackerSD)
+#         # Setting aTrackerSD to all logical volumes with the same name
+#         # of "Chamber_LV".
+#         self.SetSensitiveDetector("Chamber_LV", self.aTrackerSD, True)
+
+#         # Create global magnetic field messenger.
+#         # Uniform magnetic field is then created automatically if
+#         # the field value is not zero.
+#         fieldValue = G4ThreeVector()
+#         self.fMagFieldMessenger = G4GlobalMagFieldMessenger(fieldValue)
+#         self.fMagFieldMessenger.SetVerboseLevel(1)
+
 
     def __del__(self):
         print("using __del__ to delete the MyDetectorConstruction class ")
@@ -258,6 +368,7 @@ class MyEventAction(g4b.G4UserEventAction):
 
     def BeginOfEventAction(self, event):
         self.edep_device=0.
+        self.edep_device1=0.
         self.event_angle = 0.
         self.p_step = []
         self.energy_step = []
@@ -272,29 +383,39 @@ class MyEventAction(g4b.G4UserEventAction):
             self.event_angle = cal_angle(point_a,point_b)
         else:
             self.event_angle = None
-        save_geant4_events(eventID,self.edep_device,
+        save_geant4_events(eventID,self.edep_device,self.edep_device1,
                            self.p_step,self.energy_step,self.event_angle)
+     
 
     def RecordDevice(self, edep,point_in,point_out):
         self.edep_device += edep
         self.p_step.append([point_in.getX()*1000,
                            point_in.getY()*1000,point_in.getZ()*1000])
         self.energy_step.append(edep)
-     
 
-def save_geant4_events(eventID,edep_device,p_step,energy_step,event_angle):
+    def RecordDevice1(self, edep,point_in,point_out):
+        self.edep_device1 += edep
+        self.p_step.append([point_in.getX()*1000,
+                           point_in.getY()*1000,point_in.getZ()*1000])
+        self.energy_step.append(edep)    
+
+def save_geant4_events(eventID,edep_device,edep_device1,p_step,energy_step,event_angle):
     if(len(p_step)>0):
         s_eventIDs.append(eventID)
         s_edep_devices.append(edep_device)
+        s_edep_devices1.append(edep_device1)
         s_p_steps.append(p_step)
         s_energy_steps.append(energy_step)
         s_events_angle.append(event_angle)
     else:
         s_eventIDs.append(eventID)
         s_edep_devices.append(edep_device)
+        s_edep_devices1.append(edep_device1)
         s_p_steps.append([[0,0,0]])
         s_energy_steps.append([0])
         s_events_angle.append(event_angle)
+        
+
 
 def cal_angle(point_a,point_b):
     "Calculate the angle between point a and b"
@@ -327,6 +448,9 @@ class MySteppingAction(g4b.G4UserSteppingAction):
         volume_name = volume.GetName()
         if(volume_name == "Device"):
             self.fEventAction.RecordDevice(edep,point_in,point_out)
+        if(volume_name == "Device1"):
+            self.fEventAction.RecordDevice1(edep,point_in,point_out)
+            
 
 
 class MyActionInitialization(g4b.G4VUserActionInitialization):
