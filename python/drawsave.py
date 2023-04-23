@@ -772,8 +772,6 @@ def set_input(dset,my_current,my_l,my_d,key):
     input_c=[]
     if abs(min(current))>max(current): #set input signal
         c_max=min(current)
-        print(c_max)
-        print("fu0")
         for i in range(0, len(current)):
             if current[i] < c_max * 0.01:
                 input_c.append(str(0))

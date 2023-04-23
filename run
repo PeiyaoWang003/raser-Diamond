@@ -112,6 +112,8 @@ usage_2_2() {
 usage_3_1() { 
     printf "\n\t%-5s  %-40s\n"  "3.1.1"    "SiC-PIN top-TCT basic information ..."
     printf "\n\t%-5s  %-40s\n"  "3.1.2"    "SiC-LGAD top-TCT basic information ..."
+    printf "\n\t%-5s  %-40s\n"  "3.1.4"    "SiC-PIN top-TCT using ngspice ..."
+    printf "\n\t%-5s  %-40s\n"  "3.1.5"    "get T1 circuit simulation result figure"
     printf "\n"
 }
 
