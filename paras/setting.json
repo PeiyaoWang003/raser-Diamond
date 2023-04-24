@@ -208,9 +208,9 @@
 
         "lx" : 10000,
         "ly" : 10000,
-        "lz" : 300,
-        "doping" : 10,  
-        "voltage" : -500,
+        "lz" : 305,
+        "doping" : -1,  
+        "voltage" : 200,
         "temp" : 300.0,
         "material" : "Si",
 
