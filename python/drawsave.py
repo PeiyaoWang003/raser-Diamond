@@ -826,6 +826,3 @@ def set_input(dset,my_current,my_l,my_d,key):
     t_out.Write()
     fout.Close()
     return input_c
-
-
-        
