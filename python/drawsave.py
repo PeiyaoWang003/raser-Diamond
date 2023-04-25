@@ -714,6 +714,7 @@ def cce(my_d,my_f,my_current):
     create_path(path) 
 
     charge=array('d')
+    cce_percent=array('d')
     x=array('d')
     for i in range(my_f.tol_elenumber):
         x.append(i+1)
@@ -721,15 +722,18 @@ def cce(my_d,my_f,my_current):
         for j in range(my_current.n_bin):
             sum_charge=sum_charge+my_current.sum_cu[i].GetBinContent(j)*my_current.t_bin
         charge.append(sum_charge)
+    for i in charge:
+        cce_percent.append(i/min(charge)*100)
+    'cce_percent=charge/min(charge)*100'
     n=int(len(charge))
 
     c1=ROOT.TCanvas("c1","canvas1",1000,1000)
-    cce=ROOT.TGraph(n,x,charge)
+    cce=ROOT.TGraph(n,x,cce_percent)
     cce.SetMarkerStyle(3)
     cce.Draw()
     cce.SetTitle("Charge Collection Efficiency")
     cce.GetXaxis().SetTitle("elenumber")
-    cce.GetYaxis().SetTitle("charge[Coulomb]")
+    cce.GetYaxis().SetTitle("Charge Collection Efficiency")
     c1.SaveAs(path+"_cce.pdf")
     c1.SaveAs(path+"_cce.root")
     
