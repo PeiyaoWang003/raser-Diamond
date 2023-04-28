@@ -436,6 +436,79 @@ def CreateIrradiatedGeneration(device, region):
 
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
+    
+    
+def CreateSiIrradiatedCharge(device, region):
+    '''
+    Add Deep Levels from Irradiated Defect 
+    able to Catch Carriers Directly and Keep Them Trapped
+    '''
+    # imaginary defect
+    sigma_e_acc1=1e-15
+    sigma_h_acc1=1e-14
+    sigma_e_acc2=7e-15
+    sigma_h_acc2=7e-14
+    eta_acc1=1.613
+    eta_acc2=0.9
+    sigma_e_donor=3.23e-13
+    sigma_h_donor=3.23e-14
+    eta_donor=0.9
+    
+    N_t_irr=1e13
+    v_T=1e7
+    E_g=3.26*1.6*1e-19
+    E_t1=0.6*1.6*1e-19
+    E_t2=-0.8*1.6*1e-19
+    
+    devsim.add_db_entry(material="global",   parameter="sigma_e_acc1",     value=sigma_e_acc1,   unit="cm^(-2)",     description="sigma_e_acc1")
+    devsim.add_db_entry(material="global",   parameter="sigma_h_acc1",     value=sigma_h_acc1,   unit="cm^(-2)",     description="sigma_h_acc1")
+    devsim.add_db_entry(material="global",   parameter="sigma_e_acc2",     value=sigma_e_acc2,   unit="cm^(-2)",     description="sigma_e_acc2")
+    devsim.add_db_entry(material="global",   parameter="sigma_h_acc2",     value=sigma_h_acc2,   unit="cm^(-2)",     description="sigma_h_acc2")
+    devsim.add_db_entry(material="global",   parameter="sigma_e_donor",     value=sigma_e_donor,   unit="cm^(-2)",     description="sigma_e_donor")
+    devsim.add_db_entry(material="global",   parameter="sigma_h_donor",     value=sigma_h_donor,   unit="cm^(-2)",     description="sigma_h_donor")
+    devsim.add_db_entry(material="global",   parameter="eta_acc1",     value=eta_acc1,   unit="cm^(-1)",     description="eta_acc1")
+    devsim.add_db_entry(material="global",   parameter="eta_acc2",     value=eta_acc2,   unit="cm^(-1)",     description="eta_acc2")
+    devsim.add_db_entry(material="global",   parameter="eta_donor",     value=eta_donor,   unit="cm^(-1)",     description="eta_donor")
+
+
+    
+    devsim.add_db_entry(material="global",   parameter="sigma_n_irr",     value=sigma_n_irr,   unit="s/cm^2",     description="sigma_n")
+    devsim.add_db_entry(material="global",   parameter="sigma_p_irr",     value=sigma_p_irr,   unit="s/cm^2",     description="sigma_p")
+    devsim.add_db_entry(material="global",   parameter="N_t_irr",     value=N_t_irr,   unit="cm^(-3)",     description="N_t")
+    devsim.add_db_entry(material="global",   parameter="v_T",     value=v_T,   unit="cm/s",     description="v_T")
+    devsim.add_db_entry(material="global",   parameter="E_g",     value=E_g,   unit="J",     description="E_g")
+    devsim.add_db_entry(material="global",   parameter="E_t1",     value=E_t1,   unit="J",     description="E_t1")
+    devsim.add_db_entry(material="global",   parameter="E_t2",     value=E_t2,   unit="J",     description="E_t2")
+
+    c_n = "(v_T * sigma_n_irr)"
+    e_n = "(N_c * exp(-(E_g/2 - E_t1)/k_T0))"
+    c_p = "(v_T * sigma_p_irr)"
+    e_p = "(N_v * exp(-(E_t2 - (-E_g/2))/k_T0))"
+
+    n_t_irr_n = "N_t_irr * {c_n} * Electrons /({c_n} * Electrons + {e_n})".format(c_n=c_n,e_n=e_n)
+    n_t_irr_p = "N_t_irr * {c_p} * Holes /({c_p} * Holes + {e_p})".format(c_p=c_p,e_p=e_p)
+    CreateNodeModel(device, region, "TrappedElectrons", n_t_irr_n)
+    CreateNodeModel(device, region, "TrappedHoles", n_t_irr_p)
+    for i in ("Electrons", "Holes", "Potential"):
+        CreateNodeModelDerivative(device, region, "TrappedElectrons", n_t_irr_n, i)
+        CreateNodeModelDerivative(device, region, "TrappedHoles", n_t_irr_p, i)
+
+
+
+def CreateSiIrradiatedGeneration(device, region):
+    c_n = "(v_T * sigma_n_irr)"
+    e_n = "(N_c * exp(-(E_g/2 - E_t1)/k_T0))"
+    c_p = "(v_T * sigma_p_irr)"
+    e_p = "(N_v * exp(-(E_t2 - (-E_g/2))/k_T0))"
+
+    R_n_irr = "(N_t_irr-TrappedElectrons)*{c_n}*Electrons-TrappedElectrons*{e_n}".format(c_n=c_n,e_n=e_n)
+    R_p_irr = "(N_t_irr-TrappedHoles)*{c_p}*Holes-TrappedHoles*{e_p}".format(c_p=c_p,e_p=e_p)
+
+    Gn = "-q * (USRH+R_z+R_h6+{R_n_irr})".format(R_n_irr=R_n_irr)
+    Gp = "+q * (USRH+R_z+R_h6+{R_p_irr})".format(R_p_irr=R_p_irr)
+
+    CreateNodeModel(device, region, "ElectronGeneration", Gn)
+    CreateNodeModel(device, region, "HoleGeneration", Gp)
 
 '''
 def CreateMobility(device, region):

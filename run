@@ -659,7 +659,7 @@ case $option in
         ;;
 
     7.2.3) echo "Simulate 1D itk I-V ..."
-        ./python/run_batchjob.py devsim "solve_iv_pin.py"
+        ./python/run_batchjob.py devsim "solve_iv_itk.py"
         ;;
         esac
     
