@@ -22,13 +22,13 @@ def main():
     output_path=path+"result/"
     drawsave.create_path(output_path)
     if 'LGAD' in path:
-        power_scale = 1.58
+        pulse_energy_scale = 1.58
     else:
-        power_scale = 1
-    # the power difference in experiment
+        pulse_energy_scale = 1
+    # the pulse energy difference in experiment
 
     if "experiment" in sys.argv:
-        amplitude, charge, risetime, elefield, Z = collect_data(path, "sim-TCT", power_scale*4e-7, 1e9)
+        amplitude, charge, risetime, elefield, Z = collect_data(path, "sim-TCT", pulse_energy_scale, 1e9)
         amplitude_exp, charge_exp, risetime_exp, elefield_exp, Z_exp = collect_data(path, "exp-TCT", 1, 1)
         draw_double_graphs(amplitude,amplitude_exp,Z,"Amplitude",output_path)
         draw_double_graphs(charge,charge_exp,Z,"Charge",output_path)
@@ -36,7 +36,7 @@ def main():
         draw_double_graphs(elefield,elefield_exp,Z,"Elefield",output_path)
 
     else:
-        amplitude, charge, risetime, elefield, Z = collect_data(path, "sim-TCT", power_scale*4e-7, 1e9)
+        amplitude, charge, risetime, elefield, Z = collect_data(path, "sim-TCT", pulse_energy_scale, 1e9)
         draw_graphs(amplitude,Z,"Amplitude",output_path)
         draw_graphs(charge,Z,"Charge",output_path)
         draw_graphs(risetime,Z,"RiseTime",output_path)
@@ -55,7 +55,7 @@ def collect_data(path, model, volt_scale, time_scale):
         rel_z = round(0.02*L,2)
         volt=array("d",[0.])
         time=array("d",[0.])
-        Z.append(rel_z)     
+        Z.append(L)     
         rootfile=path+model+str(rel_z)+".root"
         print(str(rootfile))
         volt,time=read_rootfile(rootfile,volt_scale,time_scale)
