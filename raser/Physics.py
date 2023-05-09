@@ -376,7 +376,9 @@ def CreateNetGeneration(device, region):
     if devsim.get_material(device=device, region=region) == "SiliconCarbide":
         Gn = "-q * (USRH+R_z+R_h6-1e12)"
         Gp = "+q * (USRH+R_z+R_h6-1e12)"
-
+    if devsim.get_material(device=device, region=region) == "Silicon":
+        Gn = "-q * (USRH)"
+        Gp = "+q * (USRH)"
     else:
         Gn = "-q * (USRH-1e12)"
         Gp = "+q * (USRH-1e12)"
@@ -387,6 +389,7 @@ def CreateNetGeneration(device, region):
     for i in ("Electrons", "Holes"):
         CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
+        
 
 def CreateIrradiatedCharge(device, region,Neutron_eq=1e16):
     '''
@@ -674,6 +677,18 @@ def CreateDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
     
+
+def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
+    CreatePE(device, region)
+    CreateBernoulli(device, region)
+    CreateSRH(device, region)
+
+    CreateNetGeneration(device, region)
+    #CreateMobility(device, region)
+    CreateECE(device, region, mu_n)
+    CreateHCE(device, region, mu_p)
+
+
 def CreateSiDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateSiIrradiatedCharge(device, region)
 #    CreatePEIrradiated(device, region)
