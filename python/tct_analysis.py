@@ -39,7 +39,7 @@ def main():
             draw_double_signals(time,time_exp,volt,volt_exp,z,path)
 
     else:
-        amplitude, charge, risetime, elefield, Z = collect_data(path, "sim-TCT", pulse_energy_scale, 1e9)
+        amplitude, charge, risetime, elefield, Z ,volts, times= collect_data(path, "sim-TCT", pulse_energy_scale, 1e9)
         draw_graphs(amplitude,Z,"Amplitude",output_path)
         draw_graphs(charge,Z,"Charge",output_path)
         draw_graphs(risetime,Z,"RiseTime",output_path)
