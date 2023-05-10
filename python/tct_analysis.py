@@ -39,7 +39,7 @@ def main():
             draw_double_signals(time,time_exp,volt,volt_exp,z,path)
 
     else:
-        amplitude, charge, risetime, elefield, Z = collect_data(path, "sim-TCT", pulse_energy_scale, 1e9)
+        amplitude, charge, risetime, elefield, Z ,volts, times= collect_data(path, "sim-TCT", pulse_energy_scale, 1e9)
         draw_graphs(amplitude,Z,"Amplitude",output_path)
         draw_graphs(charge,Z,"Charge",output_path)
         draw_graphs(risetime,Z,"RiseTime",output_path)
@@ -53,10 +53,13 @@ def collect_data(path, model, volt_scale, time_scale):
     elefield= array("d")
     volts = []
     times = []
+    baseline = 0
+
     sum_k=0
     sum_l=0
 
     for L in range(51):
+
         rel_z = round(0.02*L,2)
         volt=array("d",[0.])
         time=array("d",[0.])
@@ -70,25 +73,26 @@ def collect_data(path, model, volt_scale, time_scale):
         k,l=get_average(volt,time,J,mean)
         sum_k+=k      
         sum_l+=l
+
     k=int(round(np.true_divide(sum_k,51)))
     l=int(round(np.true_divide(sum_l,51)))
 
     for L in range(51):
         rel_z = round(0.02*L,2)
+        Z.append(L)
+
         volt=array("d",[0.])
         time=array("d",[0.])
-        sum_v=0
         rootfile=path+model+str(rel_z)+".root"
-        volt,time=read_rootfile(rootfile,volt_scale, time_scale)
+        volt,time=read_rootfile(rootfile, volt_scale, time_scale)
         volts.append(volt)
         times.append(time)
         J=len(volt)
-        field=get_elefield(volt,k,l)
-        elefield.append(field)
-        cha=get_charge(volt,J)
-        charge.append(cha)
-        rt=get_risetime(volt,time,J,mean)
-        risetime.append(rt)  
+
+        amplitude.append(max(volt))
+        elefield.append(get_elefield(volt,k,l))
+        charge.append(get_charge(volt,J))
+        risetime.append(get_risetime(volt,time,J,baseline))  
       
     return amplitude, charge, risetime, elefield, Z, volts, times
 
@@ -118,16 +122,16 @@ def add_noise(rootfile,J,v1,t1):
           t_out.Fill()
     t_out.Write()
     fout.Close()
-
-def get_average(volt,time,J,mean):
+    
+def get_average(volt,time,J,baseline):
     Vmax=max(volt)
     for k in range(1,J):
-        if (volt[k-1] - mean)<0.4*(Vmax-mean)<(volt[k] - mean):
+        if (volt[k-1] - baseline)<0.4*(Vmax - baseline)<(volt[k] - baseline):
             break
     for l in range(J-1):
-        if (volt[l] - mean)<0.6*(Vmax - mean)<(volt[l+1] - mean):
+        if (volt[l] - baseline)<0.6*(Vmax - baseline)<(volt[l+1] - baseline):
             break
-    return k,l 
+    return k,l
 
 def get_elefield(volt,k,l):
     sum_volt=0
@@ -141,15 +145,15 @@ def get_charge(volt,J):
         sum_charge+=volt[j]
     return sum_charge
 
-def get_risetime(volt,time,J,mean):
+def get_risetime(volt,time,J,baseline):
     x=array("d")
     y=array("d")
     Vmax=max(volt)
     for k in range(1,J):
-        if (volt[k-1] - mean)<0.2*(Vmax-mean)<(volt[k] - mean):
+        if (volt[k-1] - baseline)<0.2*(Vmax-baseline)<(volt[k] - baseline):
             break
     for l in range(J-1):
-        if (volt[l] - mean)<0.8*(Vmax - mean)<(volt[l+1] - mean):
+        if (volt[l] - baseline)<0.8*(Vmax - baseline)<(volt[l+1] - baseline):
             break
     n=l-k+1
     for j in range(k,l+1):
@@ -161,8 +165,8 @@ def get_risetime(volt,time,J,mean):
     graph1.Fit(f)
     b=f.GetParameter(1)
     c=f.GetParameter(0)
-    e1=np.true_divide((0.2*(Vmax-mean)-c),b)
-    e2=np.true_divide((0.8*(Vmax-mean)-c),b)
+    e1=np.true_divide((0.2*(Vmax-baseline)-c),b)
+    e2=np.true_divide((0.8*(Vmax-baseline)-c),b)
     risetime=np.true_divide((e2-e1),0.6)
     return risetime
 
@@ -296,7 +300,7 @@ def draw_double_signals(time_1,time_2,signal_1,signal_2,z,path):
     mg.Add(graph2)
     mg.Draw('ap')
     
-    mg.GetYaxis().SetTitle('signal [mV]')
+    mg.GetYaxis().SetTitle('signal [V]')
     mg.GetXaxis().SetTitle('time [ns]')
     mg.GetYaxis().SetLabelSize(0.05)
     mg.GetYaxis().SetTitleSize(0.05)
