@@ -10,8 +10,6 @@ Description:  Define physical models for different materials
 """ Define Material """
 
 import math
-import matplotlib.pyplot as plt
-import os
 
 class Material:
 
@@ -47,65 +45,145 @@ class Mobility:
         self.mat_name = mat_name
         if model_name == None: #default models
             if self.mat_name == "Si":
-                #self.model_name == "Selberherr"
-                self.model_name = "Selberherr"
+                #self.model_name = "Selberherr"
+                self.model_name = "Reggiani"
             if self.mat_name == "SiC":
                 self.model_name = "Das"
         else:
             self.model_name = model_name
 
-    def cal_mobility(self, temperature, Neff, charge, electric_field):
+    def cal_mobility(self, temperature, input_doping, charge, electric_field):
 
         T = temperature # K
+        t = T/300
         E = electric_field  # V/cm
-
-        Neff = abs(Neff) # um^-3
+        Neff = input_doping * 1e12 # um^-3 into cm^-3
 
         # SiC mobility
         if(self.mat_name == 'SiC'):
             if self.model_name == "Das":
+                Neff = abs(Neff) # um^-3
                 if(charge>0):
-                    alpha = 0.34
-                    ulp = 124 * math.pow(T / 300, -2)
-                    uminp = 15.9
-                    Crefp = 1.76e19
-                    betap = 1.213 * math.pow(T / 300.0, 0.17)
-                    vsatp = 2e7 * math.pow(T / 300.0, 0.52)
-                    lfm = uminp + ulp/(1.0 + math.pow(Neff*1e12 / Crefp, alpha))
-                    hfm = lfm / (math.pow(1.0 + math.pow(lfm * E / vsatp, betap), 1.0 / betap))  
+                    mu_L_p = 124 * math.pow(t, -2) # L for lattice
+                    mu_min_p = 15.9
+
+                    C_ref_p = 1.76e19
+                    alpha_p = 0.34
+                    mu_LI_p = mu_min_p + mu_L_p/(1.0 + math.pow(Neff / C_ref_p, alpha_p)) # I for ionized scattering from impurities
+
+                    beta_p = 1.213 * math.pow(t, 0.17)
+                    v_sat_p = 2e7 * math.pow(t, 0.52) # saturate velocity
+                    mu_LIF_p = mu_LI_p / (math.pow(1.0 + math.pow(mu_LI_p * E / v_sat_p, beta_p), 1.0 / beta_p)) # F for driving force  
+
+                    mu = mu_LIF_p
                 else:
-                    alpha = 0.61
-                    ulp = 947 * math.pow(T / 300, -2)
-                    Crefp = 1.94e19
-                    betap = 1 * math.pow(T / 300, 0.66)
-                    vsatp = 2e7 * math.pow(T / 300, 0.87)
-                    lfm = ulp/ (1 + math.pow(Neff*1e12 / Crefp, alpha))
-                    hfm = lfm / (math.pow(1.0 + math.pow(lfm * E / vsatp, betap), 1.0/betap))
+                    mu_L_n = 947 * math.pow(t, -2) # L for lattice
+                    mu_min_n = 0
+
+                    C_ref_n = 1.94e19
+                    alpha_n = 0.61
+                    mu_LI_n = mu_min_n + mu_L_n/ (1 + math.pow(Neff / C_ref_n, alpha_n))
+
+                    beta_n = 1 * math.pow(t, 0.66)
+                    v_sat_n = 2e7 * math.pow(t, 0.87)
+                    mu_LIF_n = mu_LI_n / (math.pow(1.0 + math.pow(mu_LI_n * E / v_sat_n, beta_n), 1.0/beta_n))
+
+                    mu = mu_LIF_n
 
         # Si mobility
         if(self.mat_name == 'Si'):
             if self.model_name == "Selberherr":
                 """Selberherr 1990"""
-                alpha = 0.72*math.pow(T/300.0,0.065)
+                Neff = abs(Neff)
                 if(charge>0):
-                    ulp = 460.0 * math.pow(T / 300.0, -2.18)
-                    uminp = 45.0*math.pow(T / 300.0, -0.45)
-                    Crefp = 2.23e17*math.pow(T / 300.0, 3.2)
-                    betap = 1.0
-                    vsatp = 9.05e6 * math.sqrt(math.tanh(312.0/T))
-                    #vsatp = 1.45e7 * math.sqrt(math.tanh(312.0/T))
-                    lfm = uminp + (ulp-uminp)/(1.0 + math.pow(Neff*1e12 / Crefp, alpha))
-                    hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatp, betap), 1.0 / betap))                        
-                else:
-                    uln = 1430.0 * math.pow(T / 300.0, -2.0)
-                    uminn = 80.0*math.pow(T / 300.0, -0.45)
-                    Crefn = 1.12e17*math.pow(T/300.0,3.2)
-                    betan = 2
-                    vsatn = 1.45e7 * math.sqrt(math.tanh(155.0/T))
-                    lfm = uminn + (uln-uminn)/ (1.0 + math.pow(Neff*1e12 / Crefn, alpha))
-                    hfm = 2*lfm / (1.0+math.pow(1.0 + math.pow(2*lfm * E / vsatn, betan), 1.0/betan))
+                    mu_L_p = 460.0 * math.pow(t, -2.18)
+                    mu_min_p = 45.0*math.pow(t, -0.45)
 
-        return hfm
+                    alpha_p = 0.72*math.pow(t , 0.065)
+                    C_ref_p = 2.23e17*math.pow(t, 3.2)
+                    mu_LI_p = mu_min_p + (mu_L_p - mu_min_p)/(1.0 + math.pow(Neff / C_ref_p, alpha_p))
+
+                    beta_p = 1.0
+                    v_sat_p = 9.05e6 * math.sqrt(math.tanh(312.0/T))
+                    #v_sat_p = 1.45e7 * math.sqrt(math.tanh(312.0/T))
+                    mu_LIF_p = mu_LI_p / (1.0+ mu_LI_p * E / v_sat_p)
+
+                    mu = mu_LIF_p
+
+                else:
+                    mu_L_n = 1430.0 * math.pow(t, -2.0)
+                    mu_min_n = 80.0*math.pow(t, -0.45)
+
+                    alpha_n = 0.72*math.pow(t, 0.065)
+                    C_ref_n = 1.12e17*math.pow(t, 3.2)
+                    mu_LI_n = mu_min_n + (mu_L_n-mu_min_n)/ (1.0 + math.pow(Neff / C_ref_n, alpha_n))
+
+                    beta_n = 2
+                    vsatn = 1.45e7 * math.sqrt(math.tanh(155.0/T))
+                    mu_LIF_n = 2*mu_LI_n / (1.0+math.pow(1.0 + math.pow(2*mu_LI_n * E / vsatn, beta_n), 1.0/beta_n))
+
+                    mu = mu_LIF_n
+            
+            if self.model_name == "Reggiani":
+                """Reggiani 1999"""
+                if Neff > 0:
+                    N_D = Neff
+                    N_A = 0
+                if Neff < 0:
+                    N_A = -Neff
+                    N_D = 0
+
+                if(charge>0):
+                    mu_L_p = 470.50 * math.pow(t, -2.16)
+                    mu_0_p_d = 90.0 * math.pow(t, -1.3)
+                    mu_0_p_a = 44.0 * math.pow(t, -0.8)
+                    mu_1_p_d = 28.2 * math.pow(t, -2.0)
+                    mu_1_p_a = 28.2 * math.pow(t, -0.2)
+                    mu_0_p = (mu_0_p_d * N_D + mu_0_p_a * N_A)/(N_D + N_A)
+                    mu_1_p = (mu_1_p_d * N_D + mu_1_p_a * N_A)/(N_D + N_A)
+
+                    alpha_p_d = 0.77
+                    alpha_p_a = 0.719
+                    C_r_p_d = 1.30e18 * math.pow(t, 2.2)
+                    C_r_p_a = 2.45e17 * math.pow(t, 3.1)
+                    C_s_p_d = 1.10e18 * math.pow(t, 6.2)
+                    C_s_p_a = 6.10e20
+                    mu_LI_p = mu_0_p\
+                            +(mu_L_p - mu_0_p)/(1.0 + math.pow(N_D / C_r_p_d, alpha_p_d) + math.pow(N_A / C_r_p_a, alpha_p_a))\
+                            - mu_1_p/(1.0 + math.pow(N_D/C_s_p_d + N_A / C_s_p_a, 2))
+
+                    beta_p_1 = 2*math.pow(t, -0.2) + 0.6*math.pow(N_A, 2)/(math.pow(N_A, 2) + math.pow(8e17, 2)) + 0.6*math.pow(N_D, 2)/(math.pow(N_D, 2) + math.pow(1e19, 2))
+                    beta_p_2 = 0.15*math.pow(t, 1) + 0.8*math.pow(N_A, 2)/(math.pow(N_A, 2) + math.pow(8e17, 2)) + 0.8*math.pow(N_D, 2)/(math.pow(N_D, 2) + math.pow(1e19, 2))
+                    v_sat_p = 9.1e6 * math.pow(t, -0.4)
+                    mu_LIF_p = mu_LI_p / math.pow((1.0+ math.pow(mu_LI_p * E / v_sat_p, beta_p_1+beta_p_2)), 1.0 / beta_p_1)
+
+                    mu = mu_LIF_p
+
+                else:
+                    mu_L_n = 1441.0 * math.pow(t, -2.45 + 0.07*t)
+                    mu_0_n_d = 62.2 * math.pow(t, -1.3)
+                    mu_0_n_a = 132.0 * math.pow(t, -1.3)
+                    mu_1_n_d = 48.6 * math.pow(t, -0.7)
+                    mu_1_n_a = 73.5 * math.pow(t, -1.25)
+                    mu_0_n = (mu_0_n_d * N_D + mu_0_n_a * N_A)/(N_D + N_A)
+                    mu_1_n = (mu_1_n_d * N_D + mu_1_n_a * N_A)/(N_D + N_A)
+
+                    alpha_n_d = 0.68
+                    alpha_n_a = 0.72
+                    C_r_n_d = 8.30e16 * math.pow(t, 3.65)
+                    C_r_n_a = 1.22e17 * math.pow(t, 2.65)
+                    C_s_n_d = 4e20
+                    C_s_n_a = 7e20
+                    mu_LI_n = mu_0_n\
+                            +(mu_L_n - mu_0_n)/(1.0 + math.pow(N_D / C_r_n_d, alpha_n_d) + math.pow(N_A / C_r_n_a, alpha_n_a))\
+                            - mu_1_n/(1.0 + math.pow(N_D/C_s_n_d + N_A / C_s_n_a, 2))
+
+                    beta_n = 2.1*math.pow(t, -0.2) + 2*math.pow(N_A, 2)/(math.pow(N_A, 2) + math.pow(1e19, 2)) + 3*math.pow(N_D, 2)/(math.pow(N_D, 2) + math.pow(1e19, 2))
+                    v_sat_n = 2.4e7 / (1 + 0.8*math.exp(t/2))
+                    mu_LIF_n = mu_LI_n / math.pow((1.0+ math.pow(mu_LI_n * E / v_sat_n, beta_n)), 1.0 / beta_n)
+
+                    mu = mu_LIF_n
+        return mu
     
     def draw_velocity(self, temperature, Neff):
         x_field = []
@@ -295,6 +373,8 @@ class Vector:
 
 if __name__ == "__main__":
     #usage: apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs /afs/ihep.ac.cn/users/s/shixin/raser/raser-1.3.sif raser/model.py
+    import matplotlib.pyplot as plt
+    import os
     if not (os.path.exists("./output/model")):
         os.makedirs("./output/model")
     mob = Mobility("Si")
