@@ -50,8 +50,8 @@ myLgadTree = myLgadFile.Get("edge")
 
 z_init_pin = "11.985"
 z_init_lgad = "11.954"
-t_init_pin = "11.0"
-t_init_lgad = "11.05"
+t_init_pin = "11.03"
+t_init_lgad = "11.02"
 
 save_experiment_data(z_init_pin,t_init_pin,myPinTree,"output/pintct/HPK-Si-PIN/exp-TCT")
 save_experiment_data(z_init_lgad,t_init_lgad,myLgadTree,"output/lgadtct/HPK-Si-LGAD/exp-TCT")

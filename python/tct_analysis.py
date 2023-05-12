@@ -76,6 +76,7 @@ def collect_data(path, model, volt_scale, time_scale):
 
     k=int(round(np.true_divide(sum_k,51)))
     l=int(round(np.true_divide(sum_l,51)))
+    print("k=",k,"l=",l)
 
     for L in range(51):
         rel_z = round(0.02*L,2)
@@ -162,7 +163,7 @@ def get_risetime(volt,time,J,baseline):
 
     graph1 = ROOT.TGraph(n,x,y)
     f=ROOT.TF1("f","[0]+[1]*x",0,2)
-    graph1.Fit(f)
+    graph1.Fit(f,"Q")
     b=f.GetParameter(1)
     c=f.GetParameter(0)
     e1=np.true_divide((0.2*(Vmax-baseline)-c),b)
