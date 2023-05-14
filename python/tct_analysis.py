@@ -58,7 +58,7 @@ def collect_data(path, model, volt_scale, time_scale):
     sum_k=0
     sum_l=0
 
-    for L in range(51):
+    for L in range(-10,61):
 
         rel_z = round(0.02*L,2)
         volt=array("d",[0.])
@@ -71,14 +71,15 @@ def collect_data(path, model, volt_scale, time_scale):
         J=len(volt)
         amplitude.append(max(volt))
         k,l=get_average(volt,time,J,mean)
-        sum_k+=k      
-        sum_l+=l
+        if rel_z>=0 and rel_z<=1:
+            sum_k+=k      
+            sum_l+=l
 
     k=int(round(np.true_divide(sum_k,51)))
     l=int(round(np.true_divide(sum_l,51)))
     print("k=",k,"l=",l)
 
-    for L in range(51):
+    for L in range(-10,61):
         rel_z = round(0.02*L,2)
         Z.append(L)
 
@@ -138,7 +139,7 @@ def get_elefield(volt,k,l):
     sum_volt=0
     for j in range(k,l+1):
         sum_volt+=volt[j]
-    return sum_volt
+    return sum_volt/(l+1-k)
 
 def get_charge(volt,J):
     sum_charge=0
@@ -232,7 +233,7 @@ def draw_double_graphs(array1,array2,Z,name,path):
         if 'LGAD' in path:
             mg.GetYaxis().SetRangeUser(0,1.13)
         else:
-            mg.GetYaxis().SetRangeUser(0,0.045)
+            mg.GetYaxis().SetRangeUser(0,0.04)
 
     if name == 'Charge':
         Y_title = 'Charge [a.u.]'
@@ -244,9 +245,9 @@ def draw_double_graphs(array1,array2,Z,name,path):
     if name == 'Elefield':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,1.5)
+            mg.GetYaxis().SetRangeUser(0,0.8)
         else:
-            mg.GetYaxis().SetRangeUser(0,0.05)
+            mg.GetYaxis().SetRangeUser(0,0.02)
 
     if name == 'RiseTime':
         Y_title = 'RiseTime [ns]'
