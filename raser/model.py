@@ -13,46 +13,33 @@ import math
 
 class Material:
 
-    def __init__(self,mat_name):
+    def __init__(self,mat_name,mobility_model=None,avalanche_model=None):
         self.mat_name = mat_name
+        self.mat_database()
+        if mobility_model != None:
+            self.mobility_model = mobility_model
+        if avalanche_model != None:
+            self.avalanche_model = avalanche_model
 
     def mat_database(self):
+        m_e = 9.109e-31
+        if self.mat_name == "Si":
+            self.permittivity=11.5
+            self.hole_mass = 0.386*m_e
+            self.electron_mass = 0.26*m_e
+            self.avalanche_model = "vanOverstraeten"
+            self.mobility_model = 'Reggiani'
+        if self.mat_name == "SiC":
+            # 4H-SiC, use the longitudinal effective mass
+            self.permittivity=9.76
+            self.hole_mass = 1.0*m_e
+            self.electron_mass = 0.29*m_e
+            self.avalanche_model = 'Hatakeyama'
+            self.mobility_model = 'Das'
 
-        # material par
-        self.si_par_dict = {'Permittivity' : 11.5,\
-                             'Avalanche': 'vanOverstraeten',\
-                             'Mobility' : 'Selberherr'\
-                            }
-
-        self.sic_par_dict = {'Permittivity' : 9.76,\
-                             'Avalanche': 'Hatakeyama',\
-                             'Mobility' : 'Das'\
-                            }
-
-        # global data base
-        self.mat_db_dict = {'SiC' : self.sic_par_dict,\
-                            'Si' : self.si_par_dict\
-                            }
-
-        return self.mat_db_dict[self.mat_name]
-
-
-
-""" Define Mobility Model """
-
-class Mobility:
-    def __init__(self,mat_name,model_name=None):
-        self.mat_name = mat_name
-        if model_name == None: #default models
-            if self.mat_name == "Si":
-                #self.model_name = "Selberherr"
-                self.model_name = "Reggiani"
-            if self.mat_name == "SiC":
-                self.model_name = "Das"
-        else:
-            self.model_name = model_name
 
     def cal_mobility(self, temperature, input_doping, charge, electric_field):
+        """ Define Mobility Model """
 
         T = temperature # K
         t = T/300
@@ -61,7 +48,7 @@ class Mobility:
 
         # SiC mobility
         if(self.mat_name == 'SiC'):
-            if self.model_name == "Das":
+            if self.mobility_model == "Das":
                 Neff = abs(Neff) # um^-3
                 if(charge>0):
                     mu_L_p = 124 * math.pow(t, -2) # L for lattice
@@ -92,7 +79,7 @@ class Mobility:
 
         # Si mobility
         if(self.mat_name == 'Si'):
-            if self.model_name == "Selberherr":
+            if self.mobility_model == "Selberherr":
                 """Selberherr 1990"""
                 Neff = abs(Neff)
                 if(charge>0):
@@ -124,7 +111,7 @@ class Mobility:
 
                     mu = mu_LIF_n
             
-            if self.model_name == "Reggiani":
+            if self.mobility_model == "Reggiani":
                 """Reggiani 1999"""
                 if Neff > 0:
                     N_D = Neff
@@ -207,19 +194,14 @@ class Mobility:
         plt.xscale("log")
         plt.yscale("log")
         plt.xlabel("ElectricField  [V/cm]")
-        plt.ylabel("Velocity [cm^2/V*s]")
+        plt.ylabel("Velocity [cm/s]")
         plt.title("Mobility Model")
         plt.grid(True,ls = '--',which="both")
         fig.show()
         fig.savefig("./output/model/"+self.mat_name+"Mobility.png")
 
-""" Define Avalanche Model """
-
-class Avalanche:      
-    def __init__(self,model_name):
-        self.model_name = model_name
-
     def cal_coefficient(self, electric_field, charges, temperature):
+        """ Define Avalanche Model """
 
         coefficient = 0.
 
@@ -227,7 +209,7 @@ class Avalanche:
         T = temperature # K
 
         # van Overstraeten – de Man Model
-        if(self.model_name == 'vanOverstraeten'):
+        if(self.avalanche_model == 'vanOverstraeten'):
 
             hbarOmega = 0.063 # eV
             E0 = 4.0e5 # V/cm
@@ -275,7 +257,7 @@ class Avalanche:
             else:
                 coefficient = 0.
 
-        if(self.model_name == 'Okuto'):
+        if(self.avalanche_model == 'Okuto'):
 
             T0 = 300.0 # K
             _gamma = 1.0 # 1
@@ -306,7 +288,7 @@ class Avalanche:
             else:
                 coefficient = 0.
 
-        if(self.model_name == 'Hatakeyama'):
+        if(self.avalanche_model == 'Hatakeyama'):
             '''
             The Hatakeyama avalanche model describes the anisotropic behavior in 4H-SiC power devices. 
             The impact ionization coefficient is obtained according to the Chynoweth law.
@@ -377,7 +359,7 @@ if __name__ == "__main__":
     import os
     if not (os.path.exists("./output/model")):
         os.makedirs("./output/model")
-    mob = Mobility("Si")
+    mob = Material("Si")
     mob.draw_velocity(300,5)
-    mob = Mobility("SiC")
+    mob = Material("SiC")
     mob.draw_velocity(300,50)
