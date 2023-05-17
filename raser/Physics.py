@@ -508,13 +508,6 @@ def CreateSiIrradiatedGeneration(device, region):
     T0 = 300.0         # K    
     devsim.add_db_entry(material="Silicon",   parameter="kT0",    value=k*T0,       unit="J",        description="k*T0")
     
-    # e_acc1_posi= "(exp(E_acc1 / kT0))"  #T0 = 300K
-    # e_acc1_nega= "(exp(-(E_acc1 / kT0)))" 
-    # e_acc2_posi= "(exp(E_acc2 / kT0))"  
-    # e_acc2_nega= "(exp(-(E_acc2 / kT0)))" 
-    # e_donor_posi= "(exp(E_donor / kT0))"  
-    # e_donor_nega= "(exp(-(E_donor / kT0)))"  
-    
     e_acc1_posi= "(exp(E_acc1 / V_T0))"  #T0 = 300K
     e_acc1_nega= "(exp(-(E_acc1 / V_T0)))" 
     e_acc2_posi= "(exp(E_acc2 / V_T0))"  
