@@ -696,16 +696,6 @@ def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     #CreateMobility(device, region)
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
-    
-
-def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
-    CreatePE(device, region)
-    CreateBernoulli(device, region)
-    CreateSRH(device, region)
-    CreateNetGeneration(device, region)
-    #CreateMobility(device, region)
-    CreateECE(device, region, mu_n)
-    CreateHCE(device, region, mu_p)
 
 
 def CreateSiDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
