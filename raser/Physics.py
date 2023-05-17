@@ -502,6 +502,48 @@ def CreateSiIrradiatedCharge(device, region):
     devsim.add_db_entry(material="Silicon",   parameter="v_T_elec",     value=v_T,   unit="cm/s",     description="N_t_acc1")
     devsim.add_db_entry(material="Silicon",   parameter="v_T_hole",     value=v_T,   unit="cm/s",     description="N_t_acc2")
 
+def CreateSiIrradiatedGeneration(device, region):
+    
+    k = 1.3806503e-23  # J/K
+    T0 = 300.0         # K    
+    devsim.add_db_entry(material="Silicon",   parameter="kT0",    value=k*T0,       unit="J",        description="k*T0")
+    
+    # e_acc1_posi= "(exp(E_acc1 / kT0))"  #T0 = 300K
+    # e_acc1_nega= "(exp(-(E_acc1 / kT0)))" 
+    # e_acc2_posi= "(exp(E_acc2 / kT0))"  
+    # e_acc2_nega= "(exp(-(E_acc2 / kT0)))" 
+    # e_donor_posi= "(exp(E_donor / kT0))"  
+    # e_donor_nega= "(exp(-(E_donor / kT0)))"  
+    
+    e_acc1_posi= "(exp(E_acc1 / V_T0))"  #T0 = 300K
+    e_acc1_nega= "(exp(-(E_acc1 / V_T0)))" 
+    e_acc2_posi= "(exp(E_acc2 / V_T0))"  
+    e_acc2_nega= "(exp(-(E_acc2 / V_T0)))" 
+    e_donor_posi= "(exp(E_donor / V_T0))"  
+    e_donor_nega= "(exp(-(E_donor / V_T0)))"  
+    
+    R_acc1_up = "(v_T_hole *v_T_elec * sigma_e_acc1 * sigma_h_acc1 * N_t_acc1 * (Electrons*Holes - n_i * n_i))"
+    R_acc1_down1 = "(v_T_elec * sigma_e_acc1 *(Electrons + n_i *{e_acc1_posi}))".format(e_acc1_posi=e_acc1_posi)
+    R_acc1_down2 = "(v_T_hole * sigma_h_acc1 *(Holes + n_i *{e_acc1_nega}))".format(e_acc1_nega=e_acc1_nega)
+    R_acc1 = "{R_acc1_up}/({R_acc1_down1}+{R_acc1_down2})".format(R_acc1_up=R_acc1_up,R_acc1_down1=R_acc1_down1,R_acc1_down2=R_acc1_down2)
+    
+    R_acc2_up = "(v_T_hole *v_T_elec * sigma_e_acc2 * sigma_h_acc2 * N_t_acc2 * (Electrons*Holes - n_i * n_i))"
+    R_acc2_down1 = "(v_T_elec * sigma_e_acc2 *(Electrons + n_i *{e_acc2_posi}))".format(e_acc2_posi=e_acc2_posi)
+    R_acc2_down2 = "(v_T_hole * sigma_h_acc2 *(Holes + n_i *{e_acc2_nega}))".format(e_acc2_nega=e_acc2_nega)
+    R_acc2 = "{R_acc2_up}/({R_acc2_down1}+{R_acc2_down2})".format(R_acc2_up=R_acc2_up,R_acc2_down1=R_acc2_down1,R_acc2_down2=R_acc2_down2)
+    
+    R_donor_up = "(v_T_hole *v_T_elec * sigma_e_donor * sigma_h_donor * N_t_donor * (Electrons*Holes - n_i * n_i))"
+    R_donor_down1 = "(v_T_elec * sigma_e_donor *(Electrons + n_i *{e_donor_posi}))".format(e_donor_posi=e_donor_posi)
+    R_donor_down2 = "(v_T_hole * sigma_h_donor *(Holes + n_i *{e_donor_nega}))".format(e_donor_nega=e_donor_nega)
+    R_donor = "{R_donor_up}/({R_donor_down1}+{R_donor_down2})".format(R_donor_up=R_donor_up,R_donor_down1=R_donor_down1,R_donor_down2=R_donor_down2)
+    print("\n\n\n\n"+R_donor+"\n\n\n\n")
+
+    Gd = "-q * (USRH+{R_donor})".format(R_donor=R_donor)  #Gd -q
+    Ga = "+q * (USRH+{R_acc1}+{R_acc2})".format(R_acc1=R_acc1,R_acc2=R_acc2)
+
+    CreateNodeModel(device, region, "ElectronGeneration", Gd)
+    CreateNodeModel(device, region, "HoleGeneration", Ga)
+
 
 def CreateSiIrradiatedGeneration_bak_notZhan(device, region):
     c_n = "(v_T * sigma_n_irr)"
