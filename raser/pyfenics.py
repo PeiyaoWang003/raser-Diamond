@@ -33,8 +33,8 @@ class FenicsCal:
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
         self.u_bc,self.u_w_bc = self.boundary_definition(my_d)
         self.weighting_potential(my_d)
-        #self.electric_field(my_d)
-        self.electric_field_with_carrier(my_d)
+        self.electric_field(my_d)
+        #self.electric_field_with_carrier(my_d)
 
     def generate_mesh(self,my_d,mesh_number):
         """
@@ -264,7 +264,7 @@ class FenicsCal:
             2023/03/13
         """
         # Define variational problem
-        # original problem: -Δu = (N-exp(u/u_T)+exp(-u/u_T))/ε
+        # original problem: -Δu = (N-n_i*exp(u/u_T)+n_i*exp(-u/u_T))/ε
         # u_var = exp(±u/u_T)
 
         # under construction
@@ -292,11 +292,18 @@ class FenicsCal:
         f = self.f_expression(my_d)
         F = fenics.inner(fenics.grad(self.u), fenics.grad(v))*fenics.dx - ((f+carrier(self.u))*e0/perm0/perm_mat)*v*fenics.dx
         J = fenics.derivative(F, self.u, du)
-        for volt in range(501):
-            u_bc = self.boundary_definition_planar(None,volt,0)
-            eq = fenics.NonlinearVariationalProblem(F, self.u, u_bc, J)
-            solver = fenics.NonlinearVariationalSolver(eq)
-            solver.solve()
+
+        eq = fenics.NonlinearVariationalProblem(F, self.u, self.u_bc, J)
+        solver = fenics.NonlinearVariationalSolver(eq)
+        prm     = solver.parameters
+        prm['nonlinear_solver']                                     = 'newton'
+        prm['newton_solver']['linear_solver']                       = 'gmres'
+        prm['newton_solver']['preconditioner']                      = 'jacobi'
+        prm['newton_solver']['relaxation_parameter']                = 1.0
+        prm['newton_solver']['krylov_solver']['maximum_iterations'] = int(1e3)
+        prm['newton_solver']['krylov_solver']['absolute_tolerance'] = 1e-20
+        prm['newton_solver']['krylov_solver']['nonzero_initial_guess'] = True
+        solver.solve()
 
         # Calculate electric field
         W = fenics.VectorFunctionSpace(self.mesh3D, 'P', 1)
