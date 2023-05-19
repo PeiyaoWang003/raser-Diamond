@@ -1,0 +1,21 @@
+# Macro file for telescope
+# 
+# Can be run in batch, without graphic
+# or interactively: Idle> /control/execute ./cfg/run1.mac
+#
+# Change the default number of workers (in multi-threading mode) 
+#/run/numberOfThreads 4
+#
+# Initialize kernel
+/run/initialize
+#
+/control/verbose 2
+/run/verbose 2
+/event/verbose 0
+/tracking/verbose 2
+# 
+# pi+ 120 GeV to the direction (0.,0.,1.)
+#
+/gun/particle pi+
+/gun/energy 120 GeV
+/run/beamOn 1
