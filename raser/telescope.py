@@ -467,7 +467,7 @@ UImanager = G4UImanager.GetUIpointer()
 # # Process macro or start UI session
 if ui == None:
     # batch mode
-    command = "/control/execute "
+    command = "/control/execute ./cfg/"
     fileName = sys.argv[1]
     UImanager.ApplyCommand(command+fileName)
 else:
