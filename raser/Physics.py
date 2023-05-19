@@ -45,7 +45,6 @@ def PrintCurrents(device, contact):
     print("{0}\t{1}\t{2}\t{3}\t{4}".format(contact, voltage, electron_current, hole_current, total_current))
 
 
-
 def CreateSiliconPotentialOnly(device, region):
     '''
       Creates the physical models for a Silicon region
@@ -503,27 +502,11 @@ def CreateSiIrradiatedCharge(device, region):
     devsim.add_db_entry(material="Silicon",   parameter="v_T_elec",     value=v_T,   unit="cm/s",     description="N_t_acc1")
     devsim.add_db_entry(material="Silicon",   parameter="v_T_hole",     value=v_T,   unit="cm/s",     description="N_t_acc2")
 
-
-
-
-
 def CreateSiIrradiatedGeneration(device, region):
-    
-    c_n = "(v_T * sigma_n_irr)"
-    e_n = "(N_c * exp(-(E_g/2 - E_t)/k_T0))"
-    c_p = "(v_T * sigma_p_irr)"
-    e_p = "(N_v * exp(-(E_t - (-E_g/2))/k_T0))"
     
     k = 1.3806503e-23  # J/K
     T0 = 300.0         # K    
     devsim.add_db_entry(material="Silicon",   parameter="kT0",    value=k*T0,       unit="J",        description="k*T0")
-    
-    # e_acc1_posi= "(exp(E_acc1 / kT0))"  #T0 = 300K
-    # e_acc1_nega= "(exp(-(E_acc1 / kT0)))" 
-    # e_acc2_posi= "(exp(E_acc2 / kT0))"  
-    # e_acc2_nega= "(exp(-(E_acc2 / kT0)))" 
-    # e_donor_posi= "(exp(E_donor / kT0))"  
-    # e_donor_nega= "(exp(-(E_donor / kT0)))"  
     
     e_acc1_posi= "(exp(E_acc1 / V_T0))"  #T0 = 300K
     e_acc1_nega= "(exp(-(E_acc1 / V_T0)))" 
@@ -553,6 +536,21 @@ def CreateSiIrradiatedGeneration(device, region):
 
     CreateNodeModel(device, region, "ElectronGeneration", Gd)
     CreateNodeModel(device, region, "HoleGeneration", Ga)
+
+
+def CreateSiIrradiatedGeneration_bak_notZhan(device, region):
+    c_n = "(v_T * sigma_n_irr)"
+    e_n = "(N_c * exp(-(E_g/2 - E_t)/k_T0))"
+    c_p = "(v_T * sigma_p_irr)"
+    e_p = "(N_v * exp(-(E_t - (-E_g/2))/k_T0))"
+    R_n_irr = "(N_t_irr-TrappedElectrons)*{c_n}*Electrons-TrappedElectrons*{e_n}".format(c_n=c_n,e_n=e_n)
+    R_p_irr = "(N_t_irr-TrappedHoles)*{c_p}*Holes-TrappedHoles*{e_p}".format(c_p=c_p,e_p=e_p)
+
+    Gn = "-q * (USRH+R_z+R_h6+{R_n_irr})".format(R_n_irr=R_n_irr)
+    Gp = "+q * (USRH+R_z+R_h6+{R_p_irr})".format(R_p_irr=R_p_irr)
+
+    CreateNodeModel(device, region, "ElectronGeneration", Gn)
+    CreateNodeModel(device, region, "HoleGeneration", Gp)
 
 '''
 def CreateMobility(device, region):
@@ -690,12 +688,10 @@ def CreateDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
     
-
 def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
-
     CreateNetGeneration(device, region)
     #CreateMobility(device, region)
     CreateECE(device, region, mu_n)
@@ -704,7 +700,7 @@ def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
 
 def CreateSiDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateSiIrradiatedCharge(device, region)
-#    CreatePEIrradiated(device, region)
+    CreatePEIrradiated(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
     CreateSiIrradiatedGeneration(device, region)
