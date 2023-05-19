@@ -15,8 +15,8 @@ class B1DetectorConstruction(G4VUserDetectorConstruction):
 
     def Construct(self):
         nist = G4NistManager.Instance()
-        env_sizeXY = 20*cm
-        env_sizeZ = 30*cm
+        env_sizeXY = 35*cm
+        env_sizeZ = 35*cm
         env_mat = nist.FindOrBuildMaterial("G4_AIR")
 
         # Option to switch on/off checking of volumes overlaps
@@ -59,8 +59,8 @@ class B1DetectorConstruction(G4VUserDetectorConstruction):
                       checkOverlaps)     # overlaps checking
 
         # Shape
-        shape1_mat = nist.FindOrBuildMaterial("G4_SI")
-        pos1 = G4ThreeVector(0, 2*cm, -2*cm)
+        shape1_mat = nist.FindOrBuildMaterial("G4_Si")
+        pos1 = G4ThreeVector(-2*cm, 2*cm, 2*cm)
 
         # Conical section shape
         shape1_dxa = 6*cm
@@ -86,8 +86,8 @@ class B1DetectorConstruction(G4VUserDetectorConstruction):
                       checkOverlaps)  # overlaps checking
 
         # Shape 2
-        shape2_mat = nist.FindOrBuildMaterial("G4_SI")
-        pos2 = G4ThreeVector(0, 2*cm, 2*cm)
+        shape2_mat = nist.FindOrBuildMaterial("G4_Si")
+        pos2 = G4ThreeVector(-2*cm, 2*cm, 4*cm)
 
         # Trapezoid shape
         shape2_dxa = 6*cm
@@ -111,9 +111,145 @@ class B1DetectorConstruction(G4VUserDetectorConstruction):
                       False,           # no boolean operation
                       0,               # copy number
                       checkOverlaps)   # overlaps checking
+        
+         # Shape 3
+        shape3_mat = nist.FindOrBuildMaterial("G4_Si")
+        pos3 = G4ThreeVector(-2*cm, 2*cm, 6*cm)
 
-        # Set Shape2 as scoring volume
-        self.fScoringVolume = logicShape2
+        # Trapezoid shape
+        shape3_dxa = 6*cm
+        shape3_dxb = 6*cm
+        shape3_dya = 10*cm
+        shape3_dyb = 10*cm
+        shape3_dz = 0.5*cm
+        solidShape3 = G4Trd("Shape3",  # its name
+                            0.5*shape3_dxa, 0.5*shape3_dxb,
+                            0.5*shape3_dya, 0.5*shape3_dyb, 0.5*shape3_dz)  # its size
+
+        logicShape3 = G4LogicalVolume(solidShape3,  # its solid
+                                      shape3_mat,   # its material
+                                      "Shape3")     # its name
+
+        G4PVPlacement(None,            # no rotation
+                      pos3,            # at position
+                      logicShape3,     # its logical volume
+                      "Shape3",        # its name
+                      logicEnv,        # its mother  volume
+                      False,           # no boolean operation
+                      0,               # copy number
+                      checkOverlaps)   # overlaps checking
+        
+          # Shape 4
+        shape4_mat = nist.FindOrBuildMaterial("G4_Si")
+        pos4 = G4ThreeVector(-2*cm, 2*cm, 8*cm)
+
+        # Trapezoid shape
+        shape4_dxa = 6*cm
+        shape4_dxb = 6*cm
+        shape4_dya = 10*cm
+        shape4_dyb = 10*cm
+        shape4_dz = 0.5*cm
+        solidShape4 = G4Trd("Shape4",  # its name
+                            0.5*shape4_dxa, 0.5*shape4_dxb,
+                            0.5*shape4_dya, 0.5*shape4_dyb, 0.5*shape4_dz)  # its size
+
+        logicShape4 = G4LogicalVolume(solidShape4,  # its solid
+                                      shape4_mat,   # its material
+                                      "Shape4")     # its name
+
+        G4PVPlacement(None,            # no rotation
+                      pos4,            # at position
+                      logicShape4,     # its logical volume
+                      "Shape4",        # its name
+                      logicEnv,        # its mother  volume
+                      False,           # no boolean operation
+                      0,               # copy number
+                      checkOverlaps)   # overlaps checking
+        
+        # Shape 5
+        shape5_mat = nist.FindOrBuildMaterial("G4_Si")
+        pos5 = G4ThreeVector(-2*cm, 2*cm, 10*cm)
+
+        # Trapezoid shape
+        shape5_dxa = 6*cm
+        shape5_dxb = 6*cm
+        shape5_dya = 10*cm
+        shape5_dyb = 10*cm
+        shape5_dz = 0.5*cm
+        solidShape5 = G4Trd("Shape5",  # its name
+                            0.5*shape5_dxa, 0.5*shape5_dxb,
+                            0.5*shape5_dya, 0.5*shape5_dyb, 0.5*shape5_dz)  # its size
+
+        logicShape5 = G4LogicalVolume(solidShape5,  # its solid
+                                      shape5_mat,   # its material
+                                      "Shape5")     # its name
+
+        G4PVPlacement(None,            # no rotation
+                      pos5,            # at position
+                      logicShape5,     # its logical volume
+                      "Shape5",        # its name
+                      logicEnv,        # its mother  volume
+                      False,           # no boolean operation
+                      0,               # copy number
+                      checkOverlaps)   # overlaps checking
+
+        # Shape 6
+        shape6_mat = nist.FindOrBuildMaterial("G4_Si")
+        pos6 = G4ThreeVector(-2*cm, 2*cm, 12*cm)
+
+        # Trapezoid shape
+        shape6_dxa = 6*cm
+        shape6_dxb = 6*cm
+        shape6_dya = 10*cm
+        shape6_dyb = 10*cm
+        shape6_dz = 0.5*cm
+        solidShape6 = G4Trd("Shape6",  # its name
+                            0.5*shape6_dxa, 0.5*shape6_dxb,
+                            0.5*shape6_dya, 0.5*shape6_dyb, 0.5*shape6_dz)  # its size
+
+        logicShape6 = G4LogicalVolume(solidShape6,  # its solid
+                                      shape6_mat,   # its material
+                                      "Shape6")     # its name
+
+        G4PVPlacement(None,            # no rotation
+                      pos6,            # at position
+                      logicShape6,     # its logical volume
+                      "Shape6",        # its name
+                      logicEnv,        # its mother  volume
+                      False,           # no boolean operation
+                      0,               # copy number
+                      checkOverlaps)   # overlaps checking
+        
+        # Shape 7
+        shape7_mat = nist.FindOrBuildMaterial("G4_Si")
+        pos7 = G4ThreeVector(-2*cm, 2*cm, 14*cm)
+
+        # Trapezoid shape
+        shape7_dxa = 6*cm
+        shape7_dxb = 6*cm
+        shape7_dya = 10*cm
+        shape7_dyb = 10*cm
+        shape7_dz = 0.5*cm
+        solidShape7 = G4Trd("Shape7",  # its name
+                            0.5*shape7_dxa, 0.5*shape7_dxb,
+                            0.5*shape7_dya, 0.5*shape7_dyb, 0.5*shape7_dz)  # its size
+
+        logicShape7 = G4LogicalVolume(solidShape7,  # its solid
+                                      shape7_mat,   # its material
+                                      "Shape7")     # its name
+
+        G4PVPlacement(None,            # no rotation
+                      pos7,            # at position
+                      logicShape7,     # its logical volume
+                      "Shape7",        # its name
+                      logicEnv,        # its mother  volume
+                      False,           # no boolean operation
+                      0,               # copy number
+                      checkOverlaps)   # overlaps checking
+
+        # Set Shape4 as scoring volume
+        self.fScoringVolume = logicShape4
+
 
         # always return the physical World
         return physWorld
@@ -272,9 +408,12 @@ class B1PrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
                         "MyCode0002", G4ExceptionSeverity.JustWarning, msg)
 
         size = 0.8
-        x0 = size * envSizeXY * (G4UniformRand()-0.5)
-        y0 = size * envSizeXY * (G4UniformRand()-0.5)
-        z0 = -0.5 * envSizeZ
+        #x0 = size * envSizeXY * (G4UniformRand()-0.5)
+        #y0 = size * envSizeXY * (G4UniformRand()-0.5)
+        #z0 = -0.5 * envSizeZ
+        x0=-2*cm
+        y0=2*cm
+        z0=0*cm
 
         self.fParticleGun.SetParticlePosition(G4ThreeVector(x0, y0, z0))
         self.fParticleGun.GeneratePrimaryVertex(anEvent)
