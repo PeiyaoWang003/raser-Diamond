@@ -407,10 +407,6 @@ class B1PrimaryGeneratorAction(G4VUserPrimaryGeneratorAction):
             G4Exception("B1PrimaryGeneratorAction::GeneratePrimaries()",
                         "MyCode0002", G4ExceptionSeverity.JustWarning, msg)
 
-        size = 0.8
-        #x0 = size * envSizeXY * (G4UniformRand()-0.5)
-        #y0 = size * envSizeXY * (G4UniformRand()-0.5)
-        #z0 = -0.5 * envSizeZ
         x0=-2*cm
         y0=2*cm
         z0=0*cm
