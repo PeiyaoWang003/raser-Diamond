@@ -94,19 +94,19 @@ def save_current(dset,my_d,my_l,my_current,my_f,key):
 def save_signal_time_resolution(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
     if "plugin" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.d_neff) 
+        output_path = (output + "_d="+str(my_d.doping) 
                        + "_v="+str(my_d.voltage)+"_g="+str(my_d.e_gap)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius="+str(my_d.e_r) )
     elif "planar" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.d_neff) 
+        output_path = (output + "_d="+str(my_d.doping) 
                        + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius=None" )
     elif "lgad" in my_d.det_model:
-        output_path = (output + "_d="+str(my_d.doping1) 
+        output_path = (output + "_d="+str(eval(my_d.doping.replace("z",0.5).replace("tol",1e-10))) 
                        + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z) 
