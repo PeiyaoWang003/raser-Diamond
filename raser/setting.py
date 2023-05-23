@@ -131,38 +131,27 @@ class Setting:
             2021/09/02
         """
         p = self.paras
-        if "planar3D" in self.det_model:
-            detector = {'det_model':'planar3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
+        detector = {'det_model':self.det_model, 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
                         'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
-                        'doping':p['doping']
-                       }
+                        'doping':p['doping']}
+        
+        if "planar3D" in self.det_model:
+            pass
         
         if "planarRing" in self.det_model:
-            detector = {'det_model':'planarRing', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'], 
-                        'e_r_inner':p['e_r_inner'],'e_r_outer':p['e_r_outer'],
-                        'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
-                        'doping':p['doping']
-                        }
+            detector.update({'e_r_inner' : p['e_r_inner'],
+                             'e_r_outer' : p['e_r_outer']})
             
         if "plugin3D" in self.det_model:
-            detector = {'det_model':'plugin3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
-                        'material':p['material'],'voltage':p['voltage'], 'temp':p['temp'], 
-                        'doping':p['doping'],
-                        'e_r':p['e_r'], 'e_gap':p['e_gap'], 'custom_electrode': p['custom_electrode']
-                        }
+            detector.update({'e_r':p['e_r'], 
+                             'e_gap':p['e_gap'], 
+                             'custom_electrode': p['custom_electrode']})
+            
         if "lgad3D" in self.det_model:
-            if p['part']==2:
-                detector = {'det_model':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
-                            'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
-                            'part':p['part'], 'avalanche_bond':p['avalanche_bond'], 
-                            'doping1':p['doping1'], 'doping2':p['doping2'], 'avalanche_model':p['avalanche_model']
-                            }
-            if p['part']==3:
-                detector = {'det_model':'lgad3D', 'lx':p['lx'], 'ly':p['ly'], 'lz':p['lz'],
-                            'material':p['material'], 'voltage':p['voltage'], 'temp':p['temp'],
-                            'part':p['part'], 'control_bond':p['control_bond'], 'avalanche_bond':p['avalanche_bond'], 
-                            'doping1':p['doping1'],'doping2':p['doping2'], 'doping3':p['doping3'], 'avalanche_model':p['avalanche_model']
-                            }
+            detector.update({'avalanche_bond':p['avalanche_bond'], 
+                             'avalanche_model':p['avalanche_model'],
+                             'doping_cpp':p['doping_cpp']})
+
         if "trapping_time" in p:
             detector['trapping_time']=p['trapping_time']
         return detector

@@ -195,7 +195,7 @@ class FenicsCal2D:
              
         e0 = 1.60217733e-19
         perm0 = 8.854187817e-12   #F/m    
-        f = fenics.Constant(e0*my_d.d_neff*1e6/perm0/perm_mat)
+        f = fenics.Constant(e0*my_d.doping*1e6/perm0/perm_mat)
         return f
         
 

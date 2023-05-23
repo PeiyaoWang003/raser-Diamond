@@ -15,12 +15,8 @@ class FenicsCal:
         self.det_model = fen_dic['det_model']
         self.fl_x=my_d.l_x/fen_dic['xyscale']  
         self.fl_y=my_d.l_y/fen_dic['xyscale']
+        self.fl_z=my_d.l_z
         self.tol_elenumber=fen_dic["tol_elenumber"]
-        
-        if self.det_model != "plugin3D":
-            self.fl_z=my_d.depletion_depth
-        else:
-            self.fl_z=my_d.l_z
 
         self.tol = 1e-14
         self.bias_voltage = my_d.voltage
@@ -243,7 +239,7 @@ class FenicsCal:
         v = fenics.TestFunction(self.V)
         f = self.f_expression(my_d)
         a = fenics.dot(fenics.grad(u), fenics.grad(v))*fenics.dx
-        L = (f*e0/perm0/perm_mat)*v*fenics.dx
+        L = (f*1e6*e0/perm0/perm_mat)*v*fenics.dx # 1e6 for converting the length dimentions of perm0 to μm
         # Compute solution
         self.u = fenics.Function(self.V)
         fenics.solve(a == L, self.u, self.u_bc,
@@ -290,7 +286,7 @@ class FenicsCal:
         v = fenics.TestFunction(self.V)
         du = fenics.TrialFunction(self.V)
         f = self.f_expression(my_d)
-        F = fenics.inner(fenics.grad(self.u), fenics.grad(v))*fenics.dx - ((f+carrier(self.u))*e0/perm0/perm_mat)*v*fenics.dx
+        F = fenics.inner(fenics.grad(self.u), fenics.grad(v))*fenics.dx - ((f+carrier(self.u))*e0*1e6/perm0/perm_mat)*v*fenics.dx
         J = fenics.derivative(F, self.u, du)
 
         eq = fenics.NonlinearVariationalProblem(F, self.u, self.u_bc, J)
@@ -322,24 +318,10 @@ class FenicsCal:
         @Modify:
             2021/08/31
         """
-        if "lgad3D" in self.det_model:
-            if my_d.part == 2:
-                f = fenics.Expression('x[2] < width + tol ? charge1 : charge2',\
-                                      degree = 0, width = my_d.avalanche_bond,\
-                                      charge1 = my_d.doping1,\
-                                      charge2 = my_d.doping2,\
-                                      tol = self.tol)
-            elif my_d.part == 3:
-                f = fenics.Expression('x[2] < width1 - tol ? charge1 : (x[2] > width2 + tol ? charge3 : charge2)',\
-                                      degree = 0, width1 = my_d.control_bond, width2 = my_d.avalanche_bond,\
-                                      charge1 = my_d.doping1,\
-                                      charge2 = my_d.doping2,\
-                                      charge3 = my_d.doping3,\
-                                      tol = self.tol)
-            else:
-                raise ValueError
+        if "lgad3D" in self.det_model:  
+            f = fenics.Expression(my_d.doping_cpp, degree = 0, tol = self.tol)
         else:
-            f = fenics.Constant(my_d.d_neff*1e6)
+            f = fenics.Constant(my_d.doping)
         return f
 
     def get_w_p(self,px,py,pz,i):
