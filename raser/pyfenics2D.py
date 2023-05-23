@@ -22,8 +22,8 @@ class FenicsCal2D:
         self.generate_mesh(my_d,fen_dic['mesh'])
         self.V = fenics.FunctionSpace(self.mesh2D, 'P', 1)
         self.u_bc = self.boundary_definition(my_d)
-        #self.electric_field(my_d)
-        self.electric_field_with_carrier(my_d)
+        self.electric_field(my_d)
+        #self.electric_field_with_carrier(my_d)
         self.u_w_bc=[]
         for elenumber in range(self.tol_elenumber):
             if (elenumber<my_d.l_x/self.striplenth):

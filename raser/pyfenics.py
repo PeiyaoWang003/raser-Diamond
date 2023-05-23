@@ -29,8 +29,10 @@ class FenicsCal:
         self.V = fenics.FunctionSpace(self.mesh3D, 'P', 1)
         self.u_bc,self.u_w_bc = self.boundary_definition(my_d)
         self.weighting_potential(my_d)
-        self.electric_field(my_d)
-        #self.electric_field_with_carrier(my_d)
+        if "Carrier" in my_d.det_model:
+            self.electric_field_with_carrier(my_d)
+        else:
+            self.electric_field(my_d)
 
     def generate_mesh(self,my_d,mesh_number):
         """
@@ -276,7 +278,7 @@ class FenicsCal:
         
         kboltz=8.617385e-5 #eV/K
         u_T = kboltz * my_d.temperature/1 # u_T = kT/q
-        n_i = 3.89e-9 #Silicon Carbide
+        n_i = 3.89e3 #Silicon Carbide, um^-3
 
         def carrier(u):
             "Return nonlinear coefficient"
@@ -318,7 +320,7 @@ class FenicsCal:
         @Modify:
             2021/08/31
         """
-        if "lgad3D" in self.det_model:  
+        if "lgad3D" in self.det_model or "Carrier" in self.det_model:  
             f = fenics.Expression(my_d.doping_cpp, degree = 0, tol = self.tol)
         else:
             f = fenics.Constant(my_d.doping)
