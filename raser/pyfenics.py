@@ -310,15 +310,30 @@ class FenicsCal:
         g_expression = fenics.Constant(0)
 
         a_u = fenics.dot(fenics.grad(u), fenics.grad(v_u))*fenics.dx
-        a_p = fenics.dot(fenics.grad(p), fenics.grad(v_p))*u_T*fenics.dx
-        a_n = fenics.dot(fenics.grad(n), fenics.grad(v_n))*(-u_T)*fenics.dx
+        a_p = fenics.dot(fenics.grad(p), fenics.grad(v_p))*fenics.dx
+        a_n = fenics.dot(fenics.grad(n), fenics.grad(v_n))*fenics.dx
 
         L_u = ((Neff+n-p)*1e6*e0/perm0/perm_mat)*v_u*fenics.dx
-        L_p = (fenics.inner(fenics.grad(u),fenics.grad(p))+g_expression)*v_p*fenics.dx
-        L_n = (fenics.inner(fenics.grad(u),fenics.grad(n))+g_expression)*v_n*fenics.dx
+        L_p = (fenics.inner(fenics.grad(u),fenics.grad(p))+g_expression)/u_T*v_p*fenics.dx
+        L_n = (fenics.inner(fenics.grad(u),fenics.grad(n))+g_expression)/(-u_T)*v_n*fenics.dx
 
-        fenics.solve(a_u+a_p+a_n-L_u-L_p-L_n == 0 , funcs, [u_bc, p_bc, n_bc],
-                     solver_parameters = {"newton_solver":{ "linear_solver" : "gmres"}})
+        class InitialConditions(fenics.UserExpression):
+            def __init__(self, u_0, p_0, n_0, **kwargs):
+                self.u_0 = u_0
+                self.p_0 = p_0
+                self.n_0 = n_0
+                super().__init__(**kwargs)
+            def eval(self, values, x):
+                values[0] = self.u_0(x)
+                values[1] = self.p_0(x)
+                values[2] = self.n_0(x)
+            def value_shape(self):
+                return (3,)
+            
+        funcs_init = InitialConditions(u_D, p_D, n_D, degree=0)
+        funcs.interpolate(funcs_init)
+
+        fenics.solve(a_u-L_u+a_p-L_p+a_n-L_n == 0 , funcs, [u_bc, p_bc, n_bc])
         self.u,_,_ = funcs.split()
 
         # Calculate electric field
