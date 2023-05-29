@@ -134,6 +134,9 @@ def save_signal_time_resolution(my_d,output,batch_number,ele_current,my_g4p,star
         create_path(output_path)
         save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
 
+    del ele_current.BB_ele
+    del ele_current.CSA_ele
+
 def save_signal_csv(ele_current,my_g4p,number,start_n,k,output_path="none"):
     """ Save induced current after CSA and BB"""
     charge = "_charge=%.2f_"%(ele_current.qtot[k]*1e15)  #fc
@@ -141,16 +144,13 @@ def save_signal_csv(ele_current,my_g4p,number,start_n,k,output_path="none"):
     output_file = output_path + "/t_" +str(number)+charge+e_dep+"events.csv"
     f1 = open(output_file,"w")
     f1.write("time[ns],CSA Amplitude [mV], BB Amplitude [mV] \n")
-    for i in range(ele_current.BB_ele.GetNbinsX()):
+    for i in range(ele_current.BB_ele[k].GetNbinsX()):
         f1.write("%s,%s,%s \n"%(i*ele_current.time_unit,
-                                ele_current.CSA_ele[i],
-                                ele_current.BB_ele[i]))
+                                ele_current.CSA_ele[k][i],
+                                ele_current.BB_ele[k][i]))
     f1.close()
 
     print("output_file:%s"%output_file)
-
-    del ele_current.BB_ele
-    del ele_current.CSA_ele
 
 def draw_ele_field(my_d,my_f,plane,sensor_model,depth,path):
     """
