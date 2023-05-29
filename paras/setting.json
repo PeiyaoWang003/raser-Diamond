@@ -145,11 +145,11 @@
         "lz" : 50,
         "doping" : "1e6 if (z < 1.0) else (-5 if (z < 49.0) else -1e6)",
         "doping_cpp" : "z < 1.0 - tol ? 1e6 : (z < 49.0 + tol ? -5 : -1e6)",
-        "voltage" : 200,
+        "voltage" : 0,
         "temp" : 300.0,
         "material" : "Si",
 
-        "mesh" : 1000,
+        "mesh" : 10000,
         "xyscale" : 10,
 
         "t_rise" : 0.7,
@@ -205,7 +205,7 @@
         "material" : "Si",
         "avalanche_model" : "vanOverstraeten",
 
-        "mesh" : 1000,
+        "mesh" : 10000,
         "xyscale" : 50,
 
         "t_rise" : 0.7,

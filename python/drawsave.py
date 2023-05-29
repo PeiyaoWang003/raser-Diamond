@@ -93,31 +93,50 @@ def save_current(dset,my_d,my_l,my_current,my_f,key):
 
 def save_signal_time_resolution(my_d,output,batch_number,ele_current,my_g4p,start_n,my_f):
     " Save data to the file"
-    if "plugin" in my_d.det_model:
+    if "strip" in my_d.det_model: # under construction
+        for k in range(ele_current.read_ele_num):
+            output_path = (output + "_d="+str(eval(my_d.doping.replace("z","0.5"))) 
+                       + "_v="+str(my_d.voltage)
+                       + "_tmp="+str(my_d.temperature) 
+                       + "_thick="+str(my_d.l_z) 
+                       + "_electrode_number="+str(k))
+        
+            create_path(output_path)
+            save_signal_csv(ele_current,my_g4p,batch_number,start_n,k,output_path)
+
+    elif "plugin" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.doping) 
                        + "_v="+str(my_d.voltage)+"_g="+str(my_d.e_gap)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius="+str(my_d.e_r) )
+        
+        create_path(output_path)
+        save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
+
     elif "planar" in my_d.det_model:
         output_path = (output + "_d="+str(my_d.doping) 
                        + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z)
                        + "_radius=None" )
+        
+        create_path(output_path)
+        save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
+
     elif "lgad" in my_d.det_model:
-        output_path = (output + "_d="+str(eval(my_d.doping.replace("z",0.5))) 
+        output_path = (output + "_d="+str(eval(my_d.doping.replace("z","0.5"))) 
                        + "_v="+str(my_d.voltage)
                        + "_tmp="+str(my_d.temperature) 
                        + "_thick="+str(my_d.l_z) 
                        + "_radius=None")
-    
-    create_path(output_path)
-    save_signal_csv(ele_current,my_g4p,batch_number,start_n,output_path)
+        
+        create_path(output_path)
+        save_signal_csv(ele_current,my_g4p,batch_number,start_n,0,output_path)
 
-def save_signal_csv(ele_current,my_g4p,number,start_n,output_path="none"):
+def save_signal_csv(ele_current,my_g4p,number,start_n,k,output_path="none"):
     """ Save induced current after CSA and BB"""
-    charge = "_charge=%.2f_"%(ele_current.qtot*1e15)  #fc
+    charge = "_charge=%.2f_"%(ele_current.qtot[k]*1e15)  #fc
     e_dep = "dep=%.5f_"%(my_g4p.edep_devices[number-start_n]) #mv
     output_file = output_path + "/t_" +str(number)+charge+e_dep+"events.csv"
     f1 = open(output_file,"w")
@@ -129,6 +148,7 @@ def save_signal_csv(ele_current,my_g4p,number,start_n,output_path="none"):
     f1.close()
 
     print("output_file:%s"%output_file)
+
     del ele_current.BB_ele
     del ele_current.CSA_ele
 

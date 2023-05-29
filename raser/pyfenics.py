@@ -56,12 +56,12 @@ class FenicsCal:
                 m_sensor = m_sensor - elec_n 
             self.mesh3D = mshr.generate_mesh(m_sensor,mesh_number)
 
-        elif "planar3D" in self.det_model or "planarRing" in self.det_model:
+        elif "planarRing" in self.det_model:
             m_sensor = mshr.Box(fenics.Point(0, 0, 0), 
                                 fenics.Point(self.fl_x, self.fl_y, self.fl_z))
             self.mesh3D = mshr.generate_mesh(m_sensor,mesh_number)
 
-        elif "lgad3D" in self.det_model: # under construction
+        elif "planar3D" in self.det_model or "lgad3D" in self.det_model: # under construction
             self.mesh3D = fenics.BoxMesh(fenics.Point(0, 0, 0),
                                          fenics.Point(self.fl_x, self.fl_y, self.fl_z), 
                                          5, 5, 1000)
@@ -782,10 +782,13 @@ class FenicsCal1D:
         Neff_0 = eval(my_d.doping.replace("z","0"))
         Neff_end = eval(my_d.doping.replace("z","self.fl_z"))
 
+        u_0 = u_T * 0.5*fenics.ln((Neff_0 + (Neff_0**2 + 4*n_i**2)**0.5)/(2*n_i))
+        u_end = u_T * 0.5*fenics.ln((Neff_end + (Neff_end**2 + 4*n_i**2)**0.5)/(2*n_i))
+
         u_D_init = fenics.Expression('x[0]<tol ? p_1:p_2',
                                 degree = 2, tol = 1E-14,
-                                p_1 = 0 + u_T * 0.5*fenics.ln((Neff_0 + (Neff_0**2 + 4*n_i**2)**0.5)/(2*n_i)),
-                                p_2 = 0 + u_T * 0.5*fenics.ln((Neff_end + (Neff_end**2 + 4*n_i**2)**0.5)/(2*n_i)))
+                                p_1 = 0 + u_0,
+                                p_2 = 0 + u_end)
         
         def boundary(x, on_boundary):
             return abs(x[0])<1e-14 or abs(x[0]-self.fl_z)<1e-14
@@ -796,13 +799,9 @@ class FenicsCal1D:
         v_u_init = fenics.TestFunction(self.V)
 
         a_u_init = fenics.dot(fenics.grad(u_init), fenics.grad(v_u_init))*fenics.dx
-        L_u_init = (((Neff+n_i*fenics.exp(u_init/u_T))-n_i*fenics.exp(-u_init/u_T))*1e6*e0/perm0/perm_mat)*v_u_init*fenics.dx
+        L_u_init = ((Neff-n_i*fenics.exp(u_init/u_T)+n_i*fenics.exp(-u_init/u_T))*1e6*e0/perm0/perm_mat)*v_u_init*fenics.dx
 
         fenics.solve(a_u_init-L_u_init == 0 , u_init, u_bc_init)
-
-        for i in range(51):
-            print(u_init(i))
-
         return u_init
 
     def electric_field(self,my_d):    
@@ -883,7 +882,7 @@ class FenicsCal1D:
         a_p = fenics.dot(fenics.grad(p), fenics.grad(v_p))*fenics.dx
         a_n = fenics.dot(fenics.grad(n), fenics.grad(v_n))*fenics.dx
 
-        L_u = ((Neff+n-p)*1e6*e0/perm0/perm_mat)*v_u*fenics.dx
+        L_u = ((Neff-n+p)*1e6*e0/perm0/perm_mat)*v_u*fenics.dx
         L_p = (fenics.inner(fenics.grad(u),fenics.grad(p))+g_expression)/u_T*v_p*fenics.dx
         L_n = (fenics.inner(fenics.grad(u),fenics.grad(n))+g_expression)/(-u_T)*v_n*fenics.dx
 
