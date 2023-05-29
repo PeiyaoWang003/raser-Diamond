@@ -463,7 +463,7 @@ class FenicsCal:
 
 class FenicsCal2D:
     def __init__(self,my_d,fen_dic):
-        self.det_model = fen_dic['det_model']
+        self.det_model = my_d.det_model
         self.fl_x=my_d.l_x
         self.fl_y=my_d.l_y
         self.fl_z=my_d.l_z
@@ -765,6 +765,46 @@ class FenicsCal1D:
         self.u_w = fenics.Function(self.V)
         fenics.solve(a_w == L_w, self.u_w, self.u_w_bc)
 
+    def electric_field_initial_problem(self,my_d):  
+        if my_d.material == 'Si':
+            perm_mat = 11.7  
+        elif my_d.material == 'SiC':
+            perm_mat = 9.76  
+        else:
+            raise NameError(my_d.material)
+             
+        e0 = 1.60217733e-19
+        perm0 = 8.854187817e-12   #F/m  
+        kboltz = 8.617385e-5 #eV/K
+        u_T = kboltz * my_d.temperature/1 # u_T = kT/q
+        n_i = 6.95e-3 #Silicon, um^-3
+        Neff = self.doping_expression(my_d)
+        Neff_0 = eval(my_d.doping.replace("z","0"))
+        Neff_end = eval(my_d.doping.replace("z","self.fl_z"))
+
+        u_D_init = fenics.Expression('x[0]<tol ? p_1:p_2',
+                                degree = 2, tol = 1E-14,
+                                p_1 = 0 + u_T * 0.5*fenics.ln((Neff_0 + (Neff_0**2 + 4*n_i**2)**0.5)/(2*n_i)),
+                                p_2 = 0 + u_T * 0.5*fenics.ln((Neff_end + (Neff_end**2 + 4*n_i**2)**0.5)/(2*n_i)))
+        
+        def boundary(x, on_boundary):
+            return abs(x[0])<1e-14 or abs(x[0]-self.fl_z)<1e-14
+        
+        u_bc_init = fenics.DirichletBC(self.V, u_D_init, boundary)
+
+        u_init = fenics.Function(self.V)
+        v_u_init = fenics.TestFunction(self.V)
+
+        a_u_init = fenics.dot(fenics.grad(u_init), fenics.grad(v_u_init))*fenics.dx
+        L_u_init = (((Neff+n_i*fenics.exp(u_init/u_T))-n_i*fenics.exp(-u_init/u_T))*1e6*e0/perm0/perm_mat)*v_u_init*fenics.dx
+
+        fenics.solve(a_u_init-L_u_init == 0 , u_init, u_bc_init)
+
+        for i in range(51):
+            print(u_init(i))
+
+        return u_init
+
     def electric_field(self,my_d):    
         """
         @description:
@@ -792,7 +832,8 @@ class FenicsCal1D:
 
         u_D = fenics.Expression('x[0]<tol ? p_1:p_2',
                                 degree = 2, tol = 1E-14,
-                                p_1 = my_d.voltage, p_2 = 0)
+                                p_1 = my_d.voltage + u_T * 0.5*fenics.ln((Neff_0 + (Neff_0**2 + 4*n_i**2)**0.5)/(2*n_i)),
+                                p_2 = 0 + u_T * 0.5*fenics.ln((Neff_end + (Neff_end**2 + 4*n_i**2)**0.5)/(2*n_i)))
 
         p_D = fenics.Expression('x[0]<tol ? p_1:p_2',
                                 degree = 2, tol = 1E-14,
@@ -830,7 +871,10 @@ class FenicsCal1D:
                 values[2] = self.n_0(x)
             def value_shape(self):
                 return (3,)
-        funcs_init = InitialConditions(u_D, p_D, n_D, degree=0)
+            
+        u_init = self.electric_field_initial_problem(my_d)
+        
+        funcs_init = InitialConditions(u_init, abs(Neff), abs(Neff), degree=0)
         funcs.interpolate(funcs_init)
         u, p, n = fenics.split(funcs) # Electric Potential, Electron Density, Hole Density
         v_u, v_p, v_n = fenics.TestFunctions(V)
@@ -842,6 +886,9 @@ class FenicsCal1D:
         L_u = ((Neff+n-p)*1e6*e0/perm0/perm_mat)*v_u*fenics.dx
         L_p = (fenics.inner(fenics.grad(u),fenics.grad(p))+g_expression)/u_T*v_p*fenics.dx
         L_n = (fenics.inner(fenics.grad(u),fenics.grad(n))+g_expression)/(-u_T)*v_n*fenics.dx
+
+        solver = fenics.NewtonSolver()
+        solver.parameters["relaxation_parameter"] = 0.5
 
         fenics.solve(a_u-L_u+a_p-L_p+a_n-L_n == 0 , funcs, [u_bc, p_bc, n_bc])
         self.u,_,_ = funcs.split()
