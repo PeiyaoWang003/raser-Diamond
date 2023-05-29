@@ -159,7 +159,7 @@ def batch_loop(dset, my_d, my_f, my_g4p):
             effective_number += 1
             my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
             ele_current = raser.Amplifier(my_current, dset.amplifier)
-            drawsave.save_signal_TTree_signal_time_resolution(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
+            drawsave.save_signal_time_resolution(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
             del ele_current
     detection_efficiency =  effective_number/(end_n-start_n) 
     print("detection_efficiency=%s"%detection_efficiency)
