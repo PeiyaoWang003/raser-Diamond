@@ -68,9 +68,6 @@ def main():
         drawsave.get1_beam_number(my_g4p,ele_current)
         drawsave.cce(my_d,my_f,my_current)
         return
-
-
-
     
     if "reactor" in args:
         my_f = raser.FenicsCal(my_d,dset.fenics)
@@ -88,8 +85,11 @@ def main():
         drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         drawsave.cce(my_d,my_f,my_current)
         return
-    
-    my_f = raser.FenicsCal(my_d,dset.fenics)
+    print(det_dic['voltage'])
+    e_field_filepath = './output/devsim/1D_NJU_PIN/'\
+                        + str(-int(det_dic['voltage'])) + '.0V_x_E.csv'
+    #my_f = raser.FenicsCal(my_d,dset.fenics)
+    my_f = raser.DevsimCal(e_field_filepath, my_d, dset.fenics)
     my_g4p = raser.Particles(my_d, my_f, dset)
     if "scan=True" not in args:
         my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
