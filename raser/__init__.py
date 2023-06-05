@@ -11,3 +11,4 @@ from raser.model import Material
 from raser.source import TCTTracks
 from raser.g4SiITk import SiITk
 from raser.g4simulation import Particles
+from raser.devsim import DevsimCal
