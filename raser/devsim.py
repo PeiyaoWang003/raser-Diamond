@@ -1,39 +1,61 @@
-# -*- encoding: utf-8 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+@File    :   devsim.py
+@Time    :   2023/06/04
+@Author  :   Henry Stone 
+@Version :   1.0
+'''
+
 import os
+import csv
+from scipy.interpolate import interp1d
+import math
 
 
-class Devsimcal:
-    def __init__(self, my_d, dev_dic):
+class DevsimCal:
+    def __init__(self, filepath, my_d, dev_dic):
+        self.elefield = []
+        self.protential = []
+        self.gradu = []
+        self.lz = []
+        self.l_z = my_d.l_z
         self.det_model = dev_dic['det_model']
-        self.dl_x = my_d.l_x/dev_dic['xyscale']
-        self.dl_y = my_d.l_y/dev_dic['xyscale']
-        self.dl_z = my_d.l_z
-        self.electrode_total_number = dev_dic['electrode_total_number']
+        self.fl_x=my_d.l_x/dev_dic['xyscale']  
+        self.fl_y=my_d.l_y/dev_dic['xyscale']
+        self.readfile(filepath)
+        self.tol_elenumber=dev_dic["tol_elenumber"]
 
-        self.tol = 1e-14
-        self.bias_voltage = my_d.voltage
-
-        filepath = './output/devsim/1D_NJU_PIN/500.0V_x_E.csv'
-        self.depth, self.elefield, self.protential = self.readfield(filepath, 
-                                                                    self.dl_z)
-
-
-    def readfield(filepath, zmax):
-        depth, elefield, protential = [], []
+    def readfile(self, filepath):
+        i = 0
         with open(filepath, 'r') as f:
             for line in f.readlines():
                 try:
                     fargs = list(map(float, 
                                      line.strip('\n').strip().split(',')))
-                    depth.append(fargs[0])
-                    elefield.append(fargs[1])
-                    protential.append(1 - fargs[0]/zmax)
-                    
+                    self.lz.append(fargs[0]*1e4) #cm->um
+                    self.elefield.append(fargs[1]/1e4) #V/cm -> V/um         
                 except Exception as e:
-                    print(filepath + ' has been read.')
                     pass
-        
-        return depth, elefield
+        self.gradu.append(0)
+        grad = 0
+        for i in range(len(self.elefield)-1):
+            grad = grad + (self.elefield[i]+self.elefield[i+1]) * \
+                            (self.lz[i+1]-self.lz[i]) / 2
+            self.gradu.append(grad)
 
-
+    def get_e_field(self, x, y, depth):
+        f_ef = interp1d(self.lz, self.elefield, 
+                        kind='linear', fill_value="extrapolate")
+        #print(depth)        
+        #print(f_ef(depth))
+        return 0, 0, f_ef(depth) #x, y方向为0
     
+    def get_w_p(self, x, y, depth, i):
+        f_p = 1 - (1/self.l_z) * depth
+        return f_p
+    
+    def get_potential(self, x, y, depth):
+        f_u = interp1d(self.lz, self.gradu, 
+                       kind = 'linear', fill_value="extrapolate")
+        return f_u(depth)
