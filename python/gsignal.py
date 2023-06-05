@@ -68,7 +68,15 @@ def main():
         drawsave.get1_beam_number(my_g4p,ele_current)
         drawsave.cce(my_d,my_f,my_current)
         return
-    
+
+    if "Carrier" in args:
+        my_f = raser.FenicsCal1D(my_d,dset.fenics)
+        my_g4p = raser.Particles(my_d, my_f, dset)
+        my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        ele_current = raser.Amplifier(my_current, dset.amplifier)
+        drawsave.get_beam_number(my_g4p,ele_current)
+        return  
+
     if "reactor" in args:
         my_f = raser.FenicsCal(my_d,dset.fenics)
         my_g4p = raser.Particles(my_d, my_f, dset)
@@ -154,7 +162,7 @@ def batch_loop(dset, my_d, my_f, my_g4p):
             effective_number += 1
             my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
             ele_current = raser.Amplifier(my_current, dset.amplifier)
-            drawsave.save_signal_TTree_signal_time_resolution(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
+            drawsave.save_signal_time_resolution(my_d,dset.output,event,ele_current,my_g4p,start_n,my_f)
             del ele_current
     detection_efficiency =  effective_number/(end_n-start_n) 
     print("detection_efficiency=%s"%detection_efficiency)
