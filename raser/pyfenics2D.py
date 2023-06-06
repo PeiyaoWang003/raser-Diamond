@@ -22,14 +22,14 @@ class FenicsCal2D:
         self.generate_mesh(my_d,fen_dic['mesh'])
         self.V = fenics.FunctionSpace(self.mesh2D, 'P', 1)
         self.u_bc = self.boundary_definition(my_d)
-        #self.electric_field(my_d)
-        self.electric_field_with_carrier(my_d)
+        self.electric_field(my_d)
+        #self.electric_field_with_carrier(my_d)
         self.u_w_bc=[]
         for elenumber in range(self.tol_elenumber):
             if (elenumber<my_d.l_x/self.striplenth):
-                self.u_w_bc.append(self.boundary_definition_w_p(my_d,elenumber))
+                self.u_w_bc.append(self.boundary_definition_strip_w_p(my_d,1.0,0.0,elenumber))
             else:
-                self.u_w_bc.append(self.boundary_definition_p_w_p(my_d))
+                self.u_w_bc.append(self.boundary_definition_planar(my_d,1.0,0.0))
         self.weighting_potential(my_d)
         
 
@@ -51,33 +51,8 @@ class FenicsCal2D:
                                 fenics.Point(self.fl_x, self.fl_z))
             self.mesh2D = mshr.generate_mesh(m_sensor,mesh_number)
 
-
-    def boundary_definition(self,my_d):
-        if "planar" in self.det_model:
-            u_bc_l = self.boundary_definition_planar(my_d,my_d.voltage,0.0)
-            pass
-        else:
-            raise NameError(self.det_model)
-
-        return u_bc_l
-
-    def boundary_definition_p_w_p(self,my_d):
-        if "planar" in self.det_model:
-            u_bc_l = self.boundary_definition_planar(my_d,1.0,0.0)
-            pass
-        else:
-            raise NameError(self.det_model)
-
-        return u_bc_l
-
-
     def boundary_definition_planar(self,my_d,p_ele,n_ele):
-        """
-        @description:
-            Get boundary definition of planar detector with Possion and Laplace equations
-        @Modify:
-            2021/08/31
-        """
+       
         u_D = fenics.Expression('x[1]<tol ? p_1:p_2',
                                 degree = 2, tol = 1E-14,
                                 p_1 = p_ele, p_2 = n_ele)
@@ -86,18 +61,8 @@ class FenicsCal2D:
             return abs(x[1])<self.tol or abs(x[1]-self.fl_z)<self.tol
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
-    
-    def boundary_definition_w_p(self,my_d,elenumber):
-        if "planar" in self.det_model:
-            u_w_bc_l = self.boundary_definition_strip(my_d,1.0,0.0,elenumber)
-    
-            pass
-        else:
-            raise NameError(self.det_model)
 
-        return  u_w_bc_l
-
-    def boundary_definition_strip(self,my_d,p_ele,n_ele,elenumber):
+    def boundary_definition_strip_w_p(self,my_d,p_ele,n_ele,elenumber):
         u_D = fenics.Expression('(x[1]<tol && x[0]>xstripl && x[0]<xstripr) ? p_1:p_2',
                                 degree = 2, tol = 1E-14,xstripl=self.striplenth*elenumber,
                                 xstripr=self.striplenth*elenumber+self.elelenth,z=self.fl_z,
@@ -108,6 +73,17 @@ class FenicsCal2D:
                         x[0]>self.striplenth*elenumber+self.tol and
                       x[0]<self.striplenth*elenumber+self.elelenth+self.tol)
                     or (abs(x[1]-self.fl_z)<self.tol))
+        bc_l = fenics.DirichletBC(self.V, u_D, boundary)
+        return bc_l
+    
+    def boundary_definition_strip_E(self,my_d,p_ele,n_ele):
+      
+        u_D = fenics.Expression('x[1]<tol ? p_1:p_2',
+                                degree = 2, tol = 1E-14,
+                                p_1 = p_ele, p_2 = n_ele)
+
+        def boundary(x, on_boundary):
+            return abs(x[1])<self.tol or abs(x[1]-self.fl_z)<self.tol
         bc_l = fenics.DirichletBC(self.V, u_D, boundary)
         return bc_l
 

@@ -19,7 +19,10 @@ if "parameter_alter=True" in args:
 else:
     key = ""
 my_d = raser.R3dDetector(dset)
-my_f = raser.FenicsCal(my_d, dset.fenics)
+if"det_name=Si_Strip" in args:
+    my_f = raser.FenicsCal2D(my_d, dset.fenics)
+else:
+    my_f = raser.FenicsCal(my_d, dset.fenics)
 my_l = raser.TCTTracks(my_d, dset.laser)
 
 my_current = raser.CalCurrentLaser(my_d, my_f, my_l)

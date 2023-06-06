@@ -466,7 +466,7 @@ def draw_current(my_d, my_current, ele_current, tol_elenumber, model, path, tag=
     legend.AddEntry(my_current.gain_negative_cu[tol_elenumber], "gain electron", "l")
     legend.AddEntry(my_current.gain_positive_cu[tol_elenumber], "gain hole", "l")
     legend.AddEntry(my_current.sum_cu[tol_elenumber], "e+h", "l")
-    #legend.AddEntry(ele_current, "electronics", "l")
+    legend.AddEntry(ele_current[tol_elenumber], "electronics", "l")
     legend.SetBorderSize(0)
     #legend.SetTextFont(43)
     #legend.SetTextSize(42)
@@ -766,7 +766,6 @@ def cce(my_d,my_f,my_current):
             sum_charge=sum_charge+my_current.sum_cu[i].GetBinContent(j)*my_current.t_bin
         charge.append(sum_charge)
     n=int(len(charge))
-
     c1=ROOT.TCanvas("c1","canvas1",1000,1000)
     cce=ROOT.TGraph(n,x,charge)
     cce.SetMarkerStyle(3)
@@ -777,7 +776,30 @@ def cce(my_d,my_f,my_current):
     c1.SaveAs(path+"_cce.pdf")
     c1.SaveAs(path+"_cce.root")
     
-def set_input(dset,my_current,my_l,my_d,key):
+
+def save_current(dset,my_d,my_current,my_f,key):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
+        path = os.path.join('output', 'pintct', dset.det_name, )
+    elif "lgad3D" in my_d.det_model:
+        path = os.path.join('output', 'lgadtct', dset.det_name, )
+    create_path(path) 
+    L = eval("round(my_l.{})".format(key))
+    #L is defined by different keys
+    time = array('d', [999.])
+    current = array('d', [999.])
+    fout = ROOT.TFile(os.path.join(path, "sim-TCT-current") + str(L) + ".root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("time", time, "time/D")
+    for i in range(my_f.tol_elenumber):
+        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
+        for j in range(my_current.n_bin):
+            current[0]=my_current.sum_cu[i].GetBinContent(j)
+            time[0]=j*my_current.t_bin
+            t_out.Fill()
+        t_out.Write()
+    fout.Close()
+
+def set_input(dset,my_current,my_d,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join('output', 'pintct', dset.det_name, )
     elif "lgad3D" in my_d.det_model:
@@ -848,5 +870,30 @@ def set_input(dset,my_current,my_l,my_d,key):
     fout.Close()
     return input_c
 
-
-        
+def save_current_geant4(my_d,dset,event,my_current,my_g4p,start_n,my_f):
+    if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
+        path = os.path.join('output', 'pin3D', dset.det_name, )
+    elif "lgad3D" in my_d.det_model:
+        path = os.path.join('output', 'lgad3D', dset.det_name, )
+    create_path(path) 
+    L = event
+    #L is defined by different keys
+    e_dep = array('d', [999.])
+    time = array('d', [999.])
+    current = array('d', [999.])
+    fout = ROOT.TFile(os.path.join(path, "beam-monitor-current") + str(L) + ".root", "RECREATE")
+    t_out = ROOT.TTree("tree", "signal")
+    t_out.Branch("time", time, "time/D")
+    
+    for i in range(my_f.tol_elenumber):
+        t_out.Branch("current"+str(i), current, "current"+str(i)+"/D")
+        for j in range(my_current.n_bin):
+            current[0]=my_current.sum_cu[i].GetBinContent(j)
+            time[0]=j*my_current.t_bin
+            t_out.Fill()
+        t_out.Write()
+    t_out.Branch("edep", e_dep, "edep/D")
+    e_dep[0] = my_g4p.edep_devices[event-start_n]
+    t_out.Fill()
+    t_out.Write()
+    fout.Close()
