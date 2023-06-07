@@ -34,7 +34,7 @@ def InitialSolution(device, region, circuit_contacts=None):
             CreateSiliconPotentialOnlyContact(device, region, i)
 
 
-def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
+def DriftDiffusionInitialSolution(device, region,constant, circuit_contacts=None):
     ####
     #### drift diffusion solution variables
     ####
@@ -53,7 +53,8 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ### Set up equations
     ###
     if device == "1D_ITK_MD8":
-        CreateSiDriftDiffusion(device, region)
+        CreateSiDriftDiffusion(device, region,constant)
+        print("DriftDiffusionInitialSolution is right")
     else:
         CreateDriftDiffusion(device, region)
     for i in devsim.get_contact_list(device=device):

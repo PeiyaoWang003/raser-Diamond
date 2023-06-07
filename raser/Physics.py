@@ -385,8 +385,8 @@ def CreateNetGeneration(device, region):
         Gn = "-q * (USRH+R_z+R_h6-1e12)"
         Gp = "+q * (USRH+R_z+R_h6-1e12)"
     if devsim.get_material(device=device, region=region) == "Silicon":
-        Gn = "-q * (USRH)"
-        Gp = "+q * (USRH)"
+        Gn = "-q * (USRH-1e12)"
+        Gp = "+q * (USRH-1e12)"
     else:
         Gn = "-q * (USRH)"
         Gp = "+q * (USRH)"
@@ -398,6 +398,41 @@ def CreateNetGeneration(device, region):
         CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
         
+def CreateNetGeneration_test(device, region,constant):
+
+    #Gn = "-q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
+    #Gp = "+q * ( USRH + R_z + R_h6 + R_Ti + R_EH5 )"
+
+    #Gn = "-q * (USRH - 1e12)"
+    #Gp = "+q * (USRH - 1e12)"
+
+    #Gn = "-q * (USRH - 1e18*x*x)"
+    #Gp = "+q * (USRH - 1e18*x*x)"
+
+    if devsim.get_material(device=device, region=region) == "SiliconCarbide":
+        Gn = "-q * (USRH+R_z+R_h6-1e12)"
+        Gp = "+q * (USRH+R_z+R_h6-1e12)"
+        print("in SiC")
+    if devsim.get_material(device=device, region=region) == "Silicon":
+        Gn = "-q * (USRH{constant})".format(constant=constant)
+        Gp = "+q * (USRH{constant})".format(constant=constant)
+        print("in get material")
+    if device== "1D_ITK_MD8":
+        Gn = "-q * (USRH{constant})".format(constant=constant)
+        Gp = "+q * (USRH{constant})".format(constant=constant)
+        print("in device=md8")
+    else:
+        Gn = "-q * (USRH)"
+        Gp = "+q * (USRH)"
+        print("in else")
+
+    CreateNodeModel(device, region, "ElectronGeneration", Gn)
+    CreateNodeModel(device, region, "HoleGeneration", Gp)
+
+    for i in ("Electrons", "Holes"):
+        CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
+        CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
+  
 
 def CreateIrradiatedCharge(device, region, Neutron_eq=1e16):
     '''
@@ -473,9 +508,9 @@ def CreateSiIrradiatedCharge(device, region):
     sigma_h_donor=3.23e-14
     eta_donor=0.9
     
-    E_acc1=0.42
-    E_acc2=0.46
-    E_donor=0.36
+    E_acc1=0.42*1.6e-19
+    E_acc2=0.46*1.6e-19
+    E_donor=0.36*1.6e-19
     
     N_t_acc1 = flux*eta_acc1
     N_t_acc2 = flux*eta_acc2
@@ -688,11 +723,12 @@ def CreateDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
     
-def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
+def CreateSiDriftDiffusion(device, region,constant, mu_n="mu_n", mu_p="mu_p"):
     CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
-    CreateNetGeneration(device, region)
+    #CreateNetGeneration(device, region)
+    CreateNetGeneration_test(device, region,constant)
     #CreateMobility(device, region)
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)

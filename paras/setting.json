@@ -231,11 +231,10 @@
         "lx" : 8000,
         "ly" : 8000,
         "lz" : 305,
-        "doping" : 2.6,  
+        "doping" : 4.7,  
         "voltage" : 200,
         "temp" : 300.0,
         "material" : "Si",
-
         "mesh" : 32,
         "xyscale" : 10,
 
