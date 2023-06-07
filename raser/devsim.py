@@ -12,23 +12,16 @@ import csv
 from scipy.interpolate import interp1d
 import math
 
-
 class DevsimCal:
     def __init__(self, filepath, my_d, dev_dic):
         self.voltage = my_d.voltage
         self.protential = []
         self.l_z = my_d.l_z
         self.read_ele_num = dev_dic['read_ele_num']        
-        if False:
-            self.lz = lz
-            self.elefield = elefield        
-            self.gradu = gradu
-        else:
-            self.lz = []
-            self.elefield = []
-            self.gradu = []
-            self.readfile(filepath)
-
+        self.lz = []
+        self.elefield = []
+        self.gradu = []
+        self.readfile(filepath)
 
     def readfile(self, filepath):
         i = 0
