@@ -798,7 +798,7 @@ def cce(my_d,my_f,my_current):
     
 
 
-def set_input(dset,my_current,my_d,key):
+def set_input(dset,my_current,my_l,my_d,key):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = os.path.join('output', 'pintct', dset.det_name, )
     elif "lgad3D" in my_d.det_model:
