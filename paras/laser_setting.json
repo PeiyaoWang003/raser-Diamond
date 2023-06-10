@@ -9,7 +9,7 @@
     
         "wavelength" : 355,
         "tau" : 10e-9,
-        "pulse_energy" : 1.23e11,
+        "pulse_energy" : 1.23e-11,
         "widthBeamWaist" : 20,
         "central_time" : 20e-9,
     
