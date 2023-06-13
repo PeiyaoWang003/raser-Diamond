@@ -11,7 +11,8 @@
         "voltage" : -500,
         "temp" : 300.0,
         "material" : "SiC",
-        "trapping_time":7.89e-9,
+        //"trapping_time":7.89e-9,//
+        "Irradiation" ： "3.9e13"
 
         "mesh" : 32,
         "xyscale" : 10,
