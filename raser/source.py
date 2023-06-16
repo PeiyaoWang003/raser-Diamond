@@ -112,7 +112,6 @@ class TCTTracks():
                 continue
             else:
                 k = int(pairs//group_unit + 1) # divide the carrier pairs into k groups
-                print(position, pairs, k)
                 for i in range(k):
                     temp_position.append(position)
                     temp_pairs.append(pairs/k)
