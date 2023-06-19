@@ -145,9 +145,11 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
         self.fMessenger = B2aDetectorMessenger(self)
         self.fScoringVolume = None
 
-        self.fNbOfChambers = 3
+        self.fNbOfChambers = 50
         self.fLogicChamber = []
         self.fCheckOverlaps = True
+        self.fNbOfSi = 25
+        self.fLogicSi = []
 
     def DefineMaterials(self):
         nistManager = G4NistManager.Instance()
@@ -157,6 +159,7 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
 
         # Xenon gas defined using NIST Manager
         self.fChamberMaterial = nistManager.FindOrBuildMaterial("G4_Si")
+        self.fSiMaterial = nistManager.FindOrBuildMaterial("G4_Si")
 
         # Print materials
         print(G4Material.GetMaterialTable())
@@ -166,10 +169,10 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
 
         # Sizes of the principal geometrical components (solids)
 
-        chamberSpacing = 100*um  # from chamber center to center!
+        chamberSpacing = 60*um  # from chamber center to center!
 
-        chamberWidth = 100*um  # width of the chambers
-        trackerLength = (self.fNbOfChambers+1)*chamberSpacing
+        chamberWidth = 60*um  # width of the chambers
+        trackerLength = 3*chamberSpacing
 
         worldLength = 1.2*trackerLength
         trackerSize = 0.5*trackerLength   # Half length of the Tracker
@@ -228,7 +231,14 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
         print("The chambers are", chamberWidth/um, "um of", self.fChamberMaterial.GetName())
         print("The distance between chamber is", chamberSpacing/um,  "um")
 
-        firstPosition = -trackerSize + chamberSpacing
+        SiX = 30*um
+        SiY = 30*um
+        SiZ = 2.5*um
+        SiXSpacing = 2 * SiX / 5
+        SiYSpacing = 2 * SiY / 5
+        firstZPosition = -trackerSize + chamberSpacing
+        firstXPosition = -(SiX - SiXSpacing/2) 
+        firstYPosition = -(SiY - SiYSpacing/2)
         firstLength = trackerLength/10
         lastLength = trackerLength
 
@@ -240,23 +250,305 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
                             "InvalidSetup", G4ExceptionSeverity.FatalException, "Width>Spacing")
                 
         for copyNo in range(self.fNbOfChambers):
-            Zposition = firstPosition + copyNo * chamberSpacing
+            if copyNo > -1 and copyNo < 5:
+             Zposition = firstZPosition 
+             Xposition = firstXPosition + copyNo * SiXSpacing
+             Yposition = firstYPosition
 
-            chamberS = G4Box("Chamber_solid", 60*um, 100*um, 5*um)
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
 
-            self.fLogicChamber += [G4LogicalVolume(chamberS,
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
                                                    self.fChamberMaterial, "Chamber_LV", None, None, None)]
 
-            self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
 
-            G4PVPlacement(None,                            # no rotation
-                          G4ThreeVector(0, 0, Zposition),  # at (x,y,z)
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
                           self.fLogicChamber[copyNo],      # its logical volume
                           "Chamber_PV",                    # its name
                           trackerLV,                       # its mother  volume
                           False,                           # no boolean operations
                           copyNo,                          # copy number
-                          self.fCheckOverlaps)             # checking overlaps
+                          self.fCheckOverlaps)             # checking overlaps   
+            if copyNo > 4 and copyNo < 10:
+             Zposition = firstZPosition 
+             Xposition = firstXPosition + (copyNo - 5)* SiXSpacing
+             Yposition = firstYPosition + SiYSpacing
+
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
+
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps    
+            if copyNo > 9 and copyNo < 15:
+             Zposition = firstZPosition 
+             Xposition = firstXPosition + (copyNo - 10)* SiXSpacing
+             Yposition = firstYPosition + 2 * SiYSpacing
+
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
+
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps      
+            if copyNo > 14 and copyNo < 20:
+             Zposition = firstZPosition 
+             Xposition = firstXPosition + (copyNo - 15)* SiXSpacing
+             Yposition = firstYPosition + 3 * SiYSpacing
+
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
+
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps       
+            if copyNo > 19 and copyNo < 25:
+             Zposition = firstZPosition 
+             Xposition = firstXPosition + (copyNo - 20)* SiXSpacing
+             Yposition = firstYPosition + 4 * SiYSpacing
+
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
+
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps   
+            if copyNo > 24 and copyNo < 30:
+             Zposition = firstZPosition +  chamberSpacing
+             Xposition = firstXPosition + (copyNo - 25)* SiXSpacing
+             Yposition = firstYPosition 
+
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
+
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps   
+            if copyNo > 29 and copyNo < 35:
+             Zposition = firstZPosition +  chamberSpacing
+             Xposition = firstXPosition + (copyNo - 30)* SiXSpacing
+             Yposition = firstYPosition + SiYSpacing
+
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
+
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+            if copyNo > 34 and copyNo < 40:
+             Zposition = firstZPosition +  chamberSpacing
+             Xposition = firstXPosition + (copyNo - 35)* SiXSpacing
+             Yposition = firstYPosition + 2 * SiYSpacing
+
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
+
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps       
+            if copyNo > 39 and copyNo < 45:
+             Zposition = firstZPosition +  chamberSpacing
+             Xposition = firstXPosition + (copyNo - 40)* SiXSpacing
+             Yposition = firstYPosition + 3 * SiYSpacing
+
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
+
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps  
+            if copyNo > 44 and copyNo < 50:
+             Zposition = firstZPosition +  chamberSpacing
+             Xposition = firstXPosition + (copyNo - 45)* SiXSpacing
+             Yposition = firstYPosition + 4 * SiYSpacing
+
+             chamberS = G4Box("Chamber_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+             self.fLogicChamber += [G4LogicalVolume(chamberS,
+                                                   self.fChamberMaterial, "Chamber_LV", None, None, None)]
+
+             self.fLogicChamber[copyNo].SetVisAttributes(chamberVisAtt)
+
+             G4PVPlacement(None,                            # no rotation
+                          G4ThreeVector(Xposition, Yposition,Zposition),  # at (x,y,z)
+                          self.fLogicChamber[copyNo],      # its logical volume
+                          "Chamber_PV",                    # its name
+                          trackerLV,                       # its mother  volume
+                          False,                           # no boolean operations
+                          copyNo,                          # copy number
+                          self.fCheckOverlaps)             # checking overlaps                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+
+        for SiNo in range(self.fNbOfSi):
+            SiZposition = firstZPosition +  chamberSpacing / 2
+            if SiNo > -1 and SiNo < 5:
+                SiXposition = firstXPosition + SiNo * SiXSpacing
+                SiYposition = firstYPosition
+
+                SiS = G4Box("Si_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+                self.fLogicSi += [G4LogicalVolume(SiS,
+                                            self.fSiMaterial , "Si_LV", None, None, None)]
+
+                self.fLogicSi[SiNo].SetVisAttributes(chamberVisAtt)
+
+                G4PVPlacement(None,                            # no rotation
+                    G4ThreeVector(SiXposition, SiYposition,SiZposition),  # at (x,y,z)
+                    self.fLogicSi[SiNo],      # its logical volume
+                    "Si_PV",                    # its name
+                    trackerLV,                       # its mother  volume
+                    False,                           # no boolean operations
+                    SiNo,                          # copy number
+                    self.fCheckOverlaps)             # checking overlaps\
+            if SiNo > 4 and SiNo < 10:
+                SiXposition = firstXPosition + (SiNo - 5) * SiXSpacing
+                SiYposition = firstYPosition + SiYSpacing
+                    
+                SiS = G4Box("Si_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+                self.fLogicSi += [G4LogicalVolume(SiS,
+                                            self.fSiMaterial , "Si_LV", None, None, None)]
+
+                self.fLogicSi[SiNo].SetVisAttributes(chamberVisAtt)
+
+                G4PVPlacement(None,                            # no rotation
+                    G4ThreeVector(SiXposition, SiYposition,SiZposition ),  # at (x,y,z)
+                    self.fLogicSi[SiNo],      # its logical volume
+                    "Si_PV",                    # its name
+                    trackerLV,                       # its mother  volume
+                    False,                           # no boolean operations
+                    SiNo,                          # copy number
+                    self.fCheckOverlaps)             # checking overlaps\
+            if SiNo > 9 and SiNo < 15:
+                SiXposition = firstXPosition + (SiNo - 10) * SiXSpacing
+                SiYposition = firstYPosition + 2 * SiYSpacing
+                    
+                SiS = G4Box("Si_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+                self.fLogicSi += [G4LogicalVolume(SiS,
+                                            self.fSiMaterial , "Si_LV", None, None, None)]
+
+                self.fLogicSi[SiNo].SetVisAttributes(chamberVisAtt)
+
+                G4PVPlacement(None,                            # no rotation
+                    G4ThreeVector(SiXposition, SiYposition,SiZposition ),  # at (x,y,z)
+                    self.fLogicSi[SiNo],      # its logical volume
+                    "Si_PV",                    # its name
+                    trackerLV,                       # its mother  volume
+                    False,                           # no boolean operations
+                    SiNo,                          # copy number
+                    self.fCheckOverlaps)             # checking overlaps\
+            if SiNo > 14 and SiNo < 20:
+                SiXposition = firstXPosition + (SiNo - 15) * SiXSpacing
+                SiYposition = firstYPosition + 3 * SiYSpacing
+                    
+                SiS = G4Box("Si_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+                self.fLogicSi += [G4LogicalVolume(SiS,
+                                            self.fSiMaterial , "Si_LV", None, None, None)]
+
+                self.fLogicSi[SiNo].SetVisAttributes(chamberVisAtt)
+
+                G4PVPlacement(None,                            # no rotation
+                    G4ThreeVector(SiXposition, SiYposition,SiZposition ),  # at (x,y,z)
+                    self.fLogicSi[SiNo],      # its logical volume
+                    "Si_PV",                    # its name
+                    trackerLV,                       # its mother  volume
+                    False,                           # no boolean operations
+                    SiNo,                          # copy number
+                    self.fCheckOverlaps)             # checking overlaps\
+            if SiNo > 19 and SiNo < 25:
+                SiXposition = firstXPosition + (SiNo - 20) * SiXSpacing
+                SiYposition = firstYPosition + 4 * SiYSpacing
+                    
+                SiS = G4Box("Si_solid", SiXSpacing/2, SiYSpacing/2, SiZ)
+
+                self.fLogicSi += [G4LogicalVolume(SiS,
+                                            self.fSiMaterial , "Si_LV", None, None, None)]
+
+                self.fLogicSi[SiNo].SetVisAttributes(chamberVisAtt)
+
+                G4PVPlacement(None,                            # no rotation
+                    G4ThreeVector(SiXposition, SiYposition,SiZposition ),  # at (x,y,z)
+                    self.fLogicSi[SiNo],      # its logical volume
+                    "Si_PV",                    # its name
+                    trackerLV,                       # its mother  volume
+                    False,                           # no boolean operations
+                    SiNo,                          # copy number
+                    self.fCheckOverlaps)             # checking overlaps\
+
 
         # Example of User Limits
         # Below is an example of how to set tracking constraints in a given
@@ -306,6 +598,20 @@ class B2aDetectorConstruction(G4VUserDetectorConstruction):
                 print("\n----> The chambers are made of", materialName)
             else:
                 print("\n-->  WARNING from SetChamberMaterial :", materialName, "not found")
+
+    def SetSiMaterial(self, materialName):
+        nistManager = G4NistManager.Instance()
+        pttoMaterial = nistManager.FindOrBuildMaterial(materialName)
+        if self.fSiMaterial != pttoMaterial:
+            if pttoMaterial != None:
+                self.fSiMaterial = pttoMaterial
+                for SiNo in range(self.fNbOfSi):
+                    if self.fLogicSi[SiNo] != None:
+                        self.fLogicSi[copyNo].SetMaterial(self.fSiMaterial)
+                print("\n----> The chambers are made of", materialName)
+            else:
+                print("\n-->  WARNING from SetChamberMaterial :", materialName, "not found")
+         
 
     def SetMaxStep(self, maxStep):
         if self.fStepLimit != None and maxStep > 0:
