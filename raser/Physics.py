@@ -463,7 +463,8 @@ def CreateIrradiatedGeneration(device, region):
 def CreateSiIrradiatedCharge(device, region):
 
     # imaginary defect: perugia model
-    flux = 1.12e15
+    flux = 1.6e15
+    #flux = 1e11
     sigma_e_acc1=1e-15
     sigma_h_acc1=1e-14
     sigma_e_acc2=7e-15
@@ -474,13 +475,19 @@ def CreateSiIrradiatedCharge(device, region):
     sigma_h_donor=3.23e-14
     eta_donor=0.9
     
-    E_acc1=0.42
-    E_acc2=0.46
-    E_donor=0.36
+    E_acc1=0.42*1.6e-19
+    E_acc2=0.46*1.6e-19
+    E_donor=0.36*1.6e-19
     
     N_t_acc1 = flux*eta_acc1
     N_t_acc2 = flux*eta_acc2
     N_t_donor = flux*eta_donor
+    
+    Ec=4.05*1.6e-19
+    Ev=5.17*1.6e-19
+    E_ts_acc1=Ec-0.42*1.6e-19
+    E_ts_acc2=Ec-0.46*1.6e-19
+    E_ts_donor=Ev+0.36*1.6e-19
     
     devsim.add_db_entry(material="Silicon",   parameter="sigma_e_acc1",     value=sigma_e_acc1,   unit="cm^(-2)",     description="sigma_e_acc1")
     devsim.add_db_entry(material="Silicon",   parameter="sigma_h_acc1",     value=sigma_h_acc1,   unit="cm^(-2)",     description="sigma_h_acc1")
@@ -498,10 +505,50 @@ def CreateSiIrradiatedCharge(device, region):
     devsim.add_db_entry(material="Silicon",   parameter="E_acc1",     value=E_acc1,   unit="J",     description="E_acc1")
     devsim.add_db_entry(material="Silicon",   parameter="E_acc2",     value=E_acc2,   unit="J",     description="E_acc2")
     devsim.add_db_entry(material="Silicon",   parameter="E_donor",     value=E_donor,   unit="J",     description="E_donor")
-
+    devsim.add_db_entry(material="Silicon",   parameter="E_g",     value=1.12*1.6e-19,   unit="J",     description="E_g")
+    devsim.add_db_entry(material="Silicon",   parameter="E_ts_acc1",     value=E_ts_acc1,   unit="J",     description="The real value of the defect")
+    devsim.add_db_entry(material="Silicon",   parameter="E_ts_acc2",     value=E_ts_acc2,   unit="J",     description="The real value of the defect")
+    devsim.add_db_entry(material="Silicon",   parameter="E_ts_donor",     value=E_ts_donor,   unit="J",     description="The real value of the defect")
     v_T=1e7
-    devsim.add_db_entry(material="Silicon",   parameter="v_T_elec",     value=v_T,   unit="cm/s",     description="N_t_acc1")
-    devsim.add_db_entry(material="Silicon",   parameter="v_T_hole",     value=v_T,   unit="cm/s",     description="N_t_acc2")
+    devsim.add_db_entry(material="Silicon",   parameter="v_T",     value=v_T,   unit="cm/s",     description="v_T")
+    devsim.add_db_entry(material="Silicon",   parameter="v_T_elec",     value=v_T,   unit="cm/s",     description="v_T_elec")
+    devsim.add_db_entry(material="Silicon",   parameter="v_T_hole",     value=v_T,   unit="cm/s",     description="v_T_hole")
+    
+    r_n_donor = "(v_T * sigma_e_donor)"
+    r_p_donor = "(v_T * sigma_h_donor)"
+    r_n_acc1= "(v_T * sigma_e_acc1)"
+    r_p_acc1= "(v_T * sigma_h_acc1)"
+    r_n_acc2= "(v_T * sigma_e_acc2)"
+    r_p_acc2= "(v_T * sigma_h_acc2)"
+    n_1_donor = "(N_c * exp(-(E_g/2 - E_ts_donor)/k_T0))"
+    p_1_donor = "(N_v * exp(-(E_ts_donor - (-E_g/2))/k_T0))"
+    n_1_acc1 = "(N_c * exp(-(E_g/2 - E_ts_acc1)/k_T0))"
+    p_1_acc1 = "(N_v * exp(-(E_ts_acc1 - (-E_g/2))/k_T0))"
+    n_1_acc2 = "(N_c * exp(-(E_g/2 - E_ts_acc2)/k_T0))"
+    p_1_acc2 = "(N_v * exp(-(E_ts_acc2- (-E_g/2))/k_T0))"
+
+    n_t_donor_n = "+(N_t_donor*(Electrons*{r_n_donor}+{p_1_donor}*{r_p_donor})/({r_n_donor}*(Electrons+{n_1_donor})+{r_p_donor}*(Holes+{p_1_donor})))".format(r_n_donor=r_n_donor,n_1_donor=n_1_donor,r_p_donor=r_p_donor,p_1_donor=p_1_donor)
+    n_t_donor_p = "+(N_t_donor - {n_t_donor_n})".format(n_t_donor_n=n_t_donor_n)
+    
+    n_t_acc1_n = "+(N_t_acc1*(Electrons*{r_n_acc1}+{p_1_acc1}*{r_p_acc1})/({r_n_acc1}*(Electrons+{n_1_acc1})+{r_p_acc1}*(Holes+{p_1_acc1})))".format(r_n_acc1=r_n_acc1,n_1_acc1=n_1_acc1,r_p_acc1=r_p_acc1,p_1_acc1=p_1_acc1)
+    n_t_acc1_p = "+(N_t_acc1 - {n_t_acc1_n})".format(n_t_acc1_n=n_t_acc1_n)
+    
+    n_t_acc2_n = "+(N_t_acc2*(Electrons*{r_n_acc2}+{p_1_acc2}*{r_p_acc2})/({r_n_acc2}*(Electrons+{n_1_acc2})+{r_p_acc2}*(Holes+{p_1_acc2})))".format(r_n_acc2=r_n_acc2,n_1_acc2=n_1_acc2,r_p_acc2=r_p_acc2,p_1_acc2=p_1_acc2)
+    n_t_acc2_p = "+(N_t_acc2 - {n_t_acc2_n})".format(n_t_acc2_n=n_t_acc2_n)
+    
+    n_t_irr_n = n_t_donor_n + n_t_acc1_n + n_t_acc2_n
+    n_t_irr_p = n_t_donor_p + n_t_acc1_p + n_t_acc2_p
+    # #R_t_irr += "+(N_t_irr_{name} * ({c_n} * Electrons * {c_p} * Holes - {e_n} * {e_p})/({c_n} * Electrons + {e_n} + {c_p} * Holes + {e_p}))".format(name=name,c_n=c_n,e_n=e_n,c_p=c_p,e_p=e_p)
+    # R_t_irr += "+(sigma_n_irr_{name}*sigma_p_irr_{name}*v_T*N_t_irr_{name}*(Electrons*Holes - n_i^2))/(sigma_n_irr_{name}*(Electrons - n1*exp(-(E_g/2 - E_t_{name})/k_T0)) + sigma_p_irr_{name}*(Holes + p1*exp(-(E_t_{name} - (-E_g/2))/k_T0)))".format(name=name)
+
+
+    CreateNodeModel(device, region, "TrappedElectrons", n_t_irr_n)
+    CreateNodeModel(device, region, "TrappedHoles", n_t_irr_p)
+    #CreateNodeModel(device, region, "R_t_irr", R_t_irr)
+    for i in ("Electrons", "Holes", "Potential"):
+        CreateNodeModelDerivative(device, region, "TrappedElectrons", n_t_irr_n, i)
+        CreateNodeModelDerivative(device, region, "TrappedHoles", n_t_irr_p, i)
+        #CreateNodeModelDerivative(device, region, "R_t_irr", R_t_irr, i)
 
 def CreateSiIrradiatedGeneration(device, region):
     
@@ -530,7 +577,7 @@ def CreateSiIrradiatedGeneration(device, region):
     R_donor_down1 = "(v_T_elec * sigma_e_donor *(Electrons + n_i *{e_donor_posi}))".format(e_donor_posi=e_donor_posi)
     R_donor_down2 = "(v_T_hole * sigma_h_donor *(Holes + n_i *{e_donor_nega}))".format(e_donor_nega=e_donor_nega)
     R_donor = "{R_donor_up}/({R_donor_down1}+{R_donor_down2})".format(R_donor_up=R_donor_up,R_donor_down1=R_donor_down1,R_donor_down2=R_donor_down2)
-    print("\n\n\n\n"+R_donor+"\n\n\n\n")
+    #print("\n\n\n\n"+R_donor+"\n\n\n\n")
 
     Gd = "-q * (USRH+{R_donor})".format(R_donor=R_donor)  #Gd -q
     Ga = "+q * (USRH+{R_acc1}+{R_acc2})".format(R_acc1=R_acc1,R_acc2=R_acc2)
@@ -597,6 +644,7 @@ def CreateECE(device, region, mu_n):
              )
 
 
+
 def CreateHCE(device, region, mu_p):
     CreateHoleCurrent(device, region, mu_p)
     PCharge = "q * Holes"
@@ -610,6 +658,9 @@ def CreateHCE(device, region, mu_p):
              node_model="HoleGeneration", 
              edge_volume_model="ImpactGen_p"
              )
+
+    
+
 
 def CreateECE_improved(device, region, mu_n):
     CreateElectronCurrent(device, region, mu_n)
@@ -664,6 +715,7 @@ def CreatePEIrradiated(device, region):
     devsim.equation(device=device, region=region, name="PotentialEquation", variable_name="Potential",
              node_model="PotentialNodeCharge", edge_model="PotentialEdgeFlux",
              time_node_model="", variable_update="log_damp") 
+    
 
 def CreateDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreatePE(device, region)
@@ -694,14 +746,55 @@ def CreateSiDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateBernoulli(device, region)
     CreateSRH(device, region)
     CreateNetGeneration(device, region)
+    #CreateNetGeneration_test(device, region,constant)
     #CreateMobility(device, region)
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
+
+def CreateSiDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
+    '''
+      Restrict electrons and holes to their equilibrium values
+      Integrates current into circuit
+    '''
+    contact_electrons_model = "Electrons - ifelse(NetDoping > 0, {0}, n_i^2/{1})".format(celec_model, chole_model)
+    contact_holes_model = "Holes - ifelse(NetDoping < 0, +{1}, +n_i^2/{0})".format(celec_model, chole_model)
+    contact_electrons_name = "{0}nodeelectrons".format(contact)
+    contact_holes_name = "{0}nodeholes".format(contact)
+
+    CreateContactNodeModel(device, contact, contact_electrons_name, contact_electrons_model)
+    #TODO: The simplification of the ifelse statement is time consuming
+
+    CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_electrons_name, "Electrons"), "1")
+
+    CreateContactNodeModel(device, contact, contact_holes_name, contact_holes_model)
+    CreateContactNodeModel(device, contact, "{0}:{1}".format(contact_holes_name, "Holes"), "1")
+
+    #TODO: keyword args
+    if is_circuit:
+        devsim.contact_equation(device=device, contact=contact, name="ElectronContinuityEquation",
+                         node_model=contact_electrons_name,
+                         edge_current_model="ElectronCurrent", circuit_node=GetContactBiasName(contact))
+
+        devsim.contact_equation(device=device, contact=contact, name="HoleContinuityEquation",
+                         node_model=contact_holes_name,
+                         edge_current_model="HoleCurrent", circuit_node=GetContactBiasName(contact))
+
+    else:
+        devsim.contact_equation(device=device, contact=contact, name="ElectronContinuityEquation",
+                         node_model=contact_electrons_name,
+                         edge_current_model="ElectronCurrent")
+
+        devsim.contact_equation(device=device, contact=contact, name="HoleContinuityEquation",
+                         node_model=contact_holes_name,
+                         edge_current_model="HoleCurrent")
+
+
 
 
 def CreateSiDriftDiffusionIrradiated(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateSiIrradiatedCharge(device, region)
     CreatePEIrradiated(device, region)
+    #CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region)
     CreateSiIrradiatedGeneration(device, region)

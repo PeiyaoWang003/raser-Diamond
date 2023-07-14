@@ -88,6 +88,7 @@ def extend_set():
 
 def initial_solution(device,region,para_dict):
     # Initial DC solution
+    
     Initial.InitialSolution(device, region, circuit_contacts="top")
     devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
@@ -98,6 +99,7 @@ def initial_solution(device,region,para_dict):
     if "irradiation" in para_dict:
         if device == "1D_ITK_MD8":
             Initial.DriftDiffusionInitialSolutionSiIrradiated(device, region, circuit_contacts="top")
+            devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0.05)
         else:
             Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts="top")
         """names        = ["E30K"   , "V3"      , "Ip"      , "H220"    , "CiOi"    ]
@@ -108,8 +110,9 @@ def initial_solution(device,region,para_dict):
                 devsim.add_db_entry(material="global",   parameter="N_t_irr_"+name,     value=N_t_irr,   unit="cm^(-3)",     description="N_t_"+name)
             devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400)
             print("Neutron_eq="+str(Neutron_eq))"""
-        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400)
-
+        devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400,maximum_divergence=300)
+        
+        
 def set_defect(paras):
     #Z_1/2
     devsim.add_db_entry(material="global",   parameter="sigma_n",     value=float(paras["sigma_n"]),   unit="s/cm^2",     description="sigma_n")
@@ -149,10 +152,10 @@ def solve_iv(device,region,v_max,para_dict):
         args111 = ["det_name=ITk-Si-strip","parfile=paras/setting.json"]
         dset111 = Setting(args111)
         det_dic111 = dset111.detector    
-        doping1=str(det_dic111['doping'])+"e12"
+        doping1=det_dic111['doping']
         ITK_MD8_doping=doping1
         area_factor = 1.0/(0.8*0.8)
-        f_md8iv = open("./output/devsim/"+device+"_"+ITK_MD8_doping+"/"+device+condition+"_reverse_iv.csv", "w")
+        f_md8iv = open("./output/devsim/"+device+"_"+"4.7e14"+"/"+device+condition+"_reverse_iv_tau5e-6.csv", "w")
         header_md8iv = ["Voltage","Current"]
         writer_md8iv = csv.writer(f_md8iv)
         writer_md8iv.writerow(header_md8iv)
@@ -247,7 +250,12 @@ def solve_iv_single_point(device,region,reverse_v):
         devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=reverse_v)
     else:
         devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
-    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
+    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=100,maximum_divergence=50)
+    # try:
+    #     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200,maximum_divergence=50)
+    # except devsim.error as msg:
+    #     if msg=="Convergence failure!":
+    #         raise
     Physics.PrintCurrents(device, "top")
     Physics.PrintCurrents(device, "bot")
     reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
