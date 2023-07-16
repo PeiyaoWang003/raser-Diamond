@@ -15,9 +15,14 @@ if "parameter_alter=True" in args:
     # need to put the changed value at the end of the parameter list
     key,_,value=args[-1].rpartition('=')
     value=float(value)
-    dset.laser_paras.update({key:value})
+    if key in dset.laser_paras:
+        dset.laser_paras.update({key:value})
+        key_string = str(dset.laser_paras[key])+key
+    elif key in dset.paras:
+        dset.paras.update({key:value})
+        key_string = str(dset.paras[key])+key
 else:
-    key = ""
+    key_string = ""
 my_d = raser.R3dDetector(dset)
 
 e_field_filepath = './output/devsim/1D_NJU_PIN/'\
@@ -45,7 +50,7 @@ if "ngspice" in args:
         f.writelines(lines)
         f.close()
 if "scan=True" in args: #assume parameter alter
-    drawsave.save_signal_TTree(dset,my_d,my_l,ele_current,my_f,key)
+    drawsave.save_signal_TTree(dset,my_d,key_string,ele_current,my_f)
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
         path = "output/" + "pintct/" + dset.det_name + "/"
     elif "lgad3D" in my_d.det_model:

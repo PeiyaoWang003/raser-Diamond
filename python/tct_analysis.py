@@ -16,51 +16,20 @@ import ROOT
 import math
 import numpy as np
 import drawsave
-
-def main():
-    path=sys.argv[1]
-    output_path=path+"result/"
-    drawsave.create_path(output_path)
-    if 'LGAD' in path:
-        pulse_energy_scale = 1.58
-    else:
-        pulse_energy_scale = 1
-    # the pulse energy difference in experiment
-
-    if "experiment" in sys.argv:
-        amplitude, charge, risetime, elefield, Z ,volts, times= collect_data(path, "sim-TCT", pulse_energy_scale, 1e9)
-        amplitude_exp, charge_exp, risetime_exp, elefield_exp, Z_exp, volts_exp, times_exp= collect_data(path, "exp-TCT", 1, 1)
-        draw_double_graphs(amplitude,amplitude_exp,Z,"Amplitude",output_path)
-        draw_double_graphs(charge,charge_exp,Z,"Charge",output_path)
-        draw_double_graphs(risetime,risetime_exp,Z,"RiseTime",output_path)
-        draw_double_graphs(elefield,elefield_exp,Z,"Elefield",output_path)
-
-        for volt,time,volt_exp,time_exp,z in zip(volts, times, volts_exp, times_exp, list(Z)):
-            draw_double_signals(time,time_exp,volt,volt_exp,z,path)
-
-    else:
-        amplitude, charge, risetime, elefield, Z ,volts, times= collect_data(path, "sim-TCT", pulse_energy_scale, 1e9)
-        draw_graphs(amplitude,Z,"Amplitude",output_path)
-        draw_graphs(charge,Z,"Charge",output_path)
-        draw_graphs(risetime,Z,"RiseTime",output_path)
-        draw_graphs(elefield,Z,"Elefield",output_path)
-
-def collect_data(path, model, volt_scale, time_scale):
-    Z= array("d")
-    amplitude= array("d")
-    risetime= array("d")
-    charge= array("d")
-    elefield= array("d")
+    
+def collect_data(path, model, volt_scale, time_scale, keys, key_name):
+    amplitude = array("d")
+    risetime = array("d")
+    charge = array("d")
+    velprof = array("d")
+    difprof = array("d")
     volts = []
     times = []
 
-    for L in range(-10,61):
-        rel_z = round(0.02*L,2)
-        Z.append(L)
-
+    for key in keys:
         volt=array("d",[0.])
         time=array("d",[0.])
-        rootfile=path+model+str(rel_z)+".root"
+        rootfile=path+model+str(key)+key_name+".root"
         volt,time=read_rootfile(rootfile, volt_scale, time_scale)
         volts.append(volt)
         times.append(time)
@@ -68,10 +37,11 @@ def collect_data(path, model, volt_scale, time_scale):
 
         amplitude.append(get_amplitude(volt,J))
         charge.append(get_charge(volt,J))
-        elefield.append(get_elefield(volt,time,J))
+        velprof.append(get_velprof(volt,time,J))
         risetime.append(get_risetime(volt,time,J))
+        difprof.append(get_difprof(volt,time,J))
       
-    return amplitude, charge, risetime, elefield, Z, volts, times
+    return amplitude, charge, risetime, velprof, difprof, volts, times
 
 def read_rootfile(rootfile,volt_scale,time_scale):
     J=0
@@ -119,9 +89,9 @@ def get_charge(volt,J):
     sum_charge=0
     for j in range(J):
         sum_charge+=volt[j]
-    return sum_charge
+    return sum_charge/100*3.7*1000 # Capacitance of detector = 3.7 pF, result in fC
 
-def get_elefield(volt,time,J):
+def get_velprof(volt,time,J):
     x=array("d")
     y=array("d")
     Vmax=max(volt)
@@ -153,6 +123,12 @@ def get_elefield(volt,time,J):
     t_0=np.true_divide(-c,b) + 0.1 #ns
     return c + b * t_0
 
+def get_difprof(volt,time,J):
+    max_diff = 0
+    for i in range(J-1):
+        if volt[i+1]-volt[i] > max_diff:
+            max_diff = volt[i+1]-volt[i]
+    return max_diff ** 2
 
 def get_risetime(volt,time,J):
     x=array("d")
@@ -188,7 +164,7 @@ def get_risetime(volt,time,J):
     risetime=np.true_divide((e2-e1),0.6)
     return risetime
 
-def draw_graphs(array1,Z,name,path):
+def draw_graphs(array1,keys,key_name,name,path):
     n=len(array1)
     g = ROOT.TCanvas('g', '', 800, 600)
     g.SetFillColor(0)
@@ -201,7 +177,7 @@ def draw_graphs(array1,Z,name,path):
     g.SetTopMargin(0.1)
     g.SetBottomMargin(0.15)
 
-    graph=ROOT.TGraph(n,Z,array1)
+    graph=ROOT.TGraph(n,keys,array1)
     graph.SetMarkerStyle(3)
     graph.Draw('ap')
 
@@ -217,7 +193,7 @@ def draw_graphs(array1,Z,name,path):
   
     return
 
-def draw_double_graphs(array1,array2,Z,name,path):
+def draw_double_graphs(array1,array2,keys,key_name,name,path):
     c = ROOT.TCanvas('c', '', 800, 600)
     c.SetFillColor(0)
     c.SetFrameFillColor(0)
@@ -229,9 +205,9 @@ def draw_double_graphs(array1,array2,Z,name,path):
 
     mg=ROOT.TMultiGraph("mg","")
     n1=len(array1)
-    graph1 = ROOT.TGraph(n1,Z,array1)
+    graph1 = ROOT.TGraph(n1,keys,array1)
     n2=len(array2)
-    graph2 = ROOT.TGraph(n2,Z,array2)
+    graph2 = ROOT.TGraph(n2,keys,array2)
 
     graph1.SetLineColor(2)
     graph2.SetLineColor(1)
@@ -252,13 +228,13 @@ def draw_double_graphs(array1,array2,Z,name,path):
             mg.GetYaxis().SetRangeUser(0,0.04)
 
     if name == 'Charge':
-        Y_title = 'Charge [a.u.]'
+        Y_title = 'Charge [fC]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,28)
+            mg.GetYaxis().SetRangeUser(0,1000)
         else:
-            mg.GetYaxis().SetRangeUser(0,1.0)
+            mg.GetYaxis().SetRangeUser(0,40)
 
-    if name == 'Elefield':
+    if name == 'VelProf':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
             mg.GetYaxis().SetRangeUser(0,0.16)
@@ -271,9 +247,19 @@ def draw_double_graphs(array1,array2,Z,name,path):
             mg.GetYaxis().SetRangeUser(0,1.5)
         else:
             mg.GetYaxis().SetRangeUser(0,1.5)
+
+    if name == 'DifProf':
+        Y_title = '\sigma^{-2} [a.u.]'
+        if 'LGAD' in path:
+            mg.GetYaxis().SetRangeUser(0,0.007)
+        else:
+            mg.GetYaxis().SetRangeUser(0,0.000009)
     
     mg.GetYaxis().SetTitle(Y_title)
-    mg.GetXaxis().SetTitle('z [um]')
+    if key_name == "z":
+        mg.GetXaxis().SetTitle('z [\mu m]')
+    elif key_name == "voltage":
+        mg.GetXaxis().SetTitle('Reverse bias voltage [V]')
     mg.GetYaxis().SetLabelSize(0.05)
     mg.GetYaxis().SetTitleSize(0.05)
     mg.GetXaxis().SetLabelSize(0.05)
@@ -289,9 +275,9 @@ def draw_double_graphs(array1,array2,Z,name,path):
     legend.SetFillColor(0)
     legend.Draw()
 
-    c.SaveAs(path+name+"_comparison.pdf")
+    c.SaveAs(path+name+"_"+key_name+"_comparison.pdf")
 
-def draw_double_signals(time_1,time_2,signal_1,signal_2,z,path):
+def draw_double_signals(time_1,time_2,signal_1,signal_2,key,key_name,path):
     c = ROOT.TCanvas('c', '', 800, 600)
     c.SetFillColor(0)
     c.SetFrameFillColor(0)
@@ -316,9 +302,9 @@ def draw_double_signals(time_1,time_2,signal_1,signal_2,z,path):
 
     mg.Add(graph1)
     mg.Add(graph2)
-    mg.Draw('ap')
+    mg.Draw('ALP')
     
-    mg.GetYaxis().SetTitle('signal [V]')
+    mg.GetYaxis().SetTitle('Signal [V]')
     mg.GetXaxis().SetTitle('time [ns]')
     mg.GetYaxis().SetLabelSize(0.05)
     mg.GetYaxis().SetTitleSize(0.05)
@@ -328,8 +314,8 @@ def draw_double_signals(time_1,time_2,signal_1,signal_2,z,path):
     mg.GetXaxis().SetLimits(0,10)
 
     legend = ROOT.TLegend(0.45,0.65, 0.81, 0.86)
-    legend.AddEntry(graph1, "RASER simulation", "p")
-    legend.AddEntry(graph2, "TCT measurement", "p")
+    legend.AddEntry(graph1, "RASER simulation", "pl")
+    legend.AddEntry(graph2, "TCT measurement", "pl")
     legend.SetTextSize(27)
     legend.SetTextFont(43)
 
@@ -337,8 +323,66 @@ def draw_double_signals(time_1,time_2,signal_1,signal_2,z,path):
     legend.SetFillColor(0)
     legend.Draw()
 
-    c.SaveAs(path+str(z)+"_comparison.pdf")
+    c.SaveAs(path+str(key)+key_name+"_comparison.pdf")
 
+def analysis_depth(path,output_path,pulse_energy_scale):
+    Z = array("d")
+    rel_z = array("d")
+    for L in range(-10,61):
+        Z.append(L)
+        rel_z.append(round(0.02*L,2))
+
+    if "experiment" in sys.argv:
+        amplitude, charge, risetime, velprof, difprof, volts, times = collect_data(path, "sim-TCT", pulse_energy_scale, 1e9, rel_z, 'fz_rel')
+        amplitude_exp, charge_exp, risetime_exp, velprof_exp, difprof_exp, volts_exp, times_exp = collect_data(path, "exp-TCT", 1, 1, rel_z, 'fz_rel')
+        draw_double_graphs(amplitude,amplitude_exp,Z,"z","Amplitude",output_path)
+        draw_double_graphs(charge,charge_exp,Z,"z","Charge",output_path)
+        draw_double_graphs(risetime,risetime_exp,Z,"z","RiseTime",output_path)
+        draw_double_graphs(velprof,velprof_exp,Z,"z","VelProf",output_path)
+        draw_double_graphs(difprof,difprof_exp,Z,"z","DifProf",output_path)
+
+        for volt,time,volt_exp,time_exp,z in zip(volts, times, volts_exp, times_exp, list(Z)):
+            draw_double_signals(time,time_exp,volt,volt_exp,z,"z",output_path)
+
+    else:
+        amplitude, charge, risetime, velprof, difprof, volts, times= collect_data(path, "sim-TCT", pulse_energy_scale, 1e9, rel_z, 'fz_rel')
+        draw_graphs(amplitude,Z,"z","Amplitude",output_path)
+        draw_graphs(charge,Z,"z","Charge",output_path)
+        draw_graphs(risetime,Z,"z","RiseTime",output_path)
+        draw_graphs(velprof,Z,"z","VelProf",output_path)
+        draw_graphs(difprof,Z,"z","DifProf",output_path)
+
+def analysis_voltage(path,output_path,pulse_energy_scale):
+    V = array("d")
+    VN = array("i")
+    for L in range(60,220,20):
+        V.append(L)
+        VN.append(-L)
+
+    if "experiment" in sys.argv:
+        amplitude, charge, risetime, velprof, difprof, volts, times = collect_data(path, "sim-TCT", pulse_energy_scale, 1e9, V, 'voltage')
+        amplitude_exp, charge_exp, risetime_exp, velprof_exp, difprof_exp, volts_exp, times_exp = collect_data(path, "exp-TCT", 1, 1, VN, 'voltage')
+        draw_double_graphs(charge,charge_exp,V,"voltage","Charge",output_path)
+
+        for volt,time,volt_exp,time_exp,v in zip(volts, times, volts_exp, times_exp, list(V)):
+            draw_double_signals(time,time_exp,volt,volt_exp,v,"voltage",output_path)
+
+    else:
+        amplitude, charge, risetime, velprof, difprof, volts, times= collect_data(path, "sim-TCT", pulse_energy_scale, 1e9, V, 'voltage')
+        draw_graphs(charge,V,"voltage","Charge",output_path)
+
+
+def main():
+    path=sys.argv[1]
+    output_path=sys.argv[2]
+    drawsave.create_path(output_path)
+    if 'LGAD' in path:
+        pulse_energy_scale = 1.58
+    else:
+        pulse_energy_scale = 1
+    # the pulse energy difference in experiment
+    #analysis_depth(path,output_path,pulse_energy_scale)
+    analysis_voltage(path,output_path,pulse_energy_scale)             
 
 if __name__ == "__main__":
     main()

@@ -42,30 +42,25 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
     else: 
         draw_drift_path(my_d,my_f,my_current,path)
 
-def save_signal_TTree(dset,my_d,my_l,ele_current,my_f,key):
+def save_signal_TTree(dset,my_d,key,ele_current,my_f):
     if "planar3D" in my_d.det_model or "planarRing" in my_d.det_model:
-        path = os.path.join("output", "pintct", dset.det_name, )
+        path = os.path.join("output", "pintct", dset.det_name, "data",)
     elif "lgad3D" in my_d.det_model:
-        path = os.path.join("output", "lgadtct", dset.det_name, )
+        path = os.path.join("output", "lgadtct", dset.det_name, "data",)
     create_path(path) 
-    L=eval("my_l.{}".format(key))
-    #L is defined by different keys
     for j in range(my_f.read_ele_num):
         volt = array('d', [999.])
         time = array('d', [999.])
-        variation = array('d', [999.])
         if my_f.read_ele_num==1:
-            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(L) + ".root", "RECREATE")
+            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(key) + ".root", "RECREATE")
         else:
-            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(L)+"No_"+str(j)+".root", "RECREATE")
+            fout = ROOT.TFile(os.path.join(path, "sim-TCT") + str(key)+"No_"+str(j)+".root", "RECREATE")
         t_out = ROOT.TTree("tree", "signal")
         t_out.Branch("volt", volt, "volt/D")
         t_out.Branch("time", time, "time/D")
-        t_out.Branch(key, variation, "{}/D".format(key))
         for i in range(ele_current.BB_ele[j].GetNbinsX()):
             time[0]=i*ele_current.time_unit
             volt[0]=ele_current.BB_ele[j][i]
-            variation[0]=L
             t_out.Fill()
         t_out.Write()
         fout.Close()
@@ -286,11 +281,11 @@ def fill_his_1D(model,my_d,my_f):
                 f_v = math.sqrt(math.pow(f_v[0],2)
                                 +math.pow(f_v[1],2)
                                 +math.pow(f_v[2],2))
-                e_v.GetYaxis().SetTitle(model+"[V/um]")                        
+                e_v.GetYaxis().SetTitle(model+"[V/\mu m]")                        
         except RuntimeError:
             f_v = 0.0
         e_v.SetBinContent(i+1,f_v)
-    e_v.GetXaxis().SetTitle("z[um]") 
+    e_v.GetXaxis().SetTitle("z[\mu m]") 
     return e_v
 
 def get_f_v(i_x,i_y,i_z,model,my_f,plane,e_v,d_r,k):
@@ -667,13 +662,13 @@ def draw_nocarrier3D(path, my_l):
     for i in range(len(my_l.track_position)):
         h.Fill(my_l.track_position[i][0], my_l.track_position[i][1], my_l.track_position[i][2], my_l.ionized_pairs[i])
     h.Draw()
-    h.GetXaxis().SetTitle("Depth [um]")#[μm]
+    h.GetXaxis().SetTitle("Depth [\mu m]")#[μm]
     h.GetXaxis().SetTitleSize(0.05)
     h.GetXaxis().SetLabelSize(0.05)
-    h.GetYaxis().SetTitle("Width [um]")
+    h.GetYaxis().SetTitle("Width [\mu m]")
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.05)
-    h.GetZaxis().SetTitle("Thick [um]")
+    h.GetZaxis().SetTitle("Thick [\mu m]")
     h.GetZaxis().SetTitleSize(0.05)
     h.GetZaxis().SetLabelSize(0.05)
     h.GetXaxis().SetTitleOffset(1.8)
@@ -694,10 +689,10 @@ def draw_nocarrier2D(path, my_l):
     for i in range(len(my_l.track_position)):
         h.Fill(my_l.track_position[i][0], my_l.track_position[i][2], my_l.ionized_pairs[i])
     h.Draw("COLZ")
-    h.GetXaxis().SetTitle("Depth [um]")#[μm]
+    h.GetXaxis().SetTitle("Depth [\mu m]")#[μm]
     h.GetXaxis().SetTitleSize(0.05)
     h.GetXaxis().SetLabelSize(0.05)
-    h.GetYaxis().SetTitle("Thick [um]")
+    h.GetYaxis().SetTitle("Thick [\mu m]")
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.05)
     h.GetZaxis().SetLabelSize(0.05)
