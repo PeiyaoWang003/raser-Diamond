@@ -15,7 +15,6 @@ import sys
 import ROOT
 import math
 import numpy as np
-import drawsave
     
 def collect_data(path, model, volt_scale, time_scale, keys, key_name):
     amplitude = array("d")
@@ -375,7 +374,8 @@ def analysis_voltage(path,output_path,pulse_energy_scale):
 def main():
     path=sys.argv[1]
     output_path=sys.argv[2]
-    drawsave.create_path(output_path)
+    if not os.access(output_path, os.F_OK):
+        os.makedirs(output_path, exist_ok=True) 
     if 'LGAD' in path:
         pulse_energy_scale = 1.58
     else:

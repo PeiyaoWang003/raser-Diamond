@@ -120,6 +120,7 @@ class TCTTracks():
         self.ionized_pairs = temp_pairs
 
         print(len(self.ionized_pairs),"pairs of carrier models to drift")
+        print(sum(self.ionized_pairs),"total pairs of carriers")
 
     def change_coordinate(self):
         #from cylindral coordinate (axis parallel with the beam, origin at focus)

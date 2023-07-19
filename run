@@ -653,17 +653,18 @@ case $option in
             ;; 
 
     3.2.5) echo "analyse eTCT rootfiles"
-        ./python/tct_analysis.py output/pintct/HPK-Si-PIN/data/ output/pintct/HPK-Si-PIN/result/
-        ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/data/ output/lgadtct/HPK-Si-LGAD/result/
+        ./python/paper4/tct_analysis.py output/pintct/HPK-Si-PIN/data/ output/pintct/HPK-Si-PIN/result/
+        ./python/paper4/tct_analysis.py output/lgadtct/HPK-Si-LGAD/data/ output/lgadtct/HPK-Si-LGAD/result/
         ;;
 
-    3.2.6) echo "get volt-time from experiment"
-        ./python/readdata/extract_waveform.py
+    3.2.6) echo "get volt-time and iv/cv from experiment"
+        ./python/paper4/extract_waveform.py
+        ./python/paper4/draw_iv_cv.py.py
         ;;
 
     3.2.7) echo "analyse eTCT rootfiles with experiment data"
-        ./python/tct_analysis.py output/pintct/HPK-Si-PIN/data/ output/pintct/HPK-Si-PIN/result/ "experiment"
-        ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/data/ output/lgadtct/HPK-Si-LGAD/result/ "experiment"
+        ./python/paper4/tct_analysis.py output/pintct/HPK-Si-PIN/data/ output/pintct/HPK-Si-PIN/result/ "experiment"
+        ./python/paper4/tct_analysis.py output/lgadtct/HPK-Si-LGAD/data/ output/lgadtct/HPK-Si-LGAD/result/ "experiment"
         ;;
 
 esac
