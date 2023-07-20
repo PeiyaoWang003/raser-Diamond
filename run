@@ -659,7 +659,7 @@ case $option in
 
     3.2.6) echo "get volt-time and iv/cv from experiment"
         ./python/paper4/extract_waveform.py
-        ./python/paper4/draw_iv_cv.py.py
+        ./python/paper4/draw_iv_cv.py
         ;;
 
     3.2.7) echo "analyse eTCT rootfiles with experiment data"

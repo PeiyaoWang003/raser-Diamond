@@ -12,7 +12,7 @@ def save_experiment_data(Vbias, z_init, z_0, t_init, myt, out):
                     &&(z-{}-{}>-0.0001)\
                     &&(z-{}-{}<0.0001)\
                     &&((time-{})>0)\
-                    &&((time-{})<8.6)".format(Vbias,z_init,z_0,z_init,z_0,t_init,t_init),
+                    &&((time-{})<10)".format(Vbias,z_init,z_0,z_init,z_0,t_init,t_init),
                     "goff")
     graph1 = ROOT.TGraph(n,myt.GetV2(),myt.GetV1())
     v1 = array('d')
