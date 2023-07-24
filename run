@@ -94,6 +94,7 @@ usage_1_7() {
 usage_1_8() { 
     printf "\n\t%-5s  %-40s\n"  "1.8.1"    "Initial DataBase of DEVSIM" 
     printf "\n\t%-5s  %-40s\n"  "1.8.2"    "Build 1D ITk MD8 structure"
+    printf "\n\t%-5s  %-40s\n"  "1.8.3"    "Simulate 1D ITk MD8 C-V"
     printf "\n"
 }
 
@@ -458,7 +459,8 @@ case $option in
         ;;
 
     1.8.2) echo "Build 1D ITk MD8 structure ..."
-        raser "./python/itk_md8_mesh.py"
+        ./python/run_batchjob.py devsim "solve_itk_md8_cv.py" 
+        #raser "./python/itk_md8_mesh.py"
         ;;
 
     1.8.3) echo "Simulate 1D ITk MD8 C-V ..."
