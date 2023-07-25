@@ -39,7 +39,7 @@ class TCTTracks():
         self.central_time = laser["central_time"]
         if "l_Reyleigh" not in laser:
             w_0 = self.spacial_FWHM / (2 * np.log(2))**0.5
-            self.l_Rayleigh = np.pi*self.w_0**2*self.refractionIndex/self.wavelength
+            self.l_Rayleigh = np.pi*w_0**2*self.refractionIndex/self.wavelength
         else:
             self.l_Rayleigh = laser["l_Rayleigh"]#um
         #the size of the detector
