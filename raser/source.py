@@ -21,24 +21,25 @@ class TCTTracks():
     ---------
         2021/09/13
     """
-    def __init__(self, my_d, laser, t_step=50e-12):
+    def __init__(self, my_d, laser):
         #technique used
         self.tech = laser["tech"]
         self.direction = laser["direction"]
         #material parameters to certain wavelength of the beam
         self.refractionIndex = laser["refractionIndex"]
         if self.tech == "SPA":
-            self.alpha = laser["alpha"]
+            self.alpha = laser["alpha"] # m^-1
         if self.tech == "TPA":
             self.beta_2 = laser["beta_2"]
         #laser parameters
         self.wavelength = laser["wavelength"]*1e-3 #um
-        self.tau = laser["tau"]
+        self.temporal_FWHM = laser["temporal_FWHM"]
         self.pulse_energy = laser["pulse_energy"]
-        self.widthBeamWaist = laser["widthBeamWaist"]#um
+        self.spacial_FWHM = laser["spacial_FWHM"]#um
         self.central_time = laser["central_time"]
         if "l_Reyleigh" not in laser:
-            self.l_Rayleigh = np.pi*self.widthBeamWaist**2*self.refractionIndex/self.wavelength
+            w_0 = self.spacial_FWHM / (2 * np.log(2))**0.5
+            self.l_Rayleigh = np.pi*self.w_0**2*self.refractionIndex/self.wavelength
         else:
             self.l_Rayleigh = laser["l_Rayleigh"]#um
         #the size of the detector
@@ -55,12 +56,11 @@ class TCTTracks():
         #accuracy parameters
         self.r_step = laser["r_step"]#um
         self.h_step = laser["h_step"]#um
-        self.t_step = t_step#s
       
         self.mesh_definition(my_d)
 
     def mesh_definition(self,my_d):
-        self.r_char = self.widthBeamWaist / 2
+        self.r_char = self.spacial_FWHM / 2
         if self.tech == "SPA":
             self.h_char = max(my_d.l_x, my_d.l_y, my_d.l_z)
         elif self.tech == "TPA":
@@ -169,24 +169,23 @@ class TCTTracks():
     def getCarrierDensity(self, h, depth, r2):
         #return the carrier density of a given point in a given time period
         #referring to the vertical and horizontal distance from the focus 
-        w_0 = self.widthBeamWaist / 2
+        w_0 = self.spacial_FWHM / (2 * np.log(2))**0.5
         wSquared = (w_0 ** 2) * (1 + (h / self.l_Rayleigh) ** 2)
-        intensity = ((self.pulse_energy) / self.tau)\
-                    * (4 * np.log(2) ** 0.5 / (np.pi ** 1.5 * wSquared * 1e-12))\
-                    * np.exp((-2 * r2 / wSquared))\
-                    * self.t_step
-
+        intensity = ((self.pulse_energy))\
+                    * (4 / (np.pi * wSquared * 1e-12))\
+                    * np.exp((-2 * r2 / wSquared)) # time distribution decoupled
+        
+        h_Planck = 6.626*1e-34
+        speedofLight = 2.998*1e8
         if self.tech == "SPA":
             # I = I_0 * exp(-αz)
             # dE_deposit = (αdz)dE_flux = (αdz)I*dSdt = (αI)*dVdt
             # dN_ehpair = dE_deposit / Energy_for_each_ionized_ehpair
             e0 = 1.60217733e-19
-            return self.alpha * intensity * np.exp(-self.alpha * (h + depth) * 1e-6) / (3.6 * e0)
+            return self.alpha * self.wavelength * 1e-6 * intensity * np.exp(-self.alpha * (h + depth) * 1e-6) / (h_Planck * speedofLight)
         elif self.tech == "TPA":
-            h_Planck = 6.626*1e-34
-            speedofLight = 2.998*1e8
             return self.beta_2 * self.wavelength * 1e-6 * intensity ** 2 / (2 * h_Planck * speedofLight)
         
     def timePulse(self, t):
         # to reduce run time, convolute the time pulse function with the signal after the signal is calculated
-        return np.exp(-4 * np.log(2) * t ** 2 / self.tau ** 2)
+        return np.exp(-4 * np.log(2) * t ** 2 / self.temporal_FWHM ** 2) / ((2*np.pi)**(1/2) * self.temporal_FWHM / (2 * (2*np.log(2))**(1/2)))

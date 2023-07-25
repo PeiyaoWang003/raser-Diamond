@@ -525,7 +525,7 @@ class CalCurrentLaser(CalCurrent):
             pulse_responce = cu.GetBinContent(i)
             for j in range(-i,self.n_bin-i): 
                 time_pulse = timePulse(j*self.t_bin)
-                convolved_cu.Fill((i+j)*self.t_bin - 1e-14, pulse_responce*time_pulse)
+                convolved_cu.Fill((i+j)*self.t_bin - 1e-14, pulse_responce*time_pulse*self.t_bin)
                 #resolve float error
 
 class CarrierListFromG4P:
