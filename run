@@ -40,9 +40,9 @@ usage() {
 usage_1_1() { 
     printf "\n\t%-5s  %-40s\n"  "1.1.1"    "NJU-PIN basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "1.1.2"    "batch model with total number, split with step number" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.3"    "get time resolution for HPK-Si-PIN"
+    printf "\n\t%-5s  %-40s\n"  "1.1.3"    "get time resolution for NJU-PIN"
     printf "\n\t%-5s  %-40s\n"  "1.1.4"    "batch model with total number, split with step number, multi points voltage [-50,-500]" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.5"    "get time resolution 3D-SiC multi points voltage [-300,-500]" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.5"    "get time resolution multi points voltage [-300,-500]" 
     printf "\n\t%-5s  %-40s\n"  "1.1.6"    "get time resolution vs draw voltage" 
     printf "\n"
 }
@@ -663,8 +663,8 @@ case $option in
         ;;
 
     3.2.7) echo "analyse eTCT rootfiles with experiment data"
-        ./python/paper4/tct_analysis.py output/pintct/HPK-Si-PIN/data/ output/pintct/HPK-Si-PIN/result/ "experiment"
-        ./python/paper4/tct_analysis.py output/lgadtct/HPK-Si-LGAD/data/ output/lgadtct/HPK-Si-LGAD/result/ "experiment"
+        raser './python/paper4/tct_analysis.py output/pintct/HPK-Si-PIN/data/ output/pintct/HPK-Si-PIN/result/ experiment'
+        raser './python/paper4/tct_analysis.py output/lgadtct/HPK-Si-LGAD/data/ output/lgadtct/HPK-Si-LGAD/result/ experiment'
         ;;
 
 esac

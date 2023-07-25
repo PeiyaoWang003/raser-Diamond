@@ -58,9 +58,9 @@ def save_signal_TTree(dset,my_d,key,ele_current,my_f):
         t_out = ROOT.TTree("tree", "signal")
         t_out.Branch("volt", volt, "volt/D")
         t_out.Branch("time", time, "time/D")
-        for i in range(ele_current.BB_ele[j].GetNbinsX()):
+        for i in range(ele_current.CSA_ele[j].GetNbinsX()):
             time[0]=i*ele_current.time_unit
-            volt[0]=ele_current.BB_ele[j][i]
+            volt[0]=ele_current.CSA_ele[j][i]
             t_out.Fill()
         t_out.Write()
         fout.Close()

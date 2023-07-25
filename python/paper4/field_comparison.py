@@ -15,7 +15,6 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import raser
-import drawsave
 import time
 import ROOT
 import math
@@ -87,7 +86,7 @@ def draw_sigma(field,path):
         if z<2:
             s=0
         else:
-            s = 1/(450 + 49 + 2.8*(1+2*math.log(e_2/e))**2) # tau^2 v^2 + sigma_0^2 + (k_{B}Tε/q^2N_{eff})(1+2ln(E_2/E)^2)
+            s = 1/(450 + 49 + 2.8*(1+2*math.log(e_2/e))**2) # temporal_FWHM^2 v^2 + sigma_0^2 + (k_{B}Tε/q^2N_{eff})(1+2ln(E_2/E)^2)
         E.SetBinContent(i+1,e)
         S.SetBinContent(i+1,s)
 
