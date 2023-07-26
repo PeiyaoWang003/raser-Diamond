@@ -4,7 +4,7 @@
 import devsim 
 import os
 import sys
-
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from raser import Physics
 from raser import Node
 from raser import Initial
@@ -28,8 +28,10 @@ region="1D_ITK_MD8"
 # DUT 0.8cm* 0.8cm
 area_factor = 1.0/(0.76*0.76)
 
+
+
 itk_md8_mesh.Create1DMesh(device=device, region=region)
-itk_md8_mesh.SetDoping(device=device, region=region,bulk_doping=3.5e12)
+itk_md8_mesh.SetDoping(device=device, region=region)
 itk_md8_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/itk_md8_doping.png")
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")

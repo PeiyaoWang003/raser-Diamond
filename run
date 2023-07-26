@@ -459,12 +459,12 @@ case $option in
         ;;
 
     1.8.2) echo "Build 1D ITk MD8 structure ..."
-        ./python/run_batchjob.py devsim "solve_itk_md8_cv.py" 
-        #raser "./python/itk_md8_mesh.py"
+        raser "./python/itk_md8_mesh.py"
         ;;
 
     1.8.3) echo "Simulate 1D ITk MD8 C-V ..."
-        raser "./python/solve_itk_md8_cv.py"
+        ./python/run_batchjob.py devsim "solve_itk_md8_cv.py" 
+        #raser "./python/solve_itk_md8_cv.py"
         ;;
 esac
 }
