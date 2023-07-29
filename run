@@ -94,6 +94,7 @@ usage_1_7() {
 usage_1_8() { 
     printf "\n\t%-5s  %-40s\n"  "1.8.1"    "Initial DataBase of DEVSIM" 
     printf "\n\t%-5s  %-40s\n"  "1.8.2"    "Build 1D ITk MD8 structure"
+    printf "\n\t%-5s  %-40s\n"  "1.8.3"    "Simulate 1D ITk MD8 C-V"
     printf "\n"
 }
 
@@ -384,6 +385,9 @@ case $option in
     1.3.12) echo "plot improved 1D NJU-PIN I-V ..."
         raser "./python/plot_nju_pin_iv_improved.py"
         ;;
+    1.3.20) echo "2Dcvfor v0.1"
+        raser "./python/2Dcv_v0.1.py"
+        ;;
             
 esac
 }
@@ -462,7 +466,8 @@ case $option in
         ;;
 
     1.8.3) echo "Simulate 1D ITk MD8 C-V ..."
-        raser "./python/solve_itk_md8_cv.py"
+        ./python/run_batchjob.py devsim "solve_itk_md8_cv.py" 
+        #raser "./python/solve_itk_md8_cv.py"
         ;;
 esac
 }
