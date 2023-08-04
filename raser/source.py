@@ -35,7 +35,7 @@ class TCTTracks():
         self.wavelength = laser["wavelength"]*1e-3 #um
         self.temporal_FWHM = laser["temporal_FWHM"]
         self.pulse_energy = laser["pulse_energy"]
-        self.spacial_FWHM = laser["spacial_FWHM"]#um
+        self.spacial_FWHM = 0.58 * laser["spacial_FWHM"]#um
         self.central_time = laser["central_time"]
         if "l_Reyleigh" not in laser:
             w_0 = self.spacial_FWHM / (2 * np.log(2))**0.5
