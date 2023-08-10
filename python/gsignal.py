@@ -99,7 +99,7 @@ def main():
         try:
             my_f = raser.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
         except:
-            print("Please run 1.3.3 first to get efield")
+            print("Please run 1.3.3 first to get efield(make sure run 1.3.1 once before you run 1.3.3)")
             exit(0)
     else:
         print("using fenics to build the field")
