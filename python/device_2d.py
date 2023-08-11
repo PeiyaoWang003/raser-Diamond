@@ -125,7 +125,7 @@ while v < 7:
     diode_element_physics.printCurrents(device, "bot", 0.0)
     v += 0.1
 
-    devsim.write_devices(file="./output/testdio/{0}_{1}dd.dat".format(type,v), type="floops")
-    devsim.write_devices(file="./output/testdio/{0}_{1}_2d_dd".format(type,v), type="tecplot")
+    devsim.write_devices(file="./output/testdiode/{0}_{1}dd.dat".format(type,v), type="floops")
+    devsim.write_devices(file="./output/testdiode/{0}_{1}_2d_dd".format(type,v), type="tecplot")
 
 print("This is simple pn juction with 2diffrent doping,please download .dd file and use tecplot to check")
