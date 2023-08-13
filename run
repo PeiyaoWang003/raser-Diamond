@@ -192,7 +192,7 @@ imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-1.4.sif
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 raser(){
-    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs $imagefile $1 
+    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 $imagefile $1 
 }
 
 sub_1_1(){
@@ -455,6 +455,10 @@ sub_1_7(){
 case $option in 
     1.7.1) echo "1.7.1"   "Si strip for RASER simulation ..."
         raser "./python/gsignal.py det_name=Si_Strip parfile=paras/setting.json Si_Strip geant4_model=Si_strip geant4_parfile=paras/geant4_setting.json"
+        ;;
+
+    1.7.2) echo "1.7.2"   "Si strip experiment analyse ..."
+        raser "./python/si_strip_analyse.py"
         ;;
 esac
 }
