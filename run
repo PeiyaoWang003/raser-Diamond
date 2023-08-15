@@ -297,17 +297,7 @@ case $option in
         ;;
 
     1.3.6) echo "Simulate 1D SICAR1 LGAD I-V ..."
-      #  ./python/run_batchjob.py devsim "devsim_solve.py device=1D_SICAR1_LGAD IV=True v_max=800"
-          gaindoping=(7.9e16 7.93e16 7.96e16 8.0e16)
-      
-       for ((i=0;i<4;i++))
-        do
-            bulkdoping=(5e14 5.2e14 5.4e14 5.6e14)
-            for ((c=0;c<4;c++))
-            do
-                ./python/run_batchjob.py devsim  "devsim_solve.py ${gaindoping[i]} ${bulkdoping[c]} device=1D_SICAR1_LGAD IV=True v_max=400"
-            done
-        done
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_SICAR1_LGAD IV=True v_max=800"
         ;;
 
     1.3.7) echo "Simulate 1D SICAR1 LGAD C-V ..."
