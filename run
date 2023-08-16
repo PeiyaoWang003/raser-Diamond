@@ -1028,12 +1028,12 @@ case $option in
         ;;
 
     6.2) echo "PixelDetector telescope"
-        usage_6_1
+        usage_6_2
         echo "Please enter your option: " 
         read option 
-        sub_6_1 option 
+        sub_6_2 option 
         ;;
     6.2.*) echo "PixelDetector telescope"
-        sub_6_1 option
+        sub_6_2 option
         ;;
 esac		
