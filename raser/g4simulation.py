@@ -17,6 +17,8 @@ import numpy as np
 
 # Geant4 main process
 class Particles:
+    #model name for other class to use
+    _model = None
     def __init__(self, my_d, my_f, dset):
         """
         Description:
@@ -38,6 +40,11 @@ class Particles:
         detector_material=dset.detector['material']
         if(self.geant4_model=='PixelDetector'):
             my_g4d = PixelDetectorConstruction(g4_dic,g4_dic['maxstep'])
+            Particles._model = self.geant4_model
+            #there's some parameter only use by this model
+            global s_devicenames,s_localposition
+            s_devicenames,s_localposition=[],[]
+            print("end g4")
         else:
             my_g4d = MyDetectorConstruction(my_d,g4_dic,detector_material,g4_dic['maxstep'])		
         if g4_dic['g4_vis']: 
@@ -86,6 +93,14 @@ class Particles:
         self.edep_devices=s_edep_devices
         self.events_angle=s_events_angle
 
+        if(self.geant4_model=='PixelDetector'):
+            #record localpos in logicvolume
+            self.devicenames = s_devicenames
+            self.localposition = s_localposition
+            for i in range (0,len(s_devicenames)):
+                print("eventID:",i)
+                print("totalhits:",len(s_localposition[i]))
+                
         if(self.geant4_model=="beam_monitor"):
             hittotal=0
             for particleenergy in s_edep_devices:
@@ -129,6 +144,8 @@ class PixelDetectorConstruction(g4b.G4VUserDetectorConstruction):
         self.logical = {}
         self.physical = {}
         self.checkOverlaps = True
+        self.maxStep = maxStep*g4b.um
+        self.fStepLimit = g4b.G4UserLimits(self.maxStep)
         self.create_world(g4_dic['world'])
         
         if(g4_dic['object']):
@@ -142,8 +159,7 @@ class PixelDetectorConstruction(g4b.G4VUserDetectorConstruction):
                     for every_object in g4_dic['object'][object_type]:
                         self.create_layer(g4_dic['object'][object_type][every_object])
 
-        self.maxStep = maxStep*g4b.um
-        self.fStepLimit = g4b.G4UserLimits(self.maxStep)
+        
         
 
     def create_world(self,world_type):
@@ -241,7 +257,7 @@ class PixelDetectorConstruction(g4b.G4VUserDetectorConstruction):
             for j in range(0,int(column)):
                 pixel = self.g4_dic['object']['pixel'][pixel_type]
                 t_translation = g4b.G4ThreeVector((pixel['side_x']*(j+1/2-column/2))*g4b.um, (pixel['side_y']*(i+1/2-row/2))*g4b.um,0.0*g4b.um)
-                t_pixelname = pixel_type+'_'+str(i)+'_'+str(j)+'_'+names
+                t_pixelname = pixel_type+'_'+str(i)+'_'+str(j)+'_'+name
                 g4b.G4PVPlacement(None, t_translation, 
                                 self.logical[pixel_type],t_pixelname,
                                 self.logical[name], False,
@@ -493,6 +509,8 @@ class MyEventAction(g4b.G4UserEventAction):
             self.event_angle = None
         save_geant4_events(eventID,self.edep_device,
                            self.p_step,self.energy_step,self.event_angle)
+        if(Particles._model == "PixelDetector"):
+            save_PixelDetector_events(self.volume_name,self.localposition)
 
     def RecordDevice(self, edep,point_in,point_out):
         self.edep_device += edep
@@ -514,15 +532,17 @@ class MyEventAction(g4b.G4UserEventAction):
         localpos = transform.TransformPoint(point_in)
         
         self.edep_device += edep
-        self.energy_step.append(edep)
-        self.volume_name.append(volume.GetName())
         self.p_step.append([point_in.getX()*1000,
                            point_in.getY()*1000,point_in.getZ()*1000])
+        self.energy_step.append(edep)
+        #save only in RecordPixel
+        self.volume_name.append(volume.GetName())
         self.localposition.append([localpos.getX()/g4b.um,localpos.getY()/g4b.um,localpos.getZ()/g4b.um])
-        print("edep:", edep)
-        print("Volume Name:", volume.GetName())
-        print("Global Position in Worlds Volume:",point_in/g4b.um)
-        print("Local Position in Logical Volume:", localpos/g4b.um)
+        
+        #print("edep:", edep)
+        #print("Volume Name:", volume.GetName())
+        #print("Global Position in Worlds Volume:",point_in/g4b.um)
+        #print("Local Position in Logical Volume:", localpos/g4b.um)
 
 def save_geant4_events(eventID,edep_device,p_step,energy_step,event_angle):
     if(len(p_step)>0):
@@ -537,7 +557,14 @@ def save_geant4_events(eventID,edep_device,p_step,energy_step,event_angle):
         s_p_steps.append([[0,0,0]])
         s_energy_steps.append([0])
         s_events_angle.append(event_angle)
-
+        
+def save_PixelDetector_events(volume_name,localposition):
+        global s_devicenames,s_localposition
+        s_devicenames.append(volume_name)
+        s_localposition.append(localposition)
+        #print("volume_name len:",len(volume_name))
+        #print("localposition len: ",len(localposition))
+        
 def cal_angle(point_a,point_b):
     "Calculate the angle between point a and b"
     x=np.array(point_a)
