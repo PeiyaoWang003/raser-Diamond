@@ -193,7 +193,7 @@ def draw_graphs(array1,keys,key_name,name,path):
   
     return
 
-def draw_double_graphs(array1,array2,keys,key_name,name,path):
+def draw_double_graphs(array1,array2,keys1,keys2,key_name,name,path):
     c = ROOT.TCanvas('c', '', 800, 600)
     c.SetFillColor(0)
     c.SetFrameFillColor(0)
@@ -205,9 +205,9 @@ def draw_double_graphs(array1,array2,keys,key_name,name,path):
 
     mg=ROOT.TMultiGraph("mg","")
     n1=len(array1)
-    graph1 = ROOT.TGraph(n1,keys,array1)
+    graph1 = ROOT.TGraph(n1,keys1,array1)
     n2=len(array2)
-    graph2 = ROOT.TGraph(n2,keys,array2)
+    graph2 = ROOT.TGraph(n2,keys2,array2)
 
     graph1.SetLineColor(2)
     graph2.SetLineColor(1)
@@ -237,7 +237,7 @@ def draw_double_graphs(array1,array2,keys,key_name,name,path):
     if name == 'VelProf':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.08)
+            mg.GetYaxis().SetRangeUser(0,0.1)
         else:
             mg.GetYaxis().SetRangeUser(0,0.015)
 
@@ -251,7 +251,7 @@ def draw_double_graphs(array1,array2,keys,key_name,name,path):
     if name == 'DifProf':
         Y_title = '1/\sigma [\mu m^{-1}]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.07)
+            mg.GetYaxis().SetRangeUser(0,0.1)
         else:
             mg.GetYaxis().SetRangeUser(0,0.003)
     
@@ -277,7 +277,7 @@ def draw_double_graphs(array1,array2,keys,key_name,name,path):
 
     c.SaveAs(path+name+"_"+key_name+"_comparison.pdf")
 
-def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
+def draw_triple_graphs(array1,array2,array3,keys1,keys2,keys3,key_name,name,path):
     c = ROOT.TCanvas('c', '', 800, 600)
     c.SetFillColor(0)
     c.SetFrameFillColor(0)
@@ -289,28 +289,48 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
 
     mg=ROOT.TMultiGraph("mg","")
     n1=len(array1)
-    graph1 = ROOT.TGraph(n1,keys,array1)
+    graph1 = ROOT.TGraph(n1,keys1,array1)
     n2=len(array2)
-    graph2 = ROOT.TGraph(n2,keys,array2)
+    graph2 = ROOT.TGraph(n2,keys2,array2)
     n3=len(array3)
-    graph3 = ROOT.TGraph(n3,keys,array3)
+    graph3 = ROOT.TGraph(n3,keys3,array3)
 
     graph1.SetLineColor(2)
     graph2.SetLineColor(1)
-    graph3.SetLineColor(40)
+    graph3.SetLineColor(35)
     graph1.SetMarkerColor(2)
     graph2.SetMarkerColor(1)
-    graph3.SetMarkerColor(4)
+    graph3.SetMarkerColor(35)
     graph1.SetMarkerStyle(26)
     graph2.SetMarkerStyle(4)
     graph3.SetMarkerStyle(32)
 
     graph3.SetLineWidth(4)
 
+    # fill the background
+    # gain layer
+    x1 = array("d",[0,2,2,0,0])
+    y1 = array("d",[0,0,0.1,0.1,0])
+    excl1 = ROOT.TGraph(5,x1,y1)
+    excl1.SetLineColor(ROOT.kPink+1)
+    excl1.SetFillColor(ROOT.kPink+1)
+    # bulk
+    x2 = array("d",[2,50,50,2,2])
+    y2 = array("d",[0,0,0.1,0.1,0])
+    excl2 = ROOT.TGraph(5,x2,y2)
+    excl2.SetLineColor(ROOT.kCyan-10)
+    excl2.SetFillColor(ROOT.kCyan-10)
+
+    mg.Add(excl1,"f")
+    mg.Add(excl2,"f")
+
     mg.Add(graph1,"p")
     mg.Add(graph2,"p")
     mg.Add(graph3,"l")
-    mg.Draw("a")
+    mg.Draw("a*")
+
+    ROOT.gPad.RedrawAxis()
+    ROOT.gPad.RedrawAxis("G")
 
     if name == 'Amplitude':
         Y_title = 'Amplitude [V]'
@@ -329,7 +349,7 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
     if name == 'VelProf':
         Y_title = 'Ve+Vh [a.u.]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.08)
+            mg.GetYaxis().SetRangeUser(0,0.1)
         else:
             mg.GetYaxis().SetRangeUser(0,0.015)
 
@@ -343,9 +363,20 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
     if name == 'DifProf':
         Y_title = '1/\sigma [\mu m^{-1}]'
         if 'LGAD' in path:
-            mg.GetYaxis().SetRangeUser(0,0.08)
+            mg.GetYaxis().SetRangeUser(0,0.1)
         else:
             mg.GetYaxis().SetRangeUser(0,0.003)
+
+        Box=ROOT.TBox(8,0.03,42,0.05)
+        Box.SetLineColor(ROOT.kRed)
+        Box.SetFillStyle(0)
+        Box.SetLineStyle(2)
+        Box.Draw()
+
+        l=ROOT.TLatex()
+        l.SetTextSize(20)
+        l.SetTextFont(43)
+        l.DrawLatex(11,0.022,"Full Gaussian shape region")
     
     mg.GetYaxis().SetTitle(Y_title)
     if key_name == "z":
@@ -357,10 +388,10 @@ def draw_triple_graphs(array1,array2,array3,keys,key_name,name,path):
     mg.GetXaxis().SetLabelSize(0.05)
     mg.GetXaxis().SetTitleSize(0.05)
 
-    legend = ROOT.TLegend(0.45,0.65, 0.81, 0.86)
+    legend = ROOT.TLegend(0.4,0.65, 0.76, 0.85)
     legend.AddEntry(graph1, "RASER simulation", "p")
     legend.AddEntry(graph2, "TCT measurement", "p")
-    legend.AddEntry(graph3, "Theory", "l")
+    legend.AddEntry(graph3, "Expected value", "l")
     legend.SetTextSize(27)
     legend.SetTextFont(43)
 
@@ -398,7 +429,7 @@ def draw_double_signals(time_1,time_2,signal_1,signal_2,key,key_name,path):
     mg.Draw('apl')
     
     mg.GetYaxis().SetTitle('Signal [V]')
-    mg.GetXaxis().SetTitle('time [ns]')
+    mg.GetXaxis().SetTitle('Time [ns]')
     mg.GetYaxis().SetLabelSize(0.05)
     mg.GetYaxis().SetTitleSize(0.05)
     mg.GetXaxis().SetLabelSize(0.05)
@@ -428,15 +459,21 @@ def analysis_depth(path,output_path,pulse_energy_scale):
     if "experiment" in sys.argv:
         amplitude, charge, risetime, velprof, difprof, volts, times = collect_data(path, "ngspice", pulse_energy_scale, 1e9, rel_z, 'fz_rel')
         amplitude_exp, charge_exp, risetime_exp, velprof_exp, difprof_exp, volts_exp, times_exp = collect_data(path, "exp-TCT", 1, 1, rel_z, 'fz_rel')
-        draw_double_graphs(amplitude,amplitude_exp,Z,"z","Amplitude",output_path)
-        draw_double_graphs(charge,charge_exp,Z,"z","Charge",output_path)
-        draw_double_graphs(risetime,risetime_exp,Z,"z","RiseTime",output_path)
-        draw_double_graphs(velprof,velprof_exp,Z,"z","VelProf",output_path)
-        draw_double_graphs(difprof,difprof_exp,Z,"z","DifProf",output_path)
+        draw_double_graphs(amplitude,amplitude_exp,Z,Z,"z","Amplitude",output_path)
+        draw_double_graphs(charge,charge_exp,Z,Z,"z","Charge",output_path)
+        draw_double_graphs(risetime,risetime_exp,Z,Z,"z","RiseTime",output_path)
+        draw_double_graphs(velprof,velprof_exp,Z,Z,"z","VelProf",output_path)
+        draw_double_graphs(difprof,difprof_exp,Z,Z,"z","DifProf",output_path)
 
         velprof_theory, difprof_theory = dif_cal()
-        draw_triple_graphs(velprof,velprof_exp,velprof_theory,Z,"z","VelProf",output_path)   
-        draw_triple_graphs(difprof,difprof_exp,difprof_theory,Z,"z","DifProf",output_path)   
+        Z_vel = array("d")
+        Z_dif = array("d")
+        for L in range(0,51):
+            Z_vel.append(L)
+        for L in range(2,51):
+            Z_dif.append(L)
+        draw_triple_graphs(velprof,velprof_exp,velprof_theory,Z,Z,Z_vel,"z","VelProf",output_path)   
+        draw_triple_graphs(difprof,difprof_exp,difprof_theory,Z,Z,Z_dif,"z","DifProf",output_path)   
 
         for volt,time,volt_exp,time_exp,z in zip(volts, times, volts_exp, times_exp, list(Z)):
             draw_double_signals(time,time_exp,volt,volt_exp,z,"z",output_path)
@@ -460,7 +497,7 @@ def analysis_voltage(path,output_path,pulse_energy_scale):
     if "experiment" in sys.argv:
         amplitude, charge, risetime, velprof, difprof, volts, times = collect_data(path, "sim-TCT", pulse_energy_scale, 1e9, V, 'voltage')
         amplitude_exp, charge_exp, risetime_exp, velprof_exp, difprof_exp, volts_exp, times_exp = collect_data(path, "exp-TCT", 1, 1, VN, 'voltage')
-        draw_double_graphs(charge,charge_exp,V,"voltage","Charge",output_path)
+        draw_double_graphs(charge,charge_exp,V,V,"voltage","Charge",output_path)
 
         for volt,time,volt_exp,time_exp,v in zip(volts, times, volts_exp, times_exp, list(V)):
             draw_double_signals(time,time_exp,volt,volt_exp,v,"voltage",output_path)
@@ -475,23 +512,22 @@ def dif_cal():
     my_lgad = raser.R3dDetector(lgad_set)
     my_lgad_field = raser.FenicsCal(my_lgad,lgad_set.fenics)
 
-    field = array("d")
-    dif = array("d")
+    field = array("d") # in [0,50]
+    dif = array("d")   # in [2,50]
     E_2 = my_lgad_field.get_e_field(650,650,2)[2]
-    for i in range(-8,59):
+    for i in range(0,51):
         E = my_lgad_field.get_e_field(650,650,i)[2]
         field.append(0.002*E)
-        if i not in range(2,50):
-            dif.append(0) # fake value for not shown in the figure
+        if i not in range(2,51):
             continue
-        fE = (1+2*np.log(E_2/E))
+        fE = (E_2/E)**2
         C = (350e-12*1e5*1e6/2)**2/2/np.log(2) # τ^2v^2
         z1C0 = (6.8/2)**2 # w_0^2/4
         z1C2 = 1.064**2/4/np.pi**2/(6.8/2)**2/11.9**2
         z2 = 2.8
         alpha = 9.87e-4
         def f(x):
-            return np.exp(-alpha*x)*alpha/(C + (z1C2 * x**2 + z1C0) * fE + z2 * fE**2)**0.5
+            return np.exp(-alpha*x)*alpha/(C + (z1C2 * x**2 + z1C0) * fE + z2/2 * (fE-1))**0.5
 
         n = 1301
         x_list = np.linspace(0, 1300, n) # in cm
