@@ -21,8 +21,10 @@ n_i    = 3.8e-9 # #/cm^3
 # constant in our approximation
 mu_n   = 1100
 mu_p   = 114
-n_a    = 2.1e7
-p_a    =  1.7e7
+#n_a    = 2.1e7
+n_a    = 176000000
+#p_a    =  1.7e7
+p_a    = 341000000
 def GetContactBiasName(contact):
     return "{0}".format(contact)
 
@@ -196,8 +198,8 @@ def CreateImpactGeneration(device, region):
     #Ion_coeff_n  = "gamma * n_a * exp( - gamma * n_b / (ElectricField))"
     #Ion_coeff_p  = "gamma * p_a * exp( - gamma * p_b / (ElectricField))"
 
-    Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, gamma * n_a * exp( - gamma * n_b / (abs(ElectricField)+1)), 1)"
-    Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, gamma * p_a * exp( - gamma * p_b / (abs(ElectricField)+1)), 1)"
+    Ion_coeff_n  = "ifelse(abs(ElectricField)1.75e05, gamma * n_a * exp( - gamma * n_b / (abs(ElectricField)+1)), 1)"
+    Ion_coeff_p  = "ifelse(abs(ElectricField)>1e7, gamma * p_a * exp( - gamma * p_b / (abs(ElectricField)+1)), 1)"
 
     Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/q"
 

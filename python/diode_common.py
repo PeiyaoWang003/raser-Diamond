@@ -39,46 +39,6 @@ def Create2DMesh(device, region):
 
 
 
-'''
-def Create2DMesh(device,region):
-    create_2d_mesh  (mesh="Sicar")
-    #宽0.01cm
-    add_2d_mesh_line(mesh="Sicar", dir="x", pos=0     , ps=1e-4)
-    add_2d_mesh_line(mesh="Sicar", dir="x", pos=1e-2  , ps=1e-4)
-
-    #长0.5cm
-    add_2d_mesh_line(mesh="Sicar", dir="y", pos=0     , ps=1e-4)
-    add_2d_mesh_line(mesh="Sicar", dir="y", pos=0.5 , ps=1e-4)
-
-    #划分各个区域
-    #0-0.3um P++
-    add_2d_mesh_line(mesh="Sicar", dir="x", pos=0.3e-4     , ps=1e-4)
-    #0.3e-5-1.3um N+
-    add_2d_mesh_line(mesh="Sicar", dir="x", pos=1.3e-4  , ps=1e-4)
-    #1.3-51.3um n-
-    add_2d_mesh_line(mesh="Sicar", dir="x", pos=51.3e-4  , ps=1e-4)
-    #51.3um-56.3um nbuffer
-    add_2d_mesh_line(mesh="Sicar", dir="x", pos=56.3e-4  , ps=1e-4)
-
-    add_2d_mesh_line(mesh="Sicar", dir="x", pos=-1e-4   , ps=1e-4)
-    add_2d_mesh_line(mesh="Sicar", dir="x", pos=1.01e-2, ps=1e-4)
-
-    add_2d_region   (mesh="Sicar", material="SiliconCarbide", region=region)
-    add_2d_region   (mesh="Sicar", material="air", region="air1", xl=-1e-4,  xh=0)
-    add_2d_region   (mesh="Sicar", material="air", region="air2", xl=1.01e-2, xh=1e-2)
-
-    add_2d_contact  (mesh="Sicar", name="Pcontact", region=region, yl=0, yh=0.5, xl=0, xh=0, bloat=1e-6, material="metal")
-    add_2d_contact  (mesh="Sicar", name="Ncontact", region=region, xl=1e-2,   xh=1e-2, bloat=1e-6, material="metal")
-
-    finalize_mesh   (mesh="Sicar")
-    create_device   (mesh="Sicar", device=device)
-    
-'''
-
-
-
-
-
 
 def SetParameters(device, region):
     '''
@@ -91,14 +51,14 @@ def SetNetDoping(device, region,type1):
     
     if type1=="PNjuction":
         physics2D.CreateNodeModel(device, region, "Acceptors", "1.0e19*step(0.3e-4-x)")
-        physics2D.CreateNodeModel(device, region, "Donors",    "7.96e13*( step((1.3e-4)-x) -step((3e-5)-x) ) + 5.6e12*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((1e-2)-x) - step((51.3e-4)-x) )")
+        physics2D.CreateNodeModel(device, region, "Donors",    "7.96e13*( step((1.3e-4)-x) -step((3e-5)-x) ) + 5.6e12*( step((1e-2)-x) - step((1.3e-4)-x) ) ")
         physics2D.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
         devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
         devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")
         devsim.edge_from_node_model(device=device,region=region,node_model="Donors")
     elif type1 =="PNwithGainlayer":
-        physics2D.CreateNodeModel(device, region, "Acceptors", "1.0e19*step(0.3e-4-x)")
-        physics2D.CreateNodeModel(device, region, "Donors",    "7.96e13*( step((1.3e-4)-x) -step((3e-5)-x) ) + 5.6e12*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 2.0e18*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
+        physics2D.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")
+        physics2D.CreateNodeModel(device, region, "Donors",    "1.0e17*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.0e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 1.0e19*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
         physics2D.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
         devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
         devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")
