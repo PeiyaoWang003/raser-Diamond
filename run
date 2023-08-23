@@ -18,6 +18,7 @@ usage() {
     printf "\n\t%-9s  %-40s\n"  "1.6"       "Ring-PIN"
     printf "\n\t%-9s  %-40s\n"  "1.7"       "Si_Strip"
     printf "\n\t%-9s  %-40s\n"  "1.8"       "ITk MD8"
+    printf "\n\t%-9s  %-40s\n"  "1.9"       "ALiBaVa"
 
     printf "\n\t%-9s  %-40s"    "2.1"       "SiC-LGAD"
     printf "\n\t%-9s  %-40s\n"  "2.2"       "Si-LGAD"
@@ -29,8 +30,10 @@ usage() {
     printf "\n\t%-9s  %-40s\n"  "4.1"       "SiC-3D"
 
     printf "\n\t%-9s  %-40s\n"  "5.1"       "TRACK-NGspice"
-
+    printf "\n\t%-9s  %-40s\n"  "5.2"       "T1-TEST"
+    
     printf "\n\t%-9s  %-40s\n"  "6.1"       "Telescope"
+    printf "\n\t%-9s  %-40s\n"  "6.2"       "PixelDetector Telescope "
 
     printf "\n\t%-9s  %-40s"    "7.1"       "Si strip"
 
@@ -40,9 +43,9 @@ usage() {
 usage_1_1() { 
     printf "\n\t%-5s  %-40s\n"  "1.1.1"    "NJU-PIN basic information for RASER simulation ..." 
     printf "\n\t%-5s  %-40s\n"  "1.1.2"    "batch model with total number, split with step number" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.3"    "get time resolution for HPK-Si-PIN"
+    printf "\n\t%-5s  %-40s\n"  "1.1.3"    "get time resolution for NJU-PIN"
     printf "\n\t%-5s  %-40s\n"  "1.1.4"    "batch model with total number, split with step number, multi points voltage [-50,-500]" 
-    printf "\n\t%-5s  %-40s\n"  "1.1.5"    "get time resolution 3D-SiC multi points voltage [-300,-500]" 
+    printf "\n\t%-5s  %-40s\n"  "1.1.5"    "get time resolution multi points voltage [-300,-500]" 
     printf "\n\t%-5s  %-40s\n"  "1.1.6"    "get time resolution vs draw voltage" 
     printf "\n"
 }
@@ -67,6 +70,9 @@ usage_1_3() {
     printf "\n\t%-5s  %-40s\n"  "1.3.10"   "Simulate 3D NJU-PIN I-V"
     printf "\n\t%-5s  %-40s\n"  "1.3.11"   "Simulate irradiated NJU-PIN"
     printf "\n\t%-5s  %-40s\n"  "1.3.12"   "plot improved 1D NJU-PIN I-V"
+    printf "\n\t%-5s  %-40s\n"  "1.3.20"   "simulate simple 2d PN juction with 2diffrent doping"
+    printf "\n\t%-5s  %-40s\n"  "1.3.21"   "simulate simple 2d PN juction with Gain layer doping and bulk doping"
+    printf "\n\t%-5s  %-40s\n"  "1.3.22"   "Simulate 2D Sicar C-V"
 }
 
 usage_1_4() { 
@@ -94,6 +100,7 @@ usage_1_7() {
 usage_1_8() { 
     printf "\n\t%-5s  %-40s\n"  "1.8.1"    "Initial DataBase of DEVSIM" 
     printf "\n\t%-5s  %-40s\n"  "1.8.2"    "Build 1D ITk MD8 structure"
+    printf "\n\t%-5s  %-40s\n"  "1.8.3"    "Simulate 1D ITk MD8 C-V"
     printf "\n"
 }
 
@@ -170,8 +177,18 @@ usage_5_1() {
     printf "\n"
 }
 
+usage_5_2() {
+    printf "\n\t%-5s  %-40s\n"  "5.2.1"    "T1 noise test..." 
+    printf "\n"
+}
+
 usage_6_1() {
     printf "\n\t%-5s  %-40s\n"  "6.1.1"    " two pixel detector..create."  
+    printf "\n"
+}
+
+usage_6_2() {
+    printf "\n\t%-5s  %-40s\n"  "6.2.1"    " Simulation of PixelDetector, and Telescope reconstrution"  
     printf "\n"
 }
 
@@ -186,17 +203,17 @@ else
 fi
 
 
-imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-1.3.sif
+imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-1.4.sif
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
 raser(){
-    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs $imagefile $1 
+    apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 $imagefile $1 
 }
 
 sub_1_1(){
 case $option in 
     1.1.1) echo "SiC-PIN basic information for RASER simulation ..." 
-        raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json" 
+        raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json devsim geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json" 
         ;;
 
 	1.1.2) echo "batch model with total number, split with step number"
@@ -299,7 +316,8 @@ case $option in
         ;;
 
     1.3.7) echo "Simulate 1D SICAR1 LGAD C-V ..."
-        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_SICAR1_LGAD CV=True v_max=400"
+        gaindoping=1.48e17 bulkdoping=1.0e14
+        ./python/run_batchjob.py devsim "devsim_solve.py ${gaindoping} ${bulkdoping} device=1D_SICAR1_LGAD CV=True v_max=400 g"
         ;;
 
     1.3.8) echo "Simulate 1D NJU-PIN I-V Defect ..."
@@ -384,6 +402,21 @@ case $option in
     1.3.12) echo "plot improved 1D NJU-PIN I-V ..."
         raser "./python/plot_nju_pin_iv_improved.py"
         ;;
+
+    1.3.13) echo "simulate doping of SICAR1 using C-V of SICAR1-1"
+        gaindoping=7.96e16 bulkdoping=2.3e14
+        ./python/run_batchjob.py devsim "devsim_solve.py ${gaindoping} ${bulkdoping} device=1D_SICAR1_LGAD CV=True v_max=320"
+        ;;
+        
+    1.3.20) echo "simulate simple 2d PN juction with 2diffrent doping"
+        raser "./python/device_2d.py PNjuction"
+        ;; 
+    1.3.21) echo "simulate simple 2d PN juction with Gain layer doping and bulk doping"
+        raser "./python/device_2d.py PNwithGainlayer" 
+        ;;
+    1.3.22) echo "simulate Sicar Lgad CV"
+        ./python/run_batchjob.py devsim "scanCV.py"
+       
             
 esac
 }
@@ -448,6 +481,10 @@ case $option in
     1.7.1) echo "1.7.1"   "Si strip for RASER simulation ..."
         raser "./python/gsignal.py det_name=Si_Strip parfile=paras/setting.json Si_Strip geant4_model=Si_strip geant4_parfile=paras/geant4_setting.json"
         ;;
+
+    1.7.2) echo "1.7.2"   "Si strip experiment analyse ..."
+        raser "./python/si_strip_analyse.py"
+        ;;
 esac
 }
 
@@ -462,7 +499,16 @@ case $option in
         ;;
 
     1.8.3) echo "Simulate 1D ITk MD8 C-V ..."
-        raser "./python/solve_itk_md8_cv.py"
+        ./python/run_batchjob.py devsim "solve_itk_md8_cv.py" 
+        #raser "./python/solve_itk_md8_cv.py"
+        ;;
+esac
+}
+
+sub_1_9(){
+case $option in 
+    1.9.1) echo "ALiBaVa SiC PIN ..."
+        raser "./python/alibava/AliSys.py --config python/alibava/config/default_config.yml --data 20230809"
         ;;
 esac
 }
@@ -616,6 +662,18 @@ case $option in
                 "TCTtest.py det_name=HPK-Si-PIN parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/HPK-Si-PIN/ parameter_alter=True fz_rel=$z"
             done 
             ;;  
+
+    3.2.3V) echo "get volt-time for Si-PIN edge-TCT, multi points V [-200,-60]"
+        step=1
+        k=20
+
+            for ((j=3;j<11;j++))
+            do
+                V=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
+                ./python/run_batchjob.py pintct/HPK-Si-PIN \
+                "TCTtest.py det_name=HPK-Si-PIN parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/HPK-Si-PIN/ parameter_alter=True voltage=$V"
+            done 
+            ;;  
  
     3.2.4) echo "get volt-time for Si-LGAD edge-TCT, multi points z [0,50]"
         step=1
@@ -628,18 +686,31 @@ case $option in
             done            
             ;;
 
+    3.2.4V) echo "get volt-time for Si-LGAD edge-TCT, multi points V [-200,-60]"
+        step=1
+        k=20
+
+            for ((j=3;j<11;j++))
+            do
+                V=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
+                ./python/run_batchjob.py lgadtct/HPK-Si-LGAD \
+                "TCTtest.py det_name=HPK-Si-LGAD parfile=paras/setting.json laser_model=edge_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/HPK-Si-LGAD/ parameter_alter=True voltage=$V"
+            done 
+            ;; 
+
     3.2.5) echo "analyse eTCT rootfiles"
-        ./python/tct_analysis.py output/pintct/HPK-Si-PIN/
-        ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/
+        ./python/paper4/tct_analysis.py output/pintct/HPK-Si-PIN/data/ output/pintct/HPK-Si-PIN/result/
+        ./python/paper4/tct_analysis.py output/lgadtct/HPK-Si-LGAD/data/ output/lgadtct/HPK-Si-LGAD/result/
         ;;
 
-    3.2.6) echo "get volt-time from experiment"
-        ./python/readdata/extract_waveform.py
+    3.2.6) echo "get volt-time and iv/cv from experiment"
+        ./python/paper4/extract_waveform.py
+        ./python/paper4/draw_iv_cv.py
         ;;
 
     3.2.7) echo "analyse eTCT rootfiles with experiment data"
-        ./python/tct_analysis.py output/pintct/HPK-Si-PIN/ "experiment"
-        ./python/tct_analysis.py output/lgadtct/HPK-Si-LGAD/ "experiment"
+        raser './python/paper4/tct_analysis.py output/pintct/HPK-Si-PIN/data/ output/pintct/HPK-Si-PIN/result/ experiment'
+        raser './python/paper4/tct_analysis.py output/lgadtct/HPK-Si-LGAD/data/ output/lgadtct/HPK-Si-LGAD/result/ experiment'
         ;;
 
 esac
@@ -719,10 +790,27 @@ case $option in
 esac
 }
 
+sub_5_2(){
+case $option in 
+    5.2.1) echo "T1 noise test ..."
+        raser "./python/noise_histogram.py" 
+        echo "raw data file t1.raw has been saved in fig/t1.raw"
+        ;;
+esac
+}
+
 sub_6_1(){
 case $option in 
     6.1.1) echo "create two pixel detector..."
         raser "./raser/telescope.py"
+        ;;
+esac
+}
+
+sub_6_2(){
+case $option in 
+    6.2.1) echo "Simulation of PixelDetector, and Telescope reconstrution"
+        raser "./python/gsignal.py det_name=Taichu3 parfile=paras/setting.json geant4_model=PixelDetector geant4_parfile=paras/geant4_setting.json PixelDetector"
         ;;
 esac
 }
@@ -855,6 +943,15 @@ case $option in
     1.8.*) echo "ITk MD8 simulation"
         sub_1_8 option
         ;;
+    1.9) echo "ALBaVa"
+        usage_1_9
+        echo "Please enter your option: " 
+        read option 
+        sub_1_9 option 
+        ;;
+    1.9.*) echo "ALiBaVa"
+        sub_1_9 option
+        ;;
 
     2.1) echo "RASER simulate SiC-LGAD"
         usage_2_1
@@ -963,7 +1060,15 @@ case $option in
     5.1.*) echo "NGspice simulation"
         sub_5_1 option
         ;;
-
+    5.2) echo "T1 noise test"
+        usage_5_2
+        echo "Please enter your option: " 
+        read option 
+        sub_5_2 option 
+        ;;
+    5.2.*) echo "T1 noise test"
+        sub_5_2 option
+        ;;
     6.1) echo "telescope"
         usage_6_1
         echo "Please enter your option: " 
@@ -972,5 +1077,15 @@ case $option in
         ;;
     6.1.*) echo "telescope"
         sub_6_1 option
+        ;;
+
+    6.2) echo "PixelDetector telescope"
+        usage_6_2
+        echo "Please enter your option: " 
+        read option 
+        sub_6_2 option 
+        ;;
+    6.2.*) echo "PixelDetector telescope"
+        sub_6_2 option
         ;;
 esac		

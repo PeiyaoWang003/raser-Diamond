@@ -52,6 +52,15 @@ def main():
             print("The electrode model is wrong.")
     my_d = raser.R3dDetector(dset)
     
+    if "PixelDetector" in args:
+        #my_f = raser.FenicsCal(my_d,dset.fenics)
+        my_f = 0
+        my_g4p = raser.Particles(my_d, my_f, dset)
+        #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+        #ele_current = raser.Amplifier(my_current, dset.amplifier)
+        #drawsave.get_beam_number(my_g4p,ele_current)
+        return  
+    
     if "beammonitor" in args:
         my_f = raser.FenicsCal(my_d,dset.fenics)
         my_g4p = raser.Particles(my_d, my_f, dset)
@@ -93,14 +102,16 @@ def main():
         drawsave.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         drawsave.cce(my_d,my_f,my_current)
         return
-    print(det_dic['voltage'])
-
-    e_field_filepath = './output/devsim/1D_NJU_PIN/'\
-                        + str(-int(det_dic['voltage'])) + '.0V_x_E.csv'
-    try:
-        my_f = raser.DevsimCal(e_field_filepath, my_d, dset.fenics)
-    except FileNotFoundError:
-        print("devsim field not found, using fenics to build the field")
+   
+    if('devsim' in args):
+        print("using devsim to build the field")
+        try:
+            my_f = raser.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
+        except:
+            print("Please run 1.3.3 first to get efield(make sure run 1.3.1 once before you run 1.3.3)")
+            exit(0)
+    else:
+        print("using fenics to build the field")
         my_f = raser.FenicsCal(my_d,dset.fenics)
         
     my_g4p = raser.Particles(my_d, my_f, dset)

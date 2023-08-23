@@ -2,6 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 from geant4_pybind import *
+import numpy as np
 
 import math
 import sys
@@ -501,14 +502,75 @@ class B2SteppingAction(G4UserSteppingAction):
                    "pos1:",G4BestUnit(self.pos1,"Length"),
                    "pos2:",G4BestUnit(self.pos2,"Length"),
                    "\n准位置分辨:",G4BestUnit((self.pos0 + self.pos2)/2 - self.pos1,"Length"))
+             
+             points = [[self.hitpos0.getX(), self.hitpos0.getY(), self.hitpos0.getZ()], 
+                       [self.hitpos2.getX(), self.hitpos2.getY(), self.hitpos2.getZ()]]
+             k1, b1, k2, b2 = B2SteppingAction.linear_fitting_3D_points(points)
+             print("k1:", k1)
+             print("b1:", b1)
+             print("k2:", k2)
+             print("b2:", b2)
+             
+             Reconpos0X = k1 * firstZPosition + b1
+             Reconpos0Y = k2 * firstZPosition + b2 
+             Reconpos2X = k1 * (firstZPosition + chamberSpacing) + b1
+             Reconpos2Y = k2 * (firstZPosition + chamberSpacing) + b2
+             ReconPosResX = (Reconpos0X+ Reconpos2X)/2 - self.hitpos1.getX()
+             ReconPosResY = (Reconpos0Y+ Reconpos2Y)/2 - self.hitpos1.getY()
+             ReconPosResX0 = k1 * (firstZPosition + chamberSpacing/2) + b1 - self.hitpos1.getX()
+             ReconPosResY0 = k2 * (firstZPosition + chamberSpacing/2) + b2 - self.hitpos1.getY()
 
-
+             print("重建后位置分辨:X:",G4BestUnit(ReconPosResX,"Length"),
+                   "Y:",G4BestUnit(ReconPosResY,"Length"),
+                   "X0:",G4BestUnit(ReconPosResX0,"Length"),
+                   "Y0:",G4BestUnit(ReconPosResY0,"Length"))
+             
              return
-        edepStep = aStep.GetTotalEnergyDeposit()
 
-       
+     ##  由空间3维点拟合出一条直线
+    def linear_fitting_3D_points(points):
+     '''
+     用直线拟合三维空间数据点。
+     直线方程可以转化成如下形式：
+     x = k1 * z + b1
+     y = k2 * z + b2
 
-        
+     Input:
+         points    ---   List，三维空间数据点，例如：
+                         [[2,3,48],[4,5,50],[5,7,51]]
+                
+     返回值是公式系数 k1, b1, k2, b2
+     '''
+
+     # 表示矩阵中的值
+     Sum_X = 0.0
+     Sum_Y = 0.0
+     Sum_Z = 0.0
+     Sum_XZ = 0.0
+     Sum_YZ = 0.0
+     Sum_Z2 = 0.0
+
+     for i in range(0, len(points)):
+        xi = points[i][0]
+        yi = points[i][1]
+        zi = points[i][2]
+
+        Sum_X = Sum_X + xi
+        Sum_Y = Sum_Y + yi
+        Sum_Z = Sum_Z + zi
+        Sum_XZ = Sum_XZ + xi * zi
+        Sum_YZ = Sum_YZ + yi * zi
+        Sum_Z2 = Sum_Z2 + zi ** 2
+
+     n = len(points)  # 点数
+     den = n * Sum_Z2 - Sum_Z * Sum_Z  # 公式分母
+     k1 = (n * Sum_XZ - Sum_X * Sum_Z) / den
+     b1 = (Sum_X - k1 * Sum_Z) / n
+     k2 = (n * Sum_YZ - Sum_Y * Sum_Z) / den
+     b2 = (Sum_Y - k2 * Sum_Z) / n
+
+     return k1, b1, k2, b2
+  
 
 
 class B2ActionInitialization(G4VUserActionInitialization):

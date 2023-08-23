@@ -8,9 +8,9 @@
         "refractionIndex" : 3.124,
     
         "wavelength" : 355,
-        "tau" : 10e-9,
+        "temporal_FWHM" : 10e-9,
         "pulse_energy" : 1.23e-11,
-        "widthBeamWaist" : 20,
+        "spacial_FWHM" : 20,
         "central_time" : 20e-9,
     
         "r_step" : 5,
@@ -30,9 +30,9 @@
         "refractionIndex" : 3.51,
     
         "wavelength" : 660,
-        "tau" : 500e-12,
+        "temporal_FWHM" : 500e-12,
         "pulse_energy" : 8e-13,
-        "widthBeamWaist" : 5,
+        "spacial_FWHM" : 5,
         "central_time" : 1e-9,
     
         "r_step" : 1,
@@ -52,9 +52,9 @@
         "refractionIndex" : 3.51,
     
         "wavelength" : 660,
-        "tau" : 350e-12,
+        "temporal_FWHM" : 350e-12,
         "pulse_energy" : 8e-13,
-        "widthBeamWaist" : 5,
+        "spacial_FWHM" : 5,
         "central_time" : 1e-9,
     
         "r_step" : 2,
@@ -74,9 +74,9 @@
         "refractionIndex" : 3.51,
     
         "wavelength" : 1064,
-        "tau" : 500e-12,
-        "pulse_energy" : 1e-12,
-        "widthBeamWaist" : 14,
+        "temporal_FWHM" : 350e-12,
+        "pulse_energy" : 2.2e-15,
+        "spacial_FWHM" : 8,
         "central_time" : 1e-9,
     
         "r_step" : 2,
@@ -96,9 +96,9 @@
         "refractionIndex" : 3.124,
 
         "wavelength" : 355,
-        "tau" : 8.1e-9,
+        "temporal_FWHM" : 8.1e-9,
         "pulse_energy" : 3e3,
-        "widthBeamWaist" : 25,
+        "spacial_FWHM" : 25,
         "central_time" : 20e-9,
 
         "r_step" : 1,
@@ -118,9 +118,9 @@
         "refractionIndex" : 3.51,
 
         "wavelength" : 1550,
-        "tau" : 60e-15,
+        "temporal_FWHM" : 60e-15,
         "pulse_energy" : 5e-11,
-        "widthBeamWaist" : 1,
+        "spacial_FWHM" : 1,
         "l_Rayleigh" : 15.7,
         "central_time" : 1e-9,
         

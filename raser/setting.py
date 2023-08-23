@@ -234,7 +234,9 @@ class Setting:
                     "par_type":p['par_type'], "par_energy":p['par_energy'],
                     "world":p['world'], "object":p['object'],'model':p['geant4_model']
                     }
-        
+        if(pygeant4['model'] == "PixelDetector"):
+            pygeant4['par_randx']=p['par_randx']
+            pygeant4['par_randy']=p['par_randy']
         return pygeant4
 
     @property
@@ -259,11 +261,11 @@ class Setting:
 
         wavelength : float
             the Wavelength of Laser in nm
-        tau : float
+        temporal_FWHM : float
             the Full-width at Half-maximum (FWHM) of the Beam Temporal Profile
         pulse_energy : float
             the Energy per Laser Pulse
-        widthBeamWaist : float
+        spacial_FWHM : float
             the Width of the Beam Waist of the Laser in um
         l_Rayleigh : float
             the Rayleigh Width of the Laser Beam
@@ -284,7 +286,7 @@ class Setting:
             p = self.laser_paras
             laser = {'tech':p['tech'],'direction':p['direction'],
                     'refractionIndex':p['refractionIndex'],
-                    "wavelength":p["wavelength"],"tau":p["tau"],"pulse_energy":p["pulse_energy"],"widthBeamWaist":p["widthBeamWaist"],
+                    "wavelength":p["wavelength"],"temporal_FWHM":p["temporal_FWHM"],"pulse_energy":p["pulse_energy"],"spacial_FWHM":p["spacial_FWHM"],
                     'r_step':p['r_step'],'h_step':p['h_step'], 'central_time':p["central_time"],
                     'fx_rel':p['fx_rel'],'fy_rel':p['fy_rel'],'fz_rel':p['fz_rel'],
                     }

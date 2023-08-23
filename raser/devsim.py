@@ -13,7 +13,7 @@ from scipy.interpolate import interp1d
 import math
 
 class DevsimCal:
-    def __init__(self, filepath, my_d, dev_dic):
+    def __init__(self, my_d,det_name,det_dic,dev_dic):
         self.voltage = my_d.voltage
         self.protential = []
         self.l_z = my_d.l_z
@@ -21,11 +21,13 @@ class DevsimCal:
         self.lz = []
         self.elefield = []
         self.gradu = []
-        self.readfile(filepath)
+        if(det_name=="NJU-PIN"):
+            e_field_filepath = './output/devsim/1D_NJU_PIN/'+ str(-int(det_dic['voltage'])) + '.0V_x_E.csv'
+        self.readfile(e_field_filepath)
 
-    def readfile(self, filepath):
+    def readfile(self, e_field_filepath):
         i = 0
-        with open(filepath, 'r') as f:
+        with open(e_field_filepath, 'r') as f:
             for line in f.readlines():
                 try:
                     fargs = list(map(float, 
@@ -48,7 +50,7 @@ class DevsimCal:
     
     def get_w_p(self, x, y, depth, i):
         if depth >= 1:
-            f_p = (1/(self.l_z-1)) * (depth-1)
+            f_p = 1 - (1/(self.l_z-1)) * (depth-1)
         else:
             f_p = 0
         return f_p
