@@ -56,6 +56,7 @@ def main():
         extend_set()
         initial_solution_Rirr(device,region,para_dict,Rirr=Rirrad)
         solve_iv_Rirr(device,region,Rirrad,v_max,para_dict)
+        return 0
 
     if "backdopingtest" in para_dict:
         device = "1D_ITK_MD8"
@@ -63,7 +64,7 @@ def main():
         itk_md8_mesh.Create1DMesh(device=device, region=region)
         backthickness=para_dict["backthickness"]
         back_doping=para_dict["backdopingtest"]
-        itk_md8_mesh.SetDoping_2(device=device, region=region,backthickness=backthickness, back_doping=back_doping)
+        itk_md8_mesh.SetDoping(device=device, region=region,backthickness=backthickness, back_doping=back_doping)
         extend_set()
         initial_solution(device,region,para_dict)
         solve_iv_backtest(device,region,v_max,para_dict,backthickness,back_doping)
@@ -135,10 +136,6 @@ def initial_solution(device,region,para_dict):
     else:
     ### Drift diffusion simulation at equilibrium
         Initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
-        GGGddd=devsim.get_node_model_values(device=device, region=region, name="ElectronGeneration")
-        GGGaaa=devsim.get_node_model_values(device=device, region=region, name="HoleGeneration")
-        # print("Gd="+str(GGGddd)+"\n")
-        # print("Ga="+str(GGGaaa)+"\n")
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
     """names        = ["E30K"   , "V3"      , "Ip"      , "H220"    , "CiOi"    ]
         g_ints       = [0.0497   , 0.6447    , 0.4335    , 0.5978    , 0.3780    ]
