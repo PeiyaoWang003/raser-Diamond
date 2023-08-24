@@ -227,7 +227,7 @@ def solve_iv(device,region,v_max,para_dict):
         ITK_MD8_doping=doping1
         area_factor = 1.0/(0.8*0.8)
 #        f_md8iv = open("./output/devsim/"+device+"_"+"irr_new"+"/"+device+condition+"1e11neq_reverse_iv.csv", "w")
-        f_md8iv = open("./output/devsim/withback"+device+"_"+"3.2e12"+"/2umstop1e16"+device+condition+"3.2e12_reverse_iv.csv", "w")
+        f_md8iv = open("./output/devsim/withback"+device+"_"+"3.2e12"+"/test0.1um1e17"+device+condition+"3.2e12_reverse_iv.csv", "w")
         header_md8iv = ["Voltage","Current"]
         writer_md8iv = csv.writer(f_md8iv)
         writer_md8iv.writerow(header_md8iv)

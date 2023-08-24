@@ -62,7 +62,7 @@ def SetDoping_old(device, region, bulk_doping=doping):#default doping 4.7e12
     devsim.edge_from_node_model(device=device,region=region,node_model="Donors")
 
 
-def SetDoping(device, region, bulk_doping=doping, backthickness="303", back_doping="1e16"):#default doping 4.7e12
+def SetDoping(device, region, bulk_doping=doping, backthickness="304.9", back_doping="1e17"):#default doping 4.7e12
     '''
       Doping
     '''

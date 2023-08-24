@@ -853,10 +853,9 @@ case $option in
         ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 irradiation=True IV=True v_max=800 Rirr=1e19"
         ;;
 
-    7.8.3) echo "Simulate 1D ITk MD8 C-V ..."
+    7.2.5) echo "Simulate 1D ITk MD8 C-V ..."
         raser "./python/solve_itk_md8_cv.py"
         ;;
-
         esac
 }
 
