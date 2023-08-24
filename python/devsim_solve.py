@@ -172,14 +172,6 @@ def initial_solution_Rirr(device,region,para_dict,Rirr=None):
         # print("Gd="+str(GGGddd)+"\n")
         # print("Ga="+str(GGGaaa)+"\n")
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
-    """names        = ["E30K"   , "V3"      , "Ip"      , "H220"    , "CiOi"    ]
-        g_ints       = [0.0497   , 0.6447    , 0.4335    , 0.5978    , 0.3780    ]
-        for Neutron_eq in range(int(2e11),int(5e11),int(1e11)):
-            for name, g_int in zip(names, g_ints):
-                N_t_irr = g_int*Neutron_eq
-                devsim.add_db_entry(material="global",   parameter="N_t_irr_"+name,     value=N_t_irr,   unit="cm^(-3)",     description="N_t_"+name)
-            devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=400)
-            print("Neutron_eq="+str(Neutron_eq))"""
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=50,maximum_divergence=50)
  
 
