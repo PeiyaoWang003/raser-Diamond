@@ -20,8 +20,14 @@ build-login:
 build-raser: 
 	apptainer build --fakeroot raser.sif cfg/raser.def
 
-build-raser-dev: 
-	apptainer build --force --fakeroot --sandbox /tmp/raser-dev cfg/raser.def
+build-raser-sandbox: 
+	apptainer build --force --fakeroot --sandbox /tmp/raser-sandbox/ cfg/raser.def
+
+run-raser-sandbox:
+	apptainer shell --env-file cfg/env --fakeroot -w /tmp/raser-sandbox 
+
+build-raser-sif:
+	apptainer build --fakeroot raser.sif /tmp/raser-sandbox  
 
 sign-raser: 
 	apptainer sign raser.sif 

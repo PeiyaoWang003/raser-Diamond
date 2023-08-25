@@ -49,18 +49,28 @@ From: raser-4.0.sif
     #pipx install devsim --include-deps # not work 
 
     #pip install devsim --break-system-packages
+    #pip install mkl --break-system-packages
 
-    pip install mkl --break-system-packages
+    ## Geant4
+    #apt -y install libgl1-mesa-dev 
+    ## apt-cache search x11-dev xmu-dev 
+    #apt -y install libx11-dev libxmu-dev 
+
+    #cd /usr/local/share
+    #mkdir -p geant4/src
+    #mkdir -p geant4/build 
+    #mkdir -p geant4/install
+    #mkdir -p geant4/data 
+    #wget https://gitlab.cern.ch/geant4/geant4/-/archive/v11.1.2/geant4-v11.1.2.tar.gz
+    #tar xzf geant4-v11.1.2.tar.gz -C ./geant4/src 
+    cd ./geant4/build 
+    #echo "----cmake----"
+    #cmake -DCMAKE_INSTALL_PREFIX=/usr/local/share/geant4/install  -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_OPENGL_X11=ON -DGEANT4_INSTALL_DATADIR=/usr/local/share/geant4/data -DGEANT4_BUILD_MULTITHREADED=ON  -DGEANT4_BUILD_TLS_MODEL=global-dynamic  -DGEANT4_USE_PYTHON=ON ../src/geant4-v11.1.2  
+    #make -j 28
+    #make install 
 
     ## Geant4-pybind    
+    #pip install geant4-pybind --break-system-packages
 
-    #apt -y install python3-pip libice6 libsm6  
-    #pip install matplotlib scipy pandas geant4-pybind 
-
-
-    ## NGSpice & KiCAD
-    #apt -y install ngspice 
-    #apt -y install kicad 
-
-    ## ALiBaVa 
-    #pip install pylandau tqdm numba h5py PyYAML joblib 
+    ## NGSpice 
+    apt -y install ngspice 
