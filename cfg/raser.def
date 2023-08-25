@@ -44,15 +44,19 @@ From: raser-4.0.sif
     #cmake --build . -- install -j28   
     
     
+    ## DEVSIM    
+    #apt -y install pipx python3-pip 
+    #pipx install devsim --include-deps # not work 
+
+    #pip install devsim --break-system-packages
+
+    pip install mkl --break-system-packages
 
     ## Geant4-pybind    
-    #apt -y install pipx 
-    #ln -sf /usr/bin/python3 /usr/bin/python 
+
     #apt -y install python3-pip libice6 libsm6  
     #pip install matplotlib scipy pandas geant4-pybind 
 
-    ## DevSim    
-    #pip install mkl devsim 
 
     ## NGSpice & KiCAD
     #apt -y install ngspice 
