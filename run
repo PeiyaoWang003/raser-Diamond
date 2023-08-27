@@ -32,7 +32,7 @@ function_map(){
     # transfer 1.1 to 1_1
     s="options_$r"
     t="options"
-    if [ -n $"$s" ] 
+    if [ -v $s ] 
     then
         eval $t=\(\"\${$s[@]}\"\)
         # use string to match the wanted array
