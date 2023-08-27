@@ -108,15 +108,15 @@ usage(){
 }
 
 function_map(){
-    number_dot=$1
-    number_udl=${number_dot//\./_}
+    option_dot=$1
+    option_udl=${option_dot//\./_}
     # transfer 1.1 to 1_1
-    option_string_number="options_$number_udl"
+    option_string_udl="options_$option_udl"
     option_string="options"
-    if [ -v $option_string_number ]
+    if [ -v $option_string_udl ]
     # checkout whether the option_1 exist or not
     then
-        eval $option_string=\(\"\${$option_string_number[@]}\"\)
+        eval $option_string=\(\"\${$option_string_udl[@]}\"\)
         # use string to match the wanted array
         printf "OPTIONS\n"
         for ((i=1; i<=${#options[@]};i++))
@@ -133,9 +133,6 @@ function_map(){
     fi
     return 0
 }
-operate_test(){
-    echo test
-}
 
 if [[ $# -eq 0 ]]
 then
@@ -147,7 +144,7 @@ else
     input_para=$*
 fi
 
-while [ "$(type -t operate_$option_udl)" != function ]
+while [ "$(type -t operate_$option_udl)" != function ] && [ -v options_$option_udl ] && [ -n "$option_dot" ]
 do
     function_map $option_dot
     if [ $? -eq 1 ]
@@ -160,4 +157,8 @@ do
     option_udl=${option_dot//\./_}
     printf "\n"
 done
-operate_$option_udl
+
+if [ -n "$option_dot" ] && [ "$(type -t operate_$option_udl)" == function ]
+then
+    operate_$option_udl
+fi
