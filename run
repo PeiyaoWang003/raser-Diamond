@@ -34,17 +34,17 @@ options_1_1=(
 
 1.1.1(){
     echo 'Build Devsim Database...'
-    raser "python/devsim_test.py xxx yyy zzz"
+    raser "./python/gen_devsim_db.py"
 }
 
 1.1.2(){
     echo 'Show Field...'
-    raser "python/field_calculation.py xxx yyy zzz"
+    raser "./python/field_calculation.py xxx yyy zzz"
 }
 
 1.1.3(){
     echo 'Gain Calculation...'
-    raser "python/gain_calculation.py xxx yyy zzz"
+    raser "./python/gain_calculation.py xxx yyy zzz"
 }
 
 options_2=(
@@ -58,7 +58,7 @@ options_2_1=(
 
 2.1.1(){
     echo 'Geant4 Test...'
-    raser "python/geant4_test.py xxx yyy zzz"
+    raser "./python/geant4_test.py xxx yyy zzz"
 }
 
 options_3=(
@@ -71,7 +71,7 @@ options_3_1=(
 
 3.1.1(){
     echo 'ROOT Test...'
-    raser "python/root_test.py xxx yyy zzz"
+    raser "./python/root_test.py xxx yyy zzz"
 }
 
 usage(){ 
