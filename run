@@ -28,23 +28,39 @@ options_1=(
 
 options_1_1=(
     'Build Devsim Database'
-    'Show Field'
-    'Gain Calculation'
+    'Build 1D mesh'
 )
 
-1.1.1(){
+operate_1_1_1(){
     echo 'Build Devsim Database...'
     raser "./python/gen_devsim_db.py"
 }
 
-1.1.2(){
-    echo 'Show Field...'
-    raser "./python/field_calculation.py xxx yyy zzz"
+operate_1_1_2(){
+    echo 'Build 1D mesh...'
+    raser "./python/nju_pin_5mm_5mm_mesh.py"
 }
 
-1.1.3(){
-    echo 'Gain Calculation...'
-    raser "./python/gain_calculation.py xxx yyy zzz"
+options_1_2=(
+    'Simulate I-V and electric field'
+    'I-V versus defect'
+    'I-V versus irradiation'
+)
+
+operate_1_2_1(){
+    echo 'Simulate I-V and electric field...'
+    ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN IV=True v_max=800"
+}
+
+options_1_3=(
+    'Simulate C-V'
+    'C-V versus defect'
+    'C-V versus irradiation'
+)
+
+operate_1_3_1(){
+    echo "Simulate C-V..."
+    ./python/run_batchjob.py devsim "devsim_solve.py device=1D_NJU_PIN CV=True v_max=400"
 }
 
 options_2=(
@@ -56,9 +72,9 @@ options_2_1=(
     'Geant4 Test'
 )
 
-2.1.1(){
+operate_2_1_1(){
     echo 'Geant4 Test...'
-    raser "./python/geant4_test.py xxx yyy zzz"
+    raser "./raser/telescope.py"
 }
 
 options_3=(
@@ -69,7 +85,7 @@ options_3_1=(
     'ROOT Test'
 )
 
-3.1.1(){
+operate_3_1_1(){
     echo 'ROOT Test...'
     raser "./python/root_test.py xxx yyy zzz"
 }
@@ -86,20 +102,21 @@ usage(){
     function_map
 
     echo "Please enter your option: "
-    read option
+    read option_dot
+    option_udl=${option_dot//\./_}
     printf "\n"
 }
 
 function_map(){
-    q=$1
-    r=${q//\./_}
+    number_dot=$1
+    number_udl=${number_dot//\./_}
     # transfer 1.1 to 1_1
-    s="options_$r"
-    t="options"
-    if [ -v $s ]
+    option_string_number="options_$number_udl"
+    option_string="options"
+    if [ -v $option_string_number ]
     # checkout whether the option_1 exist or not
     then
-        eval $t=\(\"\${$s[@]}\"\)
+        eval $option_string=\(\"\${$option_string_number[@]}\"\)
         # use string to match the wanted array
         printf "OPTIONS\n"
         for ((i=1; i<=${#options[@]};i++))
@@ -116,25 +133,31 @@ function_map(){
     fi
     return 0
 }
+operate_test(){
+    echo test
+}
 
 if [[ $# -eq 0 ]]
 then
     usage
 else
-    option=$1
+    option_dot=$1
+    option_udl=${option_dot//\./_}
+    # transfer 1.1 to 1_1
     input_para=$*
 fi
 
-while [ "$(type -t $option)" != function ]
+while [ "$(type -t operate_$option_udl)" != function ]
 do
-    function_map $option
+    function_map $option_dot
     if [ $? -eq 1 ]
     then
         echo "Please enter your option: "
     else
         echo "Please enter an existing option: "
     fi
-    read option
+    read option_dot
+    option_udl=${option_dot//\./_}
     printf "\n"
 done
-$option
+operate_$option_udl
