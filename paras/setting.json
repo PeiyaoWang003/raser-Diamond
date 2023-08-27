@@ -1,7 +1,8 @@
-
+[
     {
         "detector": "NJU-PIN",
         "geant4": "Sr90",
         "electronics": "T1",
         "laser": "SiC 355"
     }
+]
