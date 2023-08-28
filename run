@@ -3,6 +3,9 @@
 # Author SHI Xin <shixin@ihep.ac.cn>  
 # Created [2021-03-21 Sun 10:04] 
 
+# Call mirror:
+# apptainer shell --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 /afs/ihep.ac.cn/users/s/shixin/raser/raser-4.0.sif
+
 imagefile=/afs/ihep.ac.cn/users/s/shixin/raser/raser-4.0.sif
 export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
 
@@ -88,6 +91,32 @@ options_3_1=(
 operate_3_1_1(){
     echo 'ROOT Test...'
     raser "./python/root_test.py xxx yyy zzz"
+}
+
+options_4=(
+    'Waveform'
+)
+
+options_4_1=(
+    'Waveform Test'
+)
+
+operate_4_1_1(){
+    echo 'Waveform Test...'
+    raser "./python/gsignal.py det_name=NJU-PIN parfile=paras/setting.json devsim geant4_model=Time_resolution geant4_parfile=paras/geant4_setting.json"
+}
+
+options_7=(
+    'Edge TCT'
+)
+
+options_7_1=(
+    'Extract Waveform'
+)
+
+operate_7_1_1(){
+    echo 'Extract Waveform...'
+    raser "./python/paper4/extract_waveform.py"
 }
 
 usage(){ 
