@@ -599,18 +599,15 @@ case $option in
         ;;
 
     3.1.6) echo "Si-Strip top-TCT basic information ..."
-        raser "./python/TCTtest.py det_name=Si_Strip parfile=paras/setting.json laser_model=top_TCT_Si laser_parfile=paras/laser_setting.json"
+        raser "./python/TCTtest.py det_name=Si_Strip parfile=paras/setting.json laser_model=top_TCT_Si_Strip laser_parfile=paras/laser_setting.json"
         ;;
 
     3.1.7) echo "get volt-time for Si-Strip top-TCT, multi points x [0,550]"
-        step=1
-        k=0.01
-            for ((j=0;j<101;j++))
-            do
-                x=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
-                ./python/run_batchjob.py pintct/Si_Strip \
-                "TCTtest.py det_name=Si_Strip parfile=paras/setting.json laser_model=top_TCT_Si laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/Si_Strip/ parameter_alter=True fx_rel=$x"
-            done 
+        x=(0.250 0.255 0.260 0.265 0.270 0.275 0.280 0.285 0.290 0.295 0.300 0.305 0.310 0.315 0.320 0.325 0.330 0.335 0.340 0.345 0.350 0.355 0.360 0.365 0.370 0.375 0.380 0.380 0.390 0.395 0.400 0.405 0.410 0.415 0.420 0.425 0.430 0.435 0.440 0.445 0.450 0.455 0.460 0.465 0.470 0.475 0.480 0.485 0.490 0.495 0.500 0.505 0.510 0.515 0.520 0.525 0.530 0.535 0.540 0.545 0.550 0.555 0.560 0.565 0.570 0.575 0.580 0.585 0.590 0.595 0.600)
+        for ((j=0;j<71;j++))
+        do
+            ./python/run_batchjob.py pintct/Si_Strip "TCTtest.py det_name=Si_Strip parfile=paras/setting.json laser_model=top_TCT_Si_Strip laser_parfile=paras/laser_setting.json ${x[j]}"
+        done
         ;;
 esac
 }
