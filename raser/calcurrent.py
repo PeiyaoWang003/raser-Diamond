@@ -6,7 +6,7 @@ Description:  Simulate e-h pairs drifting and calculate induced current
 @version    : 2.0
 '''
 import random
-# import numpy as np
+import numpy as np
 import math
 import ROOT
 from raser.model import Material

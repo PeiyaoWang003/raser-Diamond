@@ -13,7 +13,7 @@ Description:
 
 import geant4_pybind as g4b
 import sys
-# import numpy as np
+import numpy as np
 import random
 
 # Geant4 main process
