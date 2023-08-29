@@ -16,6 +16,9 @@ clean:
 build-login:
 	ssh -Y shixin@lxslc701
 
+build-raser: 
+	apptainer build --fakeroot raser.sif cfg/raser.def
+
 build-raser-sandbox: 
 	apptainer build --force --fakeroot --sandbox /tmp/raser-sandbox/ cfg/raser.def
 

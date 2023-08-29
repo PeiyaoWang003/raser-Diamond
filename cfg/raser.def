@@ -1,103 +1,45 @@
 #Bootstrap: docker
-#From: library/debian:12.1   
+#From: library/debian:11.7    
 
 Bootstrap: localimage
-From: raser-4.0.sif  
+From: raser-2.0.sif  
 
 %post
-    # Use huaweicloud  
-    #cp cfg/sources.list /etc/apt/
+    ## Use huaweicloud  
     #sed -i "s@http://deb.debian.org@http://repo.huaweicloud.com@g" /etc/apt/sources.list
-    #echo "deb http://repo.huaweicloud.com/debian bookworm main non-free-firmware
-#deb-src http://repo.huaweicloud.com/debian bookworm main non-free-firmware
-
-#deb http://repo.huaweicloud.com/debian-security/ bookworm-security main non-free-firmware
-#deb-src http://repo.huaweicloud.com/debian-security/ bookworm-security main non-free-firmware
-
-#deb http://repo.huaweicloud.com/debian bookworm-updates main non-free-firmware
-#deb-src http://repo.huaweicloud.com/debian bookworm-updates main non-free-firmware" >> /etc/apt/sources.list
-
-
     #apt update 
+    #apt upgrade
 
     ## Build 
     #apt -y install apt-utils git wget vim  
     #apt -y install build-essential libboost-all-dev 
 
-
-    ## SciPy, Pandas, Matplotlib 
-    #ln -sf /usr/bin/python3 /usr/bin/python
-    #apt -y install python3-scipy python3-pandas 
-    #apt -y remove python3-scipy python3-pandas 
-    #apt -y remove python3-numpy # must remove to avoid segfault 
-    #apt -y install python3-pip 
-    #
-    #pip install scipy --break-system-packages # will install numpy 
-    #pip install pandas --break-system-packages 
-    #pip install matplotlib --break-system-packages 
-
-
     ## ROOT 
-    #apt -y install llvm libxpm-dev libxft-dev libxext-dev libgif-dev cmake
-    ## apt-cache search openblas 
-    # apt -y install libopenblas-dev
+    #apt -y install llvm libxpm-dev libxft-dev libxext-dev libgif-dev 
     #cd /usr/local/share
     #mkdir root_build root_install 
-    #wget https://root.cern/download/root_v6.28.04.source.tar.gz
-    #tar xzf root_v6.28.04.source.tar.gz 
-    #rm -rf root_v6.28.04.source.tar.gz 
-    #mv root-6.28.04 root_src 
+    #wget https://root.cern/download/root_v6.26.06.source.tar.gz
+    #tar xzf root_v6.26.06.source.tar.gz 
+    #mv root-6.26.06 root_src 
+    #rm -rf root_v6.26.06.source.tar.gz 
     #cd /usr/local/share/root_build
-    
     #cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src 
-    #cmake --build . -- install -j28   
-    
-    
-    ## DEVSIM    
-    #apt -y install pipx python3-pip 
-    #pipx install devsim --include-deps # not work 
-
-    #pip install devsim --break-system-packages
-    #pip install mkl --break-system-packages
-
-    ## Geant4
-    #apt -y install libgl1-mesa-dev 
-    ## apt-cache search x11-dev xmu-dev 
-    #apt -y install libx11-dev libxmu-dev libxerces-c-dev 
-
-    #cd /usr/local/share
-    #mkdir -p geant4/src
-    #mkdir -p geant4/build 
-    #mkdir -p geant4/install
-    #mkdir -p geant4/data 
-    #wget https://gitlab.cern.ch/geant4/geant4/-/archive/v11.1.2/geant4-v11.1.2.tar.gz
-    #tar xzf geant4-v11.1.2.tar.gz -C ./geant4/src 
-    cd ./geant4/build 
-    #echo "----cmake----"
-
-    #cmake -DCMAKE_INSTALL_PREFIX=/usr/local/share/geant4/install -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_OPENGL_X11=ON -DGEANT4_INSTALL_DATADIR=/usr/local/share/geant4/data -DGEANT4_BUILD_MULTITHREADED=ON -DGEANT4_BUILD_TLS_MODEL=global-dynamic -DGEANT4_USE_GDML=ON ../src/geant4-v11.1.2  
-
-    #make -j 28
-    #make install 
-
-    # Geant4Py is no longer distributed with the Geant4 toolkit.  It can be downloaded from:
-    # https://github.com/koichi-murakami/g4python 
-
-    # apt -y install pybind11-dev
-    # cd /usr/local/share/g4python
-    # mkdir install
-    # mkdir build
-    # cd build
-    ###
-    # Need to remove the G4Tasking in cmake, and G4gl2ps 
-    ###
-    # cmake -DCMAKE_INSTALL_PREFIX=/usr/local/share/g4python/install -DGEANT4_INSTALL=/usr/local/share/geant4/install  ..
-    # make -j28 
-    # 
+    #cmake --build . -- install -j24   
     
 
     ## Geant4-pybind    
-    #pip install geant4-pybind --break-system-packages
+    #ln -sf /usr/bin/python3 /usr/bin/python 
+    #apt -y install python3-pip libice6 libsm6  
+    #pip install matplotlib scipy pandas geant4-pybind 
 
-    ## NGSpice 
-    apt -y install ngspice 
+    ## DevSim    
+    #pip install mkl devsim 
+    #pip install mkl -U # 2023.2.0
+    #pip install devsim -U # 2.6.0
+
+    ## NGSpice & KiCAD
+    #apt -y install ngspice 
+    #apt -y install kicad 
+
+    ## ALiBaVa 
+    #pip install pylandau tqdm numba h5py PyYAML joblib 
