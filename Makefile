@@ -16,8 +16,6 @@ clean:
 build-login:
 	ssh -Y shixin@lxslc701
 
-build-raser: 
-	apptainer build --fakeroot raser.sif cfg/raser.def
 
 build-raser-sandbox: 
 	apptainer build --force --fakeroot --sandbox /tmp/raser-sandbox/ cfg/raser.def
@@ -32,7 +30,7 @@ build-raser-sif:
 	apptainer build --fakeroot raser.sif /tmp/raser-sandbox  
 
 shell-raser-sif:
-	apptainer shell --env-file cfg/env raser.sif 
+	apptainer shell --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 raser.sif 
 
 
 
