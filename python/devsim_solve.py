@@ -111,8 +111,8 @@ def set_mesh(device,region):
         device_mesh = itk_md8_mesh
     device_mesh.Create1DMesh(device=device, region=region)
     device_mesh.SetDoping(device=device, region=region)
-    device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/1D_SICAR1_LGAD_gaindoping_{0}_bulkdoping_{1}.png".format(gaindoping,bulkdoping))
-    #device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/1D_SICAR1_LGAD_bulk_thickness_{0}.png".format(bulk_thickness))
+    device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/{}_doping.png".format(device))
+
 def extend_set():
     devsim.set_parameter(name = "extended_solver", value=True)
     devsim.set_parameter(name = "extended_model", value=True)
