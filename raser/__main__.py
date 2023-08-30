@@ -39,6 +39,6 @@ except ModuleNotFoundError:
     try:
         subprocess.run('apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 \
                     /afs/ihep.ac.cn/users/s/shixin/raser/raser-2.0.sif \
-                    \"./raser/field/cal/'+module_name+'.py\"', shell=True)
+                    \"./raser/'+module_name+'.py\"', shell=True)
     except FileNotFoundError:
         print("No subcommand found")
