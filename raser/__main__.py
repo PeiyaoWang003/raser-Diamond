@@ -9,6 +9,7 @@
 import argparse
 import json
 import importlib
+import subprocess
 
 parser = argparse.ArgumentParser()
 
@@ -35,4 +36,9 @@ try:
     module = importlib.import_module(module_name)
     module.main(args_dict)
 except ModuleNotFoundError:
-    print("No subcommand found")
+    try:
+        subprocess.run('apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 \
+                    /afs/ihep.ac.cn/users/s/shixin/raser/raser-2.0.sif \
+                    \"./raser/field/cal/'+module_name+'.py\"', shell=True)
+    except FileNotFoundError:
+        print("No subcommand found")
