@@ -12,7 +12,7 @@ import json
 parser = argparse.ArgumentParser()
 
 # define temperary custom settings
-parser.add_argument("option",nargs="*")
+parser.add_argument("option",nargs="+")
 parser.add_argument('-a',"--absorber")
 parser.add_argument('-d',"--detector")
 parser.add_argument('-e',"--electronics")
