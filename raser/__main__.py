@@ -8,6 +8,7 @@
 
 import argparse
 import json
+import importlib
 
 parser = argparse.ArgumentParser()
 
@@ -30,5 +31,5 @@ with open('setting/setting.json') as f:
 
 module_name = args_dict['option'][0]
 args_dict['option']=args_dict['option'][1:]
-module = __import__(module_name)
+module = importlib.import_module(module_name)
 module.main(args_dict)
