@@ -12,7 +12,7 @@ import os
 import numpy as np
 
 class PixelDetector_Telescope:
-    def __init__(self,my_c,my_g4d):
+    def __init__(self,my_c,my_g4p):
         """
         Description:
             Telescope spatical resolution analysis, only consider vertical layer, ignore alignment
@@ -36,10 +36,11 @@ class PixelDetector_Telescope:
         """	
         #batch mode of root
         ROOT.gROOT.SetBatch(True)
-        #gemotry information, default unit is um 
+        #gemotry information, default unit is um, better read from json file 
         self.pixelsize_x = 25
         self.pixelsize_y = 25
         self.layer_z = [20000,60000,100000,140000,180000,220000]
+        
         self.Clusters = []
         self.Clustersize = []
         self.HitsID = []
