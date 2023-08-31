@@ -589,7 +589,6 @@ def save_PixelDetector_events(volume_name,localposition):
         #print("localposition len: ",len(localposition))
         
 def cal_angle(point_a,point_b):
-    """
     "Calculate the angle between point a and b"
     x=np.array(point_a)
     y=np.array(point_b)
@@ -602,8 +601,6 @@ def cal_angle(point_a,point_b):
     else:
         angle_d=9999
     return angle_d
-    """
-    return 0
 
 
 class MySteppingAction(g4b.G4UserSteppingAction):
