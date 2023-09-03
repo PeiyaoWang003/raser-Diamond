@@ -509,7 +509,7 @@ esac
 sub_1_9(){
 case $option in 
     1.9.1) echo "ALiBaVa SiC PIN ..."
-        raser "./python/alibava/AliSys.py --config python/alibava/config/default_config.yml"
+        raser "./python/alibava/AliSys.py --config python/alibava/config/default_config.yml --data 20230809"
         ;;
 
     1.9.2) echo "ALiBaVa SiC PIN ..."
