@@ -10,4 +10,3 @@ from raser.g4SiITk import SiITk
 from raser.g4simulation import Particles
 from raser.pyfenics import FenicsCal
 from raser.devsim import DevsimCal
-from raser.PixelDetector_Telescope import PixelDetector_Telescope
