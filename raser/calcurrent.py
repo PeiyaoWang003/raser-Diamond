@@ -12,8 +12,8 @@ import ROOT
 from raser.model import Material
 from raser.model import Vector
 
-t_bin = 1e-9
-t_end = 40e-9
+t_bin = 50e-12
+t_end = 60e-9
 t_start = 0
 pixel = 25 #um
 
@@ -99,6 +99,7 @@ class Carrier:
         delta_t = step*1e-4/velocity
         kboltz=8.617385e-5 #eV/K
         diffusion = (2.0*kboltz*mu*my_d.temperature*delta_t)**0.5
+        #diffusion = 0.0
         dif_x=random.gauss(0.0,diffusion)*1e4
         dif_y=random.gauss(0.0,diffusion)*1e4
         dif_z=random.gauss(0.0,diffusion)*1e4

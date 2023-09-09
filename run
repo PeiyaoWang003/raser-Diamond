@@ -732,36 +732,9 @@ case $option in
             do
                 z=$(echo $k $j|awk '{printf "%0.2f\n", $1*$2}')
                 ./python/run_batchjob.py pintct/NJU-PIN \
-                "TCTtest.py det_name=NJU-PIN parfile=paras/setting.json laser_model=edge_TCT_SiC laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/NJU-PIN/ ngspice parameter_alter=True fz_rel=$z"
+                "TCTtest.py det_name=NJU-PIN parfile=paras/setting.json laser_model=edge_TCT_SiC laser_parfile=paras/laser_setting.json scan=True total_e=$step instan=1 output=output/pintct/NJU-PIN/ parameter_alter=True fz_rel=$z"
             done
         ;;
-    3.3.3) echo "SiC-PIN edge-TCT basic information and T1 simulation by ngspice"
-        raser "./python/TCTtest.py det_name=NJU-PIN parfile=paras/setting.json laser_model=edge_TCT_SiC laser_parfile=paras/laser_setting.json ngspice"
-        raser "ngspice -b -r t1.raw output/T1_tmp.cir"
-        ;;
-
-    3.3.4) echo "get T1 circuit simulation result figure ..."
-        raser "./python/ngspice.py"
-        ;;
-
-    3.3.5) echo "get waveform by ngspice, multi points z [0,50]"
-                step=1
-                k=0.1
-            for ((j=0;j<11;j++))
-            do
-                z=$(echo $k $j|awk '{printf "%0.1f\n", $1*$2}')
-                 raser "ngspice -b -r t$z.raw output/T1_$z.cir"
-            done
-        ;;
-
-    3.3.6) echo "get T1 circuit simulation result figure ..."
-         raser "ngspice -b -r t$z.raw output/T1_$z.cir"
-    ;;
-
-    3.3.7) echo "analyse eTCT rootfiles"
-        ./python/paper4/tct_analysis.py output/ output/pintct/result/
-        ;;
-
 esac
 }
 

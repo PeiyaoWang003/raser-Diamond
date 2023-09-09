@@ -33,11 +33,12 @@
 
         "lx" : 5000,
         "ly" : 5000,
-        "lz" : 20,
+        "lz" : 100,
         "doping" : 52,
-        "voltage" : -600,
+        "voltage" : -500,
         "temp" : 300.0,
         "material" : "SiC",
+        "trapping_time" : 7.77e-10,
         "Irradiation" : 0,
 
         "mesh" : 32,
