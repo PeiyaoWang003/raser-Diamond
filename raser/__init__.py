@@ -1,6 +1,7 @@
 from sys import modules
 from raser.geometry import R3dDetector
 from raser.calcurrent import CalCurrentG4P
+from raser.calcurrent import CalCurrentPixel
 from raser.calcurrent import CalCurrentLaser
 from raser.elereadout import Amplifier
 from raser.setting import Setting
