@@ -13,19 +13,24 @@ if len(sys.argv) == 1:
     sys.exit(1)
 
 
-submodules = ['root']
+parser = argparse.ArgumentParser(prog='raser')
+subparsers = parser.add_subparsers(help='sub-command help')
+
+parser_draw = subparsers.add_parser('draw', help='draw figures')
+parser_draw.add_argument('label', help='LABEL to identify root files')
+
+parser_root = subparsers.add_parser('root', help='root files conversion')
+parser_root.add_argument('label', help='LABEL to identify root files')
+
+args = parser.parse_args()
+
+
+
+submodules = ['draw', 'root']
 
 submodule = sys.argv[1] 
 if submodule not in submodules:
     raise NameError(submodule)
 
-parser = argparse.ArgumentParser(prog='raser')
-subparsers = parser.add_subparsers(help='sub-command help')
-
-parser_root = subparsers.add_parser('root', help='root files conversion')
-parser_root.add_argument('label', help='LABEL to identify root files')
-
-
-args = parser.parse_args()
 submodule = importlib.import_module(submodule)
 submodule.main(args)

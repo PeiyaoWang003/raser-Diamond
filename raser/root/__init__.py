@@ -1,4 +1,3 @@
-# from .__main__ import main
 import sys
 import os
 import ROOT
