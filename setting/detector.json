@@ -1,33 +1,25 @@
 [
     {
-        "total_events" : 10,
         "det_name" : "Taichu3",
-        "det_model" : "PixelDetector",
+        "det_model" : "pixeldetector",
+        "total_events" : 10,
 
         "lx" : 25,
         "ly" : 25,
         "lz" : 20,
         "doping" : 52,
         "voltage" : -1.8,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "Si",
+        "trapping_time" : 7.77e-10,
         "Irradiation" : 0,
-
+        "temp": 0,
+        
         "mesh" : 32,
-        "xyscale" : 10,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 100,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 10
     },
 
     {
-        "total_events" : 1000,
         "det_name" : "NJU-PIN",
         "det_model" : "planar3D",
 
@@ -36,26 +28,16 @@
         "lz" : 100,
         "doping" : 52,
         "voltage" : -500,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "SiC",
         "trapping_time" : 7.77e-10,
         "Irradiation" : 0,
 
         "mesh" : 32,
-        "xyscale" : 10,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 100,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 10
     },
 
     {
-        "total_events" : 10000,
         "det_name" : "SICAR-1",
         "det_model" : "lgad3D",
         "lx" : 1000,
@@ -65,25 +47,15 @@
         "doping_cpp" : "z < 1.0 + tol ? 1.85e5 : 1e2",
         "avalanche_bond" : 1.0,
         "voltage" : -500,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "SiC",
         "avalanche_model" : "Hatakeyama",
 
         "mesh" : 500,
-        "xyscale" : 50,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 100,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 50
     },
 
     {
-        "total_events" : 10000,
         "det_name" : "plugin3D",
         "det_model" : "plugin3D",
         "custom_electrode" : "True",
@@ -92,52 +64,16 @@
         "lz" : 350,
         "doping" : 1e1,
         "voltage" : -500,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "SiC",
         "e_r" : 50.0,
         "e_gap" : 150.0,
 
         "mesh" : 32,
-        "xyscale" : 1,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 19500,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 1
     },
 
     {
-        "total_events" : 1000,
-        "det_name" : "PixelDetector",
-        "det_model" : "PixelDetector",
-
-        "lx" : 1500,
-        "ly" : 1500,
-        "lz" : 20,
-        "doping" : -5,
-        "voltage" : 0,
-        "temp" : 300.0,
-        "material" : "Si",
-
-        "mesh" : 32,
-        "xyscale" : 10,
-
-        "t_rise" : 0.65,
-        "t_fall" : 0.9,
-        "trans_imp" : 100,
-        "CDet" : 3.7,
-        "BBW" : 0.66,
-        "BBGain" : 100,
-        "BB_imp" : 10,
-        "OscBW" : 2
-    },
-
-    {
-        "total_events" : 1000,
         "det_name" : "HPK-Si-PIN",
         "det_model" : "planar3D",
 
@@ -146,24 +82,14 @@
         "lz" : 50,
         "doping" : -5,
         "voltage" : 200,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "Si",
 
         "mesh" : 32,
-        "xyscale" : 10,
-
-        "t_rise" : 0.65,
-        "t_fall" : 0.9,
-        "trans_imp" : 100,
-        "CDet" : 3.7,
-        "BBW" : 0.66,
-        "BBGain" : 100,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 10
     },
 
     {
-        "total_events" : 1000,
         "det_name" : "HPK-Si-PIN-Carrier",
         "det_model" : "planar3D_Carrier",
 
@@ -173,24 +99,14 @@
         "doping" : "1e6 if (z < 1.0) else (-5 if (z < 49.0) else -1e6)",
         "doping_cpp" : "z < 1.0 - tol ? 1e6 : (z < 49.0 + tol ? -5 : -1e6)",
         "voltage" : 0,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "Si",
 
         "mesh" : 10000,
-        "xyscale" : 10,
-
-        "t_rise" : 0.65,
-        "t_fall" : 0.9,
-        "trans_imp" : 100,
-        "CDet" : 3.7,
-        "BBW" : 0.66,
-        "BBGain" : 100,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 10
     },
 
     {
-        "total_events" : 10000,
         "det_name" : "HPK-Si-LGAD",
         "det_model" : "lgad3D",
         "lx" : 1300,
@@ -200,25 +116,15 @@
         "doping_cpp" : "z < 1.0 - tol ? -5 : (z < 2.0 + tol ? -1.913e4 : -5)",
         "avalanche_bond" : 2.0,
         "voltage" : 200,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "Si",
         "avalanche_model" : "vanOverstraeten",
 
         "mesh" : 500,
-        "xyscale" : 50,
-
-        "t_rise" : 0.65,
-        "t_fall" : 0.9,
-        "trans_imp" : 100,
-        "CDet" : 3.7,
-        "BBW" : 0.66,
-        "BBGain" : 100,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 50
     },
 
     {
-        "total_events" : 10000,
         "det_name" : "HPK-Si-LGAD-Carrier",
         "det_model" : "lgad3D_Carrier",
         "lx" : 1300,
@@ -228,25 +134,15 @@
         "doping_cpp" : "z < 1 - tol? 1e6 : (z < 2 - tol ? -5 : (z < 3 + tol ? -1.917e4 : (z < 49 + tol ? -5 : -1e6)))",
         "avalanche_bond" : 2.0,
         "voltage" : 200,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "Si",
         "avalanche_model" : "vanOverstraeten",
 
         "mesh" : 10000,
-        "xyscale" : 50,
-
-        "t_rise" : 0.65,
-        "t_fall" : 0.9,
-        "trans_imp" : 100,
-        "CDet" : 3.7,
-        "BBW" : 0.66,
-        "BBGain" : 100,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 50
     },
 
     {
-        "total_events" : 1000,
         "det_name" : "NJU-PIN-Beam-monitor",
         "det_model" : "planar3D",
 
@@ -255,24 +151,14 @@
         "lz" : 100,
         "doping" : 10,  
         "voltage" : -500,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "SiC",
 
         "mesh" : 32,
-        "xyscale" : 10,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 19500,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 10
     },
 
     {
-        "total_events" : 1000,
         "det_name" : "Ring-PIN",
         "det_model" : "planarRing",
 
@@ -281,28 +167,18 @@
         "lz" : 100,
         "doping" : 52,
         "voltage" : -500,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "SiC",
 
         "mesh" : 50,
         "xyscale" : 1,
 
         "e_r_inner" : 200,
-        "e_r_outer" : 250,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 19500,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "e_r_outer" : 250
     },
 
 
     {
-        "total_events" : 100000,
         "det_name" : "ITk-Si-strip",
         "det_model" : "planar3D",
 
@@ -311,7 +187,7 @@
         "lz" : 305,
         "doping" : "3.2e12",  
         "voltage" : 200,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "Si",
         "mesh" : 32,
         "xyscale" : 10,
@@ -323,20 +199,10 @@
         "par_inz" : 17000,
         "par_outx" : 5000,
         "par_outy" : 5000,
-        "par_outz" : 0.0,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 19500,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "par_outz" : 0.0
     },
 
     {
-        "total_events" : 30000,
         "det_name" : "NJU-PIN-reactor",
         "det_model" : "planar3D",
 
@@ -345,24 +211,14 @@
         "lz" : 30,
         "doping" : -10,  
         "voltage" : -500,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "SiC",
 
         "mesh" : 32,
-        "xyscale" : 10,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 19500,
-        "BB_imp" : 10,
-        "OscBW" : 2
+        "xyscale" : 10
     },
 
     {
-        "total_events" : 1000,
         "det_name" : "Si_Strip",
         "det_model" : "planar3D",
 
@@ -371,20 +227,11 @@
         "lz" : 100,
         "doping" : -1,
         "voltage" : 200,
-        "temp" : 300.0,
+        "temperature" : 300.0,
         "material" : "Si",
 
         "mesh" : 600,
         "xyscale" : 10,
-
-        "t_rise" : 0.7,
-        "t_fall" : 1.1,
-        "trans_imp" : 38,
-        "CDet" : 30,
-        "BBW" : 0.66,
-        "BBGain" : 19500,
-        "BB_imp" : 10,
-        "OscBW" : 2,
 
         "striplenth" : 110,
         "elelenth" : 60,
