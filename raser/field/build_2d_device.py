@@ -6,62 +6,7 @@ import ROOT
 import devsim
 import  physics_2d
 import node_in_2d
-#####
-# dio1
-#
-# Make doping a step function
-# print dat to text file for viewing in grace
-# verify currents analytically
-# in dio2 add recombination
-# TODO: use CreateMesh and update regressions
-'''
-def Create2DMesh(device, region):
-    devsim.create_2d_mesh  (mesh="dog")
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=0, ps=1e-5)
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=(1e-4)-(0.5e-4), ps=1e-5)
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=1e-4, ps=1e-5)
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=(1e-4)+(3e-4), ps=1e-5)
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=100*1e-4, ps=1e-5)
-    devsim.add_2d_mesh_line(mesh="dog", dir="y", pos=0     , ps=1e-4)
-    devsim.add_2d_mesh_line(mesh="dog", dir="y", pos=1e-3  , ps=1e-4)
-    devsim.add_2d_mesh_line(mesh="dog", dir="x", pos=-1e-5   , ps=1e-5)
-    devsim.add_2d_mesh_line(mesh="dog", dir="x", pos=1.001e-2, ps=1e-5)
 
-    devsim.add_2d_region   (mesh="dog", material="SiC", region=region)
-    devsim.add_2d_region   (mesh="dog", material="air", region="air1", xl=-1e-5,  xh=0)
-    devsim.add_2d_region   (mesh="dog", material="air", region="air2", xl=1.0e-2, xh=1.01e-2)
-
-    devsim.add_2d_contact  (mesh="dog", name="top", region=region,  xl=0, xh=0, bloat=1e-5, material="metal")
-    devsim.add_2d_contact  (mesh="dog", name="bot", region=region, xl=1e-2,   xh=1e-2, bloat=1e-8, material="metal")
-
-    devsim.finalize_mesh   (mesh="dog")
-    devsim.create_device   (mesh="dog", device=device)
-
-'''
-'''
-def Create2DMesh(device, region):
-    devsim.create_2d_mesh  (mesh="dog")
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=0, ps=1e-5)
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=(1e-4)-(0.5e-4), ps=1e-5)
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=1e-4, ps=1e-5)
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=(1e-4)+(3e-4), ps=1e-5)
-    devsim.add_2d_mesh_line (mesh="dog", dir="x",pos=100*1e-4, ps=1e-5)
-    devsim.add_2d_mesh_line(mesh="dog", dir="y", pos=0     , ps=1e-4)
-    devsim.add_2d_mesh_line(mesh="dog", dir="y", pos=1e-2  , ps=1e-4)
-    devsim.add_2d_mesh_line(mesh="dog", dir="x", pos=-1e-5   , ps=1e-5)
-    devsim.add_2d_mesh_line(mesh="dog", dir="x", pos=1.001e-2, ps=1e-5)
-
-    devsim.add_2d_region   (mesh="dog", material="SiC", region=region)
-    devsim.add_2d_region   (mesh="dog", material="air", region="air1", xl=-1e-5,  xh=0)
-    devsim.add_2d_region   (mesh="dog", material="air", region="air2", xl=1.0e-2, xh=1.01e-2)
-
-    devsim.add_2d_contact  (mesh="dog", name="top", region=region,  xl=0, xh=0, bloat=1e-5, material="metal")
-    devsim.add_2d_contact  (mesh="dog", name="bot", region=region, xl=1e-2,   xh=1e-2, bloat=1e-8, material="metal")
-
-    devsim.finalize_mesh   (mesh="dog")
-    devsim.create_device   (mesh="dog", device=device)
-
-'''
 
 def Create2DMesh(device,region):
     devsim.create_2d_mesh  (mesh="Sicar")

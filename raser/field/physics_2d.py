@@ -197,13 +197,7 @@ def CreateSRH(device, region):
 
 def CreateImpactGeneration(device, region):
    
-    
-    # if not devsim.InEdgeModelList(device, region, "ElectricField"):
-    #     devsim.CreateEdgeModel(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength")
-    #     devsim.CreateEdgeModelDerivatives(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength", "Potential")
-
-
-    #Ion_coeff_n  = "gamma * n_a * exp( - gamma * n_b / (ElectricField))"
+  
     #Ion_coeff_p  = "gamma * p_a * exp( - gamma * p_b / (ElectricField))"
 
     Ion_coeff_n  = "ifelse(abs(ElectricField)>1e4, gamma * n_a * exp( - gamma * n_b / (abs(ElectricField)+1)), 1)"
