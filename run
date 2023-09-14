@@ -842,7 +842,7 @@ case $option in
         ;;
     
     7.2.3backtest) echo "Simulate different backside thickness and doping concentration of 1D itk I-V ..."
-        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 IV=True v_max=700 backdopingtest=1.0e16 backthickness=304"
+        ./python/run_batchjob.py devsim "devsim_solve.py device=1D_ITK_MD8 IV=True v_max=700 backdopingtest=1e13 backthickness=295"
         ;;    
         
     7.2.4) echo "Simulate irradiated minisensor I-V C-V ..."

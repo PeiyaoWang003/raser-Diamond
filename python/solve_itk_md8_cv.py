@@ -26,8 +26,8 @@ region="1D_ITK_MD8"
 # Area factor
 # 1D 1cm*1cm
 # DUT 0.8cm* 0.8cm
+#area_factor = 1.0/(0.8*0.8)
 area_factor = 1.0/(0.76*0.76)
-
 
 
 itk_md8_mesh.Create1DMesh(device=device, region=region)
