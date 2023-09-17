@@ -45,7 +45,7 @@ def main(args):
         res = []
         psize = []
         N = 25
-        MaxSize = 5.
+        MaxSize = 25.
         for i in range(N):
             t_my_d = MyObject()
             t_my_d.p_x = MaxSize*(i+1)/N
@@ -61,10 +61,10 @@ def main(args):
         
         canvas = ROOT.TCanvas("canvas", "TGraph", 800, 600)
         graph.SetMarkerStyle(ROOT.kFullCircle)
-        graph.GetXaxis().SetTitle("Resolution [um]")
-        graph.GetXaxis().CenterTitle()  
-        graph.GetYaxis().SetTitle("Pixel Size [um]")
+        graph.GetYaxis().SetTitle("Resolution [um]")
         graph.GetYaxis().CenterTitle()  
+        graph.GetXaxis().SetTitle("Pixel Size [um]")
+        graph.GetXaxis().CenterTitle()  
         
         legend = ROOT.TLegend(0.27,0.67,0.62,0.80)
         legend.SetTextSize(0.04)
