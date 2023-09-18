@@ -11,8 +11,8 @@ import time
 import os
 import numpy as np
 
-class PixelDetector_Telescope:
-    def __init__(self,my_c,my_g4p):
+class telescope:
+    def __init__(self,my_d,my_c):
         """
         Description:
             Telescope spatical resolution analysis, only consider vertical layer, ignore alignment
@@ -37,18 +37,22 @@ class PixelDetector_Telescope:
         #batch mode of root
         ROOT.gROOT.SetBatch(True)
         #gemotry information, default unit is um, better read from json file 
-        self.pixelsize_x = 25
-        self.pixelsize_y = 25
-        self.layer_z = [20000,60000,100000,140000,180000,220000]
+        
+        self.pixelsize_x = my_d.p_x
+        self.pixelsize_y = my_d.p_y
+        self.pixelsize_z = my_d.p_z
+        self.layer_z = my_d.lt_z
+        self.seedcharge = 100
         
         self.Clusters = []
         self.Clustersize = []
-        self.HitsID = []
-        self.Hits = []
+        self.HitsID = []    # [ {0:[[i,j],[i2,j2]], ...}, ...]
+        self.Hits = []      
         
         self.Chisquare = []
         
         self.Residual = {}
+        self.kvalue= {}
         self.AveClustersize = {}
         self.Resolution_Tol = {}
         self.Resolution_DUT = {}
@@ -57,7 +61,12 @@ class PixelDetector_Telescope:
         self.cluster(self.Hits,self.Clusters)
         #print(self.Clusters)
 
+        count = 0
         for evt in self.Clusters:
+            
+            if count % 1000 == 0:
+                print("Excuate process:",count,"/",len(self.Clusters))
+            count+=1
             #tracking
             #simple choose of track, only 1 cluster 6 layer evt considered
             if(len(evt)!=len(self.layer_z)):
@@ -93,10 +102,11 @@ class PixelDetector_Telescope:
                 
                 residualx = kx*self.layer_z[DUT]+bx-cluster_dict[DUT][0][0]
                 residualy = ky*self.layer_z[DUT]+by-cluster_dict[DUT][0][1]
-                
                 if DUT not in self.Residual:
                     self.Residual[DUT] = []
+                    self.kvalue[DUT] = []
                 self.Residual[DUT].append([residualx,residualy])
+                self.kvalue[DUT].append([kx,ky])
                 
                 chisquare += (residualx**2/(self.pixelsize_x**2/12))+(residualy**2/(self.pixelsize_y**2/12))
                 
@@ -114,6 +124,7 @@ class PixelDetector_Telescope:
         self.resolution()
         self.swap_res()
         
+        print("Tol_evts:",len(self.Clusters))
         print("Tol_Resulution of each DUT",self.Resolution_Tol)
         print("DUT_Resulution of each DUT",self.Resolution_DUT)
         print("Average Clustersize:",self.AveClustersize)
@@ -121,12 +132,15 @@ class PixelDetector_Telescope:
     
     #read data from calcurrent object,and turn the pixel coordinate to the new coordinate
     def readdata(self,my_c):
-        for i in range(len(my_c.volumeID)):
+        for evt in my_c.event:
             hitID = {}
-            for t_ID in my_c.volumeID[i]:
-                if t_ID[2] not in hitID:
-                    hitID[t_ID[2]] = []
-                hitID[t_ID[2]].append([t_ID[0],t_ID[1]])
+            for layer in evt:
+                t_d = evt[layer]
+                if layer not in hitID:
+                    hitID[layer] = []
+                for i in range(len(t_d['index'])):
+                    if t_d['charge'][i] >= self.seedcharge:
+                        hitID[layer].append(t_d['index'][i])
             self.HitsID.append(hitID)
         self._postransform(self.HitsID,self.Hits)
         #print(self.HitsID)
@@ -191,13 +205,20 @@ class PixelDetector_Telescope:
         for layer in self.Residual:
             residualx = [point[0] for point in self.Residual[layer]]
             residualy = [point[1] for point in self.Residual[layer]]
+            kx = [point[0] for point in self.kvalue[layer]]
+            ky = [point[1] for point in self.kvalue[layer]]
             
             Name = "Layer_"+str(layer)
             Namex = Name+"_x"
             Namey = Name+"_y"
+            #Namekx = Name+"_kx"
+            #Nameky = Name+"_ky"
             
-            meanx,sigmax = self._draw_res(residualx,Namex)
-            meany,sigmay = self._draw_res(residualy,Namey)
+            xmin = self.pixelsize_x*4
+            meanx,sigmax = self._draw_res(residualx,Namex,-xmin,xmin)
+            meany,sigmay = self._draw_res(residualy,Namey,-xmin,xmin)
+            #meankx,sigmakx = self._draw_res(kx,Namekx,-0.002,0.002)
+            #meanky,sigmaky = self._draw_res(ky,Nameky,-0.002,0.002)
             
             self.Resolution_Tol[layer]=[sigmax,sigmay]
     
@@ -232,9 +253,8 @@ class PixelDetector_Telescope:
                     t_Hits[layer].append([t_x,t_y])
             Hits.append(t_Hits)
     #draw gauss distribution of residual 
-    def _draw_res(self,data,Name):
-        xmin,xmax = -40,40
-        hist = ROOT.TH1D(Name, Name, 20, xmin, xmax)  
+    def _draw_res(self,data,Name,xmin=-100,xmax = 100):
+        hist = ROOT.TH1D(Name, Name, 50, xmin, xmax)  
         x = data  
         for value in x:
             hist.Fill(value)
@@ -350,57 +370,77 @@ class island:
 
 #interface to generate simple examples for  debugging
 class Test:
-    def __init__(self,):
-        self.volumeID = []
-        self.layer_z = [20000,60000,100000,140000,180000,220000]
-        self.thickness = 20
-        self.pixelsizex = 25
-        self.pixelsizey = 25
+    def __init__(self,my_d):
+        self.event = []
+        
+        if my_d == 0:
+            raise TypeError(my_d)
+            
+        self.layer_z = my_d.lt_z
+        self.pixelsizex = my_d.p_x
+        self.pixelsizey = my_d.p_y
+        self.thickness = my_d.p_z
+        
+        self.laserz = 0
+        self.laserx = self.pixelsizex/2
+        self.lasery = self.pixelsizey/2
         self.generate(1000)
         
     def generate(self,Num):
-        bx,by = 512*25,256*25
+        #dont let bx,by change by pixelsize
+        bx,by = 512*25.,512*25.
         random_generator = ROOT.TRandom()
-        min_value = -32/1100
-        max_value = 32/1100
+        min_value = -256.*25./(self.layer_z[5]-self.laserz)
+        max_value = -min_value
         for i in range(Num):
-            Hitpos = []
+            evt = {}
             kx = random_generator.Uniform(min_value, max_value)
             ky = random_generator.Uniform(min_value, max_value)
-            for i in range(len(self.layer_z)):
-                x1 = kx*self.layer_z[i]+bx
-                x2 = kx*(self.layer_z[i]+self.thickness)+bx
-                y1 = ky*self.layer_z[i]+by
-                y2 = ky*(self.layer_z[i]+self.thickness)+by
-                t_list = self.get_grid_cells_for_rectangle(x1,y1,x2,y2,0)
+            tx = random_generator.Uniform(-self.laserx,self.laserx) 
+            ty = random_generator.Uniform(-self.lasery,self.lasery)
+            for j in range(len(self.layer_z)):
+                Hit = {'index':[],'charge':[]}  
+                x1 = kx*(self.layer_z[j]-self.laserz)+bx/2+tx
+                x2 = kx*(self.layer_z[j]+self.thickness-self.laserz)+bx/2+tx
+                y1 = ky*(self.layer_z[j]-self.laserz)+by/2+ty
+                y2 = ky*(self.layer_z[j]+self.thickness-self.laserz)+by/2+ty
+                t_list = self.get_grid_cells_for_rectangle(x1,y1,x2,y2)
                 for item in t_list:
-                    t_tem = item
-                    t_tem.append(i)
-                    Hitpos.append(item)
-            self.volumeID.append(Hitpos)
+                    Hit['index'].append(item)
+                    Hit['charge'].append(int(random_generator.Uniform(200, 1000)))
+                evt[j] = Hit
+            self.event.append(evt)
+        #print(self.event)
     
-    def get_grid_cells_for_rectangle(self,x1, y1, x2, y2, width=1):
+    def get_grid_cells_for_rectangle(self,x1, y1, x2, y2):
         grid_cells = set()
+        #random_generator = ROOT.TRandom()
 
-        min_x = min(x1, x2)
-        max_x = max(x1, x2)
-        min_y = min(y1, y2)
-        max_y = max(y1, y2)
-
-        for x in range(int(min_x - width), int(max_x + width) + 1):
-            for y in range(int(min_y - width), int(max_y + width) + 1):
-                grid_x = int(x // self.pixelsizex)
-                grid_y = int(y // self.pixelsizey)
-                grid_cells.add((grid_x, grid_y))
-
+        N = 5
+        for i in range(N+1):
+            grid_x = int((x1+i*(x2-x1)/N) // self.pixelsizex)
+            grid_y = int((y1+i*(y2-y1)/N) // self.pixelsizey)
+            grid_cells.add((grid_x, grid_y))
+            '''
+            tx,ty =random_generator.Uniform(0,1),random_generator.Uniform(0,1)
+            if tx>0.95:
+                grid_x +=1
+            if tx<0.05:
+                grid_x -=1
+            if ty>0.95:
+                grid_y +=1
+            if ty<0.05:
+                grid_y +=1
+            grid_cells.add((grid_x, grid_y))
+            '''
         t_list = [list(item) for item in grid_cells]
         #print(t_list)
         return t_list
     
-def main():
-    my_c = Test()
-    my_g4d = 0
-    tel = PixelDetector_Telescope(my_c,my_g4d)
+def main(my_d):
+    my_c = Test(my_d)
+    tel = telescope(my_d,my_c)
+    return tel.Resolution_Tol[2][0]
     
 if __name__ == '__main__':
     start = time.time()

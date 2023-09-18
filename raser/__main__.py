@@ -1,44 +1,59 @@
 #!/usr/bin/env python3
-# Main driver to run RASER    
-# Author FU Chenxi <1256257282@qq.com>  
+# Main driver to run raser    
+# Author FU Chenxi <1256257282@qq.com>, SHI Xin <shixin@ihep.ac.cn>
 # Created [2023-08-29 Tue 11:48] 
 
-# Call mirror:
-# apptainer shell --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 /afs/ihep.ac.cn/users/s/shixin/raser/raser-4.0.sif
-
+import sys 
 import argparse
-import json
 import importlib
 import subprocess
 
-parser = argparse.ArgumentParser()
+VERSION = 4.0
 
-# define temperary custom settings
-parser.add_argument("option",nargs="+")
-parser.add_argument('-a',"--absorber")
-parser.add_argument('-d',"--detector")
-parser.add_argument('-e',"--electronics")
-parser.add_argument('-l',"--laser")
+parser = argparse.ArgumentParser(prog='raser')
+parser.add_argument('--version', action='version', 
+                    version='%(prog)s {}'.format(VERSION))
+parser.add_argument('-b', '--batch', help='submit BATCH job to cluster', action="store_true")
+parser.add_argument('-t', '--test', help='TEST', action="store_true")
+
+subparsers = parser.add_subparsers(help='sub-command help', dest="subparser_name")
+
+parser_draw = subparsers.add_parser('draw', help='draw figures')
+parser_draw.add_argument('label', help='LABEL to identify root files')
+
+parser_field = subparsers.add_parser('field', help='calculate field and iv/cv')
+parser_field.add_argument('label', help='LABEL to identify operation')
+parser_field.add_argument('-v', '--verbose', help='VERBOSE level', 
+                          action='count', default=0)
+
+parser_field.add_argument("-b","--batch", help="run in batch mode",action="store_true")
+
+parser_root = subparsers.add_parser('root', help='root files conversion')
+parser_root.add_argument('label', help='LABEL to identify root files')
+
+parser_spaceres = subparsers.add_parser('spaceres', help='spaceres calculation')
+parser_spaceres.add_argument('label', help='LABEL to identify spaceres files')
+
 args = parser.parse_args()
 
-args_dict = vars(args)
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
 
-with open('setting/setting.json') as f:
-    # define permanent custom settings in setting.json
-    json_settings = json.load(f)
-    for key in json_settings:
-        if args_dict[key] == None:
-            args_dict.update({key:json_settings[key]})
+submodules = ['draw', 'field', 'root', 'spaceres']
 
-module_name = args_dict['option'][0]
-args_dict['option']=args_dict['option'][1:]
-try:
-    module = importlib.import_module(module_name)
-    module.main(args_dict)
-except ModuleNotFoundError:
-    try:
-        subprocess.run('apptainer exec --env-file cfg/env -B /cefs,/afs,/besfs5,/cvmfs,/scratchfs,/workfs2 \
-                    /afs/ihep.ac.cn/users/s/shixin/raser/raser-2.0.sif \
-                    \"./raser/'+module_name+'.py\"', shell=True)
-    except FileNotFoundError:
-        print("No subcommand found")
+submodule = vars(args)['subparser_name']
+if submodule not in submodules:
+    raise NameError(submodule)
+
+if vars(args)['batch'] == True:
+    batchjob = importlib.import_module('batchjob')
+    destination = submodule
+    command = ' '.join(sys.argv[1:])
+    print('batch command: {}'.format(command))
+    command = command.replace('--batch ', '')
+    command = command.replace('-b ', '')
+    batchjob.main(destination, command, args)
+else:
+    submodule = importlib.import_module(submodule)
+    submodule.main(args)
