@@ -1,21 +1,30 @@
 import os
 import ROOT
+from . import iv
+from . import cv
 
 
-def draw_figure(input_dir, output_dir):
+def draw_figure(input_dir, output_dir, label):
+
     com_name = []
     for file in os.listdir(input_dir):
         if file.endswith('.root'):
             com_name.append(file)
     for name in com_name:
+        if label == 'sicar1.1.8' and not name.startswith('sicar1.1.8'):
+            continue
+        elif label == 'sicar1.1.8-1' and not name.startswith('sicar1.1.8-1_'):
+            continue
+        elif label == 'sicar1.1.8-2' and not name.startswith('sicar1.1.8-2_'):
+            continue
         name = name.split('.root')[0]
 
         input_file = os.path.join(input_dir, name + '.root')
-        output_file = os.path.join(output_dir, name + 'v.root')
-        pdf_file = os.path.join(output_dir, name + 'v.pdf')
-        png_file = os.path.join(output_dir, name + 'v.png')
+        output_file = os.path.join(output_dir, name + '.root')
+        pdf_file = os.path.join(output_dir, name + '.pdf')
+        png_file = os.path.join(output_dir, name + '.png')
 
-        if name.endswith('i'):  
+        if name.endswith('iv'):  
             file = ROOT.TFile(input_file, "READ")
             tree = file.Get("myTree")
             graph = ROOT.TGraph()
@@ -66,7 +75,7 @@ def draw_figure(input_dir, output_dir):
             c.SaveAs(png_file)
             del c
 
-        if name.endswith('c'):  
+        if name.endswith('cv'):  
             file = ROOT.TFile(input_file, "READ")
             tree = file.Get("myTree")
             graph = ROOT.TGraph()
@@ -103,7 +112,7 @@ def draw_figure(input_dir, output_dir):
             c = ROOT.TCanvas("c","c",500,500)
             c.SetLeftMargin(0.22)
             c.SetBottomMargin(0.16)
-            legend = ROOT.TLegend(0.52,0.27,0.85,0.40)
+            legend = ROOT.TLegend(0.52,0.70,0.85,0.83)
             c.SetGrid()
             c.SetFrameLineWidth(5)
 
@@ -127,7 +136,22 @@ def main(args):
     if label == 'sicar1.1.8':
         input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
         output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
-    else:
+        draw_figure(input_dir, output_dir, label)
+    elif label == 'compare_sicar1.1.8_iv':
+        iv.main(label)
+    elif label == 'compare_sicar1.1.8_cv':
+        cv.main(label)
+    elif label == 'sicar1.1.8-1':
+        input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
+        output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
+        draw_figure(input_dir, output_dir, label)
+    elif label == 'sicar1.1.8-2':
+        input_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
+        output_dir = '/afs/ihep.ac.cn/users/w/wangkeqi/raser/output/fig'
+        draw_figure(input_dir, output_dir, label)  
+    elif label == 'compare_sicar1.1.8-1_sicar1.1.8-2_iv':
+        iv.main(label)  
+    elif label == 'compare_sicar1.1.8-1_sicar1.1.8-2_cv':
+        cv.main(label) 
+    else: 
         raise NameError(label)
-
-    draw_figure(input_dir, output_dir)
