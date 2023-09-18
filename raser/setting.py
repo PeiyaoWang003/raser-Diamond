@@ -155,7 +155,11 @@ class Setting:
         if "Carrier" in self.det_model:
             detector.update({'doping_cpp':p['doping_cpp']})
 
-     
+        if "pixeldetector" in self.det_model:
+            detector.update({'px':p['px'],
+                             'py':p['py'],
+                             'pz':p['pz'],
+                             'ltz':p['ltz']})
         if "trapping_time" in p:
             detector['trapping_time']=p['trapping_time']
         
@@ -234,7 +238,7 @@ class Setting:
                     "par_type":p['par_type'], "par_energy":p['par_energy'],
                     "world":p['world'], "object":p['object'],'model':p['geant4_model']
                     }
-        if(pygeant4['model'] == "PixelDetector"):
+        if(pygeant4['model'] == "pixeldetector"):
             pygeant4['par_randx']=p['par_randx']
             pygeant4['par_randy']=p['par_randy']
         return pygeant4
