@@ -7,7 +7,7 @@ from . import run_batchjob
 import json
 
 
-def main(batch=False):
+def main():
     
     device="MyDevice"
     region="MyRegion"
