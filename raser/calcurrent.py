@@ -569,8 +569,7 @@ class CalCurrentPixel:
     def __init__(self, my_d, my_f, my_g4p):
         batch = len(my_g4p.localposition)
         layer = len(my_d.lt_z)
-        material = my_d.material
-        G4P_carrier_list = PixelCarrierListFromG4P(material, my_g4p, batch,layer)                 
+        G4P_carrier_list = PixelCarrierListFromG4P(my_d, my_g4p)                 
         self.collected_charge=[] #temp paras don't save as self.
         self.sum_signal = []
         self.event = []        
@@ -586,9 +585,9 @@ class CalCurrentPixel:
                 print("%f pairs of carriers are generated from G4 in event_ %d layer %d" %(sum(G4P_carrier_list.ionized_pairs[k][j]),k,j))
                 #print(G4P_carrier_list.track_position[k][j])
                 for i in range(len(G4P_carrier_list.track_position[k][j])):
-                    electron = Carrier(G4P_carrier_list.track_position[k][j][i][0]+my_d.l_x/2,\
-                                       G4P_carrier_list.track_position[k][j][i][1]+my_d.l_y/2,\
-                                       G4P_carrier_list.track_position[k][j][i][2]+my_d.l_z/2,\
+                    electron = Carrier(G4P_carrier_list.track_position[k][j][i][0],\
+                                       G4P_carrier_list.track_position[k][j][i][1],\
+                                       G4P_carrier_list.track_position[k][j][i][2],\
                                        0,\
                                        -1*G4P_carrier_list.ionized_pairs[k][j][i],\
                                        my_d.material,\
@@ -750,7 +749,7 @@ class CarrierListFromG4P:
         self.ionized_pairs = [step*1e6/self.energy_loss for step in self.tracks_step]
     
 class PixelCarrierListFromG4P:
-    def __init__(self, material, my_g4p, batch,layer):
+    def __init__(self, my_d,my_g4p):
         """
         Description:
             Events position and energy depositon
@@ -764,6 +763,13 @@ class PixelCarrierListFromG4P:
         Modify:
             2022/10/25
         """
+        batch = len(my_g4p.localposition)
+        layer = len(my_d.lt_z)
+        material = my_d.material
+        self.pixelsize_x = my_d.p_x
+        self.pixelsize_y = my_d.p_y
+        self.pixelsize_z = my_d.p_z
+        
         if (material == "SiC"):
             self.energy_loss = 8.4 #ev
         elif (material == "Si"):
@@ -782,8 +788,13 @@ class PixelCarrierListFromG4P:
             name = "Layer_"+str(i)
             #print(name)
             for k in range(len(my_g4p.devicenames[j])):
+                px,py,pz = self.split_name(my_g4p.devicenames[j][k])
                 if name in my_g4p.devicenames[j][k]:
-                    position.append(my_g4p.localposition[j][k]) 
+                    tp = [0 for i in range(3)]
+                    tp[0] = my_g4p.localposition[j][k][0]+px*self.pixelsize_x
+                    tp[1] = my_g4p.localposition[j][k][1]+py*self.pixelsize_y
+                    tp[2] = my_g4p.localposition[j][k][2]+self.pixelsize_z/2
+                    position.append(tp) 
                     energy.append(my_g4p.energy_steps[j][k])
             s_track_position.append(position)
             pairs = [step*1e6/self.energy_loss for step in energy]
@@ -792,3 +803,6 @@ class PixelCarrierListFromG4P:
         self.track_position.append(s_track_position)
         self.ionized_pairs.append(s_energy)
         
+    def split_name(self,volume_name):
+        parts = volume_name.split('_')
+        return int(parts[1]),int(parts[2]),int(parts[4])
