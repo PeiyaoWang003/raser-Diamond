@@ -1,7 +1,7 @@
 [
     {
         "geant4_model" : "pixeldetector",
-        "total_events" : 10,
+        "total_events" : 1000,
 
         "object" : {
             "pixel"  : {

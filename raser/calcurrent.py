@@ -566,16 +566,22 @@ class CalCurrentG4P(CalCurrent):
 
 class CalCurrentPixel:
     """Calculation of diffusion electrons in pixel detector"""
-    def __init__(self, my_d, my_f, my_g4p, batch,layer):
-        G4P_carrier_list = PixelCarrierListFromG4P(my_d.material, my_g4p, batch,layer)                 
-        self.collected_charge=[]
-        self.sum_signal = []        
+    def __init__(self, my_d, my_f, my_g4p):
+        batch = len(my_g4p.localposition)
+        layer = len(my_d.lt_z)
+        material = my_d.material
+        G4P_carrier_list = PixelCarrierListFromG4P(material, my_g4p, batch,layer)                 
+        self.collected_charge=[] #temp paras don't save as self.
+        self.sum_signal = []
+        self.event = []        
         for k in range(batch):
+            l_dict = {}
             signal_charge = []
             for j in range(layer):
                 self.electrons = []
-                self.charge,self.collected_charge = [],[]
+                self.charge,self.collected_charge = [],[]#same like before
                 self.row,self.column=[],[]
+                Hit = {'index':[],'charge':[]} 
                 #print(len(G4P_carrier_list.ionized_pairs[k][j]))
                 print("%f pairs of carriers are generated from G4 in event_ %d layer %d" %(sum(G4P_carrier_list.ionized_pairs[k][j]),k,j))
                 #print(G4P_carrier_list.track_position[k][j])
@@ -599,16 +605,26 @@ class CalCurrentPixel:
                 for i in range(len(self.row)):
                     #test_charge.SetBinContent(int(self.row[i]),int(self.column[i]),self.charge[i])
                     test_charge.Fill(self.row[i],self.column[i],self.charge[i])
+                    
+                sum_fired = ROOT.TH2F("charge", "Pixel Detector charge",Xbins, 0, Xup, Ybins, 0, Yup)
+                sum_fired.Add(test_charge)
+                
                 self.sum_charge = ROOT.TH2F("charge", "Pixel Detector charge",Xbins, 0, Xup, Ybins, 0, Yup)
                 self.sum_charge.Add(test_charge)
+                
                 test_charge.Reset
                 collected_charge=self.pixel_charge(my_d,Xbins,Ybins)
                 signal_charge.append(collected_charge)
+                
+                Hit["index"],Hit["charge"] = self.pixel_fired(sum_fired,Xbins,Ybins)
+                l_dict[j] = Hit
                 print("%f electrons are collected in event_ %d,layer %d" %(sum(self.charge),k,j))
             self.sum_signal.append(signal_charge)
+            self.event.append(l_dict)
             #print(signal_charge)
             del signal_charge
-        print(self.sum_signal)
+        #print(self.sum_signal)
+        #print(self.event)
 
     def diffuse_loop(self, my_d, my_f):
         for electron in self.electrons:
@@ -628,6 +644,16 @@ class CalCurrentPixel:
                 if (charge>0.2):
                     self.collected_charge.append([x,y,charge])        
         return self.collected_charge
+    
+    def pixel_fired(self,tot,Xbins,Ybins):
+        Hit = {'index':[],'charge':[]} 
+        for x in range(Xbins):
+            for y in range(Ybins):
+                charge =tot.GetBinContent(x,y)
+                if (charge>0.2):
+                    Hit["index"].append([x,y])
+                    Hit["charge"].append(charge)       
+        return Hit["index"],Hit["charge"]
 
 
 class CalCurrentLaser(CalCurrent):
