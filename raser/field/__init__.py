@@ -3,8 +3,7 @@ from . import scan_cv
 def main(args):
     label = vars(args)['label']
     batch= vars(args)['batch']
-    print(batch)
-    exit()
+    
    
 
     if label == 'gen_devsim_db':
