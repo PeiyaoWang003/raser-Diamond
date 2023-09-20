@@ -16,7 +16,7 @@ def main(args):
 
     if label == 'gen_devsim_db':
         gen_devsim_db.main()
-    if label == 'sicar1.1.6_cv_0-1v':
+    elif label == 'sicar1.1.6_cv_0-1v':
         scan_cv.main()
     else:
         raise NameError(label)
