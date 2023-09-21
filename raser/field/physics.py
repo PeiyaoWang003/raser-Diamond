@@ -7,7 +7,7 @@ Description:  Physics.py
 
 import devsim
 from field.node import *
-from field.driftdiffusion import *
+from field.drift_diffusion import *
 import math
 
 
