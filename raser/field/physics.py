@@ -6,8 +6,8 @@ Description:  Physics.py
 '''
 
 import devsim
-from field.Node import *
-from field.DriftDiffusion import *
+from field.node import *
+from field.driftdiffusion import *
 import math
 
 

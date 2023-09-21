@@ -5,9 +5,9 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from field import Physics
-import field.Node
-import field.Initial
+from field import physics
+import field.node
+import field.initial
 # import Setting
 
 import field.nju_pin_5mm_5mm_mesh
@@ -122,25 +122,25 @@ def extend_set():
     devsim.set_parameter(name = "extended_solver", value=True)
     devsim.set_parameter(name = "extended_model", value=True)
     devsim.set_parameter(name = "extended_equation", value=True)
-    devsim.circuit_element(name="V1", n1=Physics.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
+    devsim.circuit_element(name="V1", n1=physics.GetContactBiasName("top"), n2=0, value=0.0, acreal=1.0, acimag=0.0)
 
 def initial_solution(device,region,para_dict):
     # Initial DC solution
     
-    field.Initial.InitialSolution(device, region, circuit_contacts="top")
+    field.initial.InitialSolution(device, region, circuit_contacts="top")
     devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
 
     if "irradiation" in para_dict:
         if device == "1D_ITK_MD8":
-            field.Initial.DriftDiffusionInitialSolutionSiIrradiated(device, region, circuit_contacts="top")
-            devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0)
+            field.initial.DriftDiffusionInitialSolutionSiIrradiated(device, region, circuit_contacts="top")
+            devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0)
 
         else:
-            field.Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts="top")
+            field.initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts="top")
     else:
     ### Drift diffusion simulation at equilibrium
-        field.Initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
+        field.initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=50)
     """names        = ["E30K"   , "V3"      , "Ip"      , "H220"    , "CiOi"    ]
         g_ints       = [0.0497   , 0.6447    , 0.4335    , 0.5978    , 0.3780    ]
@@ -161,17 +161,17 @@ def initial_solution_Rirr(device,region,para_dict,Rirr=None):
 
     if "irradiation" in para_dict:
         if device == "1D_ITK_MD8":
-            field.Initial.DriftDiffusionInitialSolutionSiIrradiated(device, region, Rirr,circuit_contacts="top")
+            field.initial.DriftDiffusionInitialSolutionSiIrradiated(device, region, Rirr,circuit_contacts="top")
             #devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0)
             GGGddd=devsim.get_node_model_values(device=device, region=region, name="ElectronGeneration")
             GGGaaa=devsim.get_node_model_values(device=device, region=region, name="HoleGeneration")
             # print("Gd="+str(GGGddd)+"\n")
             # print("Ga="+str(GGGaaa)+"\n")
         else:
-            field.Initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts="top")
+            field.initial.DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts="top")
     else:
     ### Drift diffusion simulation at equilibrium
-        field.Initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
+        field.initial.DriftDiffusionInitialSolution(device, region, circuit_contacts="top")
         GGGddd=devsim.get_node_model_values(device=device, region=region, name="ElectronGeneration")
         GGGaaa=devsim.get_node_model_values(device=device, region=region, name="HoleGeneration")
         # print("Gd="+str(GGGddd)+"\n")
@@ -513,17 +513,17 @@ def solve_cv(device,region,v_max,para_dict,frequency):
 
 def solve_iv_single_point(device,region,reverse_v):
     if device == "1D_ITK_MD8":
-        devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=reverse_v)
+        devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=reverse_v)
     else:
-        devsim.set_parameter(device=device, name=Physics.GetContactBiasName("top"), value=0-reverse_v)
+        devsim.set_parameter(device=device, name=physics.GetContactBiasName("top"), value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=100,maximum_divergence=50)
     # try:
     #     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200,maximum_divergence=50)
     # except devsim.error as msg:
     #     if msg=="Convergence failure!":
     #         raise
-    Physics.PrintCurrents(device, "top")
-    Physics.PrintCurrents(device, "bot")
+    physics.PrintCurrents(device, "top")
+    physics.PrintCurrents(device, "bot")
     reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
     reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
     reverse_top_total_current   = reverse_top_electron_current + reverse_top_hole_current
@@ -533,7 +533,7 @@ def solve_iv_single_point(device,region,reverse_v):
 def solve_cv_single_point(device,region,reverse_v,frequency):
     devsim.circuit_alter(name="V1", value=0-reverse_v)
     devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
-    Physics.PrintCurrents(device, "bot")
+    physics.PrintCurrents(device, "bot")
     devsim.solve(type="ac", frequency=frequency)
     cap=devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*math.pi*frequency)
     print("capacitance {0} {1}".format(reverse_v, cap))
