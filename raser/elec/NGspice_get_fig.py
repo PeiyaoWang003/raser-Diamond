@@ -19,7 +19,7 @@ def read_file(file_path,file_name):
     return time,volt
 
 def main():
-    file_path = 'fig/'
+    file_path = 'output/fig/'
     file_name = sys.argv[1]
     com_name=file_name.split('.')[0]
     fig_name=file_path + com_name + '.pdf'

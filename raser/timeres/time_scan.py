@@ -49,13 +49,13 @@ def time_scan(args):
         # out_file=o_ls[0]+"/"+o_ls[1]+"/time_resolution_scan"+".csv"
         job_name = str(time.time())
         job_command = "./python/add_noise_raser.py " + file
-        runcmd("mkdir job/trash/ -p")
-        with open('job/trash/'+job_name+".sh","w") as f:
+        runcmd("mkdir output/job/ -p")
+        with open('output/job/'+job_name+".sh","w") as f:
             f.write(job_command)
-        runcmd("chmod +x job/trash/"+job_name+".sh")
-        command =  "job/trash/"+job_name+".sh"
+        runcmd("chmod +x output/job/"+job_name+".sh")
+        command =  "output/job/"+job_name+".sh"
         print(command)
-        job_sub =  "hep_sub ./" + "job/trash/"+job_name+".sh"
+        job_sub =  "hep_sub ./" + "output/job/"+job_name+".sh"
         runcmd(job_sub)
 
 def draw_scan(input,index,model,eff):

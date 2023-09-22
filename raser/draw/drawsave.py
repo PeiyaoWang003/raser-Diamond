@@ -25,7 +25,7 @@ def draw_plots(my_d,ele_current,my_f,my_g4p,my_current,my_l=None):
         2021/08/31
     """
     now = time.strftime("%Y_%m%d_%H%M%S")
-    path = os.path.join("fig", str(now),'' )
+    path = os.path.join("output/fig", str(now),'' )
     create_path(path) 
     if "plugin" in my_d.det_model:
         draw_ele_field(my_d,my_f,"xy",my_d.det_model,my_d.l_z*0.5,path)
@@ -609,8 +609,8 @@ def energy_deposition(my_g4v):
     print("MPV:%s"%g1.GetParameter(1))
     h1.Draw()
     now = time.strftime("%Y_%m%d_%H%M")
-    c1.SaveAs("fig/dep_SiC"+"_"+now+"_energy.pdf")
-    c1.SaveAs("fig/dep_SiC"+"_"+now+"_energy.root")
+    c1.SaveAs("output/fig/dep_SiC"+"_"+now+"_energy.pdf")
+    c1.SaveAs("output/fig/dep_SiC"+"_"+now+"_energy.root")
 
 def create_path(path):
     """ If the path does not exit, create the path"""
@@ -740,7 +740,7 @@ def get1_beam_number(my_g4p):
 def cce(my_d,my_f,my_current):
 
     now = time.strftime("%Y_%m%d_%H%M")
-    path = "fig/" + now + "/"
+    path = "output/fig/" + now + "/"
     create_path(path) 
 
     charge=array('d')

@@ -71,7 +71,7 @@ def main(args):
         canvas.Draw()
         Name = "Res vs size"
         now = time.strftime("%Y_%m%d_%H%M")
-        path = os.path.join("fig", str(now),'' )
+        path = os.path.join("output/fig", str(now),'' )
         """ If the path does not exit, create the path"""
         if not os.access(path, os.F_OK):
             os.makedirs(path) 
