@@ -14,7 +14,7 @@ sys.path.append("..")
 import matplotlib.pyplot
 import physics2dcv
 import math
-import Sicar11
+import field.sicar11 as sicar11
 
 if not (os.path.exists("./output")):
     os.mkdir("./output")
@@ -36,8 +36,8 @@ pn_2D.SetDoping(device=device, region=region)
 
 '''
 
-Sicar11.Create2DMesh(device=device, region=region)
-Sicar11.SetDoping(device=device, region=region)
+sicar11.Create2DMesh(device=device, region=region)
+sicar11.SetDoping(device=device, region=region)
 #Sicar11.Draw_Doping(device=device, region=region, path="./output/2d_pn_doping.png")
 
 physics2dcv.SetMaterialParameters(device,region)
