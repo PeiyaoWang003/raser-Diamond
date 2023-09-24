@@ -62,13 +62,8 @@ class telescope:
         print(self.Hits)
 
         count = 0
-<<<<<<< HEAD:raser/spaceres/telescope.py
-        for evt in self.Clusters:
-            
-=======
         multi_cluster = 0
         for evt in self.Clusters:       
->>>>>>> raser/main:raser/spaceres/telescope.py
             if count % 1000 == 0:
                 print("Excuate process:",count,"/",len(self.Clusters))
             count+=1
@@ -106,13 +101,8 @@ class telescope:
                     pos_z.append(self.layer_z[layer])
                 kx,bx,ky,by = self.fit(pos_x,pos_y,pos_z)
                 
-<<<<<<< HEAD:raser/spaceres/telescope.py
-                residualx = kx*self.layer_z[DUT]+bx-cluster_dict[DUT][0][0]
-                residualy = ky*self.layer_z[DUT]+by-cluster_dict[DUT][0][1]
-=======
                 residualx = kx*(self.layer_z[DUT]+self.pixelsize_z/2)+bx-cluster_dict[DUT][0][0]
                 residualy = ky*(self.layer_z[DUT]+self.pixelsize_z/2)+by-cluster_dict[DUT][0][1]
->>>>>>> raser/main:raser/spaceres/telescope.py
                 if DUT not in self.Residual:
                     self.Residual[DUT] = []
                     self.kvalue[DUT] = []
@@ -135,10 +125,7 @@ class telescope:
         self.resolution()
         self.swap_res()
         
-<<<<<<< HEAD:raser/spaceres/telescope.py
-=======
         print("multi_clusters_evts",multi_cluster)
->>>>>>> raser/main:raser/spaceres/telescope.py
         print("Tol_evts:",len(self.Clusters))
         print("Tol_Resulution of each DUT",self.Resolution_Tol)
         print("DUT_Resulution of each DUT",self.Resolution_DUT)
@@ -229,11 +216,7 @@ class telescope:
             #Namekx = Name+"_kx"
             #Nameky = Name+"_ky"
             
-<<<<<<< HEAD:raser/spaceres/telescope.py
-            xmin = self.pixelsize_x*4
-=======
             xmin = self.pixelsize_x*3
->>>>>>> raser/main:raser/spaceres/telescope.py
             meanx,sigmax = self._draw_res(residualx,Namex,-xmin,xmin)
             meany,sigmay = self._draw_res(residualy,Namey,-xmin,xmin)
             #meankx,sigmakx = self._draw_res(kx,Namekx,-0.002,0.002)

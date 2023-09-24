@@ -566,18 +566,6 @@ class CalCurrentG4P(CalCurrent):
 
 class CalCurrentPixel:
     """Calculation of diffusion electrons in pixel detector"""
-<<<<<<< HEAD
-    def __init__(self, my_d, my_f, my_g4p, batch,layer):
-        G4P_carrier_list = PixelCarrierListFromG4P(my_d.material, my_g4p, batch,layer)                 
-        self.collected_charge=[]
-        self.sum_signal = []        
-        for k in range(batch):
-            signal_charge = []
-            for j in range(layer):
-                self.electrons = []
-                self.charge,self.collected_charge = [],[]
-                self.row,self.column=[],[]
-=======
     def __init__(self, my_d, my_f, my_g4p):
         batch = len(my_g4p.localposition)
         layer = len(my_d.lt_z)
@@ -593,20 +581,13 @@ class CalCurrentPixel:
                 self.charge,self.collected_charge = [],[]#same like before
                 self.row,self.column=[],[]
                 Hit = {'index':[],'charge':[]} 
->>>>>>> raser/main
                 #print(len(G4P_carrier_list.ionized_pairs[k][j]))
                 print("%f pairs of carriers are generated from G4 in event_ %d layer %d" %(sum(G4P_carrier_list.ionized_pairs[k][j]),k,j))
                 #print(G4P_carrier_list.track_position[k][j])
                 for i in range(len(G4P_carrier_list.track_position[k][j])):
-<<<<<<< HEAD
-                    electron = Carrier(G4P_carrier_list.track_position[k][j][i][0]+my_d.l_x/2,\
-                                       G4P_carrier_list.track_position[k][j][i][1]+my_d.l_y/2,\
-                                       G4P_carrier_list.track_position[k][j][i][2]+my_d.l_z/2,\
-=======
                     electron = Carrier(G4P_carrier_list.track_position[k][j][i][0],\
                                        G4P_carrier_list.track_position[k][j][i][1],\
                                        G4P_carrier_list.track_position[k][j][i][2],\
->>>>>>> raser/main
                                        0,\
                                        -1*G4P_carrier_list.ionized_pairs[k][j][i],\
                                        my_d.material,\
@@ -623,18 +604,6 @@ class CalCurrentPixel:
                 for i in range(len(self.row)):
                     #test_charge.SetBinContent(int(self.row[i]),int(self.column[i]),self.charge[i])
                     test_charge.Fill(self.row[i],self.column[i],self.charge[i])
-<<<<<<< HEAD
-                self.sum_charge = ROOT.TH2F("charge", "Pixel Detector charge",Xbins, 0, Xup, Ybins, 0, Yup)
-                self.sum_charge.Add(test_charge)
-                test_charge.Reset
-                collected_charge=self.pixel_charge(my_d,Xbins,Ybins)
-                signal_charge.append(collected_charge)
-                print("%f electrons are collected in event_ %d,layer %d" %(sum(self.charge),k,j))
-            self.sum_signal.append(signal_charge)
-            #print(signal_charge)
-            del signal_charge
-        print(self.sum_signal)
-=======
                     
                 sum_fired = ROOT.TH2F("charge", "Pixel Detector charge",Xbins, 0, Xup, Ybins, 0, Yup)
                 sum_fired.Add(test_charge)
@@ -655,7 +624,6 @@ class CalCurrentPixel:
             del signal_charge
         #print(self.sum_signal)
         #print(self.event)
->>>>>>> raser/main
 
     def diffuse_loop(self, my_d, my_f):
         for electron in self.electrons:
@@ -675,8 +643,6 @@ class CalCurrentPixel:
                 if (charge>0.2):
                     self.collected_charge.append([x,y,charge])        
         return self.collected_charge
-<<<<<<< HEAD
-=======
     
     def pixel_fired(self,tot,Xbins,Ybins):
         Hit = {'index':[],'charge':[]} 
@@ -687,7 +653,6 @@ class CalCurrentPixel:
                     Hit["index"].append([x,y])
                     Hit["charge"].append(charge)       
         return Hit["index"],Hit["charge"]
->>>>>>> raser/main
 
 
 class CalCurrentLaser(CalCurrent):
@@ -784,11 +749,7 @@ class CarrierListFromG4P:
         self.ionized_pairs = [step*1e6/self.energy_loss for step in self.tracks_step]
     
 class PixelCarrierListFromG4P:
-<<<<<<< HEAD
-    def __init__(self, material, my_g4p, batch,layer):
-=======
     def __init__(self, my_d,my_g4p):
->>>>>>> raser/main
         """
         Description:
             Events position and energy depositon
@@ -802,8 +763,6 @@ class PixelCarrierListFromG4P:
         Modify:
             2022/10/25
         """
-<<<<<<< HEAD
-=======
         batch = len(my_g4p.localposition)
         layer = len(my_d.lt_z)
         material = my_d.material
@@ -811,7 +770,6 @@ class PixelCarrierListFromG4P:
         self.pixelsize_y = my_d.p_y
         self.pixelsize_z = my_d.p_z
         
->>>>>>> raser/main
         if (material == "SiC"):
             self.energy_loss = 8.4 #ev
         elif (material == "Si"):
@@ -830,10 +788,6 @@ class PixelCarrierListFromG4P:
             name = "Layer_"+str(i)
             #print(name)
             for k in range(len(my_g4p.devicenames[j])):
-<<<<<<< HEAD
-                if name in my_g4p.devicenames[j][k]:
-                    position.append(my_g4p.localposition[j][k]) 
-=======
                 px,py,pz = self.split_name(my_g4p.devicenames[j][k])
                 if name in my_g4p.devicenames[j][k]:
                     tp = [0 for i in range(3)]
@@ -841,7 +795,6 @@ class PixelCarrierListFromG4P:
                     tp[1] = my_g4p.localposition[j][k][1]+py*self.pixelsize_y
                     tp[2] = my_g4p.localposition[j][k][2]+self.pixelsize_z/2
                     position.append(tp) 
->>>>>>> raser/main
                     energy.append(my_g4p.energy_steps[j][k])
             s_track_position.append(position)
             pairs = [step*1e6/self.energy_loss for step in energy]
@@ -849,11 +802,7 @@ class PixelCarrierListFromG4P:
             del position,energy
         self.track_position.append(s_track_position)
         self.ionized_pairs.append(s_energy)
-<<<<<<< HEAD
-        
-=======
         
     def split_name(self,volume_name):
         parts = volume_name.split('_')
         return int(parts[1]),int(parts[2]),int(parts[4])
->>>>>>> raser/main

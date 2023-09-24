@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-from . import telescope
-
-import ROOT
-import sys
-import time
-import os
-sys.path.append("..")
-=======
 import sys
 import os
 sys.path.insert(0, sys.path[0]+"/../")
@@ -16,7 +7,6 @@ import time
 
 from . import telescope as tlcp
 
->>>>>>> raser/main
 from g4simulation import Particles
 from setting import Setting
 from geometry import R3dDetector
@@ -34,21 +24,12 @@ def main(args):
         paths = ['det_name=Taichu3', 'parfile=setting/detector.json', 'geant4_model=pixeldetector', 'geant4_parfile=setting/absorber.json', 'pixeldetector']
         dset = Setting(paths)
         my_d = R3dDetector(dset)
-<<<<<<< HEAD
-        #my_f = 0
-        #my_g4p = Particles(my_d, my_f, dset)
-        #my_charge = CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
-        #drawsave.draw_charge(my_charge)
-        #my_telescope = telescope(my_d,my_charge) 
-        telescope.main(my_d)  
-=======
         my_f = 0
         my_g4p = Particles(my_d, my_f, dset)
         my_charge = CalCurrentPixel(my_d,my_f,my_g4p)
         #drawsave.draw_charge(my_charge)
         #my_telescope = tlcp.telescope(my_d,my_charge) 
         #tlcp.main(my_d)  
->>>>>>> raser/main
     elif label.startswith("taichu_v2"):
         #virtual object
         class MyObject:
@@ -65,11 +46,7 @@ def main(args):
             t_my_d.p_z = 200.
             t_my_d.lt_z = [20000.,60000.,100000.,140000.,180000.,220000.]
             psize.append(t_my_d.p_x)
-<<<<<<< HEAD
-            res.append(telescope.main(t_my_d))
-=======
             res.append(tlcp.main(t_my_d))
->>>>>>> raser/main
         
         graph = ROOT.TGraph()
         for i in range(len(psize)):

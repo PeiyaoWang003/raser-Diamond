@@ -1,11 +1,7 @@
 [
     {
         "geant4_model" : "pixeldetector",
-<<<<<<< HEAD
-        "total_events" : 10,
-=======
         "total_events" : 1000,
->>>>>>> raser/main
 
         "object" : {
             "pixel"  : {
