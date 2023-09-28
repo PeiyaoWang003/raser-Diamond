@@ -20,7 +20,6 @@ def main():
 
     print('delat_T ='+str(T)+' K')
 
-
-
-main()
+if __name__ == '__main__':
+    main()
 
