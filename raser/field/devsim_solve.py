@@ -91,6 +91,8 @@ def set_mesh(device,region):
         device_mesh = field.sicar1_lgad_mesh
     elif device == "1D_ITK_MD8" or device == "1D_ITK_ATLAS18":
         device_mesh = field.itk_md8_mesh
+    else: 
+        raise NameError
     device_mesh.Create1DMesh(device=device, region=region)
     device_mesh.SetDoping(device=device, region=region)
     device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/{}_doping.png".format(device))
