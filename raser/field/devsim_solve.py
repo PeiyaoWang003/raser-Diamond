@@ -14,6 +14,7 @@ import field.nju_pin_5mm_5mm_mesh
 import field.hpk_pin_5mm_5mm_mesh
 import field.sicar1_lgad_mesh
 import field.itk_md8_mesh
+import field.itk_atlas18_mesh
 
 import matplotlib 
 import matplotlib.pyplot
@@ -50,7 +51,21 @@ def main(label=None, v_max = 400):
         device = "1D_ITK_MD8"
         region = "1D_ITK_MD8"
         para_dict=[]
+        devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
+        devsim.set_parameter(device=device,   name="tau_p",  value=3e-2)
         set_mesh(device,region)
+        extend_set()
+        initial_solution(device,region,para_dict)
+        solve_iv(device,region,v_max,para_dict,area_factor)
+    elif label=='itkatlas18_iv_v1':
+        area_factor=1.0/(10.0*10.0)
+        v_max=700
+        device = "1D_ITK_ATLAS18"
+        region = "1D_ITK_ATLAS18"
+        para_dict=[]
+        set_mesh(device,region)
+        devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
+        devsim.set_parameter(device=device,   name="tau_p",  value=3e-2)
         extend_set()
         initial_solution(device,region,para_dict)
         solve_iv(device,region,v_max,para_dict,area_factor)
@@ -76,6 +91,8 @@ def set_mesh(device,region):
         device_mesh = field.sicar1_lgad_mesh
     elif device == "1D_ITK_MD8":
         device_mesh = field.itk_md8_mesh
+    elif device == "1D_ITK_ATLAS18":
+        device_mesh = field.itk_atlas18_mesh
     device_mesh.Create1DMesh(device=device, region=region)
     device_mesh.SetDoping(device=device, region=region)
     device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/{}_doping.png".format(device))
