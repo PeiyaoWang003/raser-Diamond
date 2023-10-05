@@ -1,22 +1,20 @@
 import sys
 import os
-sys.path.insert(0, sys.path[0]+"/../")
+#sys.path.insert(0, sys.path[0]+"/../")
 
 import ROOT
 import time
+import subprocess
 
 from . import telescope as tlcp
 #from . import test
-from particle.g4simulation import Particles
-from readjson import Setting
-from particle.geometry import R3dDetector
-from current.calcurrent import CalCurrentPixel
+#from particle.g4simulation import Particles
+#from readjson import Setting
+#from particle.geometry import R3dDetector
+#from current.calcurrent import CalCurrentPixel
 
 def main(args):
     label = vars(args)['label']
-    
-   
-        
     if label == "-h":
         print("taichu_v1:   ","first version of telescope simulation")
         print("taichu_v2:   ","second version of telescope simulation")
@@ -41,6 +39,7 @@ def main(args):
         MaxSize = 25.
         for i in range(N):
             t_my_d = MyObject()
+            t_my_d.seedcharge = 100
             t_my_d.p_x = MaxSize*(i+1)/N
             t_my_d.p_y = MaxSize*(i+1)/N
             t_my_d.p_z = 200.
@@ -76,8 +75,24 @@ def main(args):
         if not os.access(path, os.F_OK):
             os.makedirs(path) 
         canvas.SaveAs(path+Name+".png")
-    elif label.startswith("taichu_v3"):
-        pass    
+    elif label.startswith("acts_v1"):
+        python_script = "raser/spaceres/telescope_simulation.py"  
+
+        result = subprocess.run(["python3", python_script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        if result.returncode == 0:
+            print(f"Script '{python_script}' executed successfully.")
+        else:
+            print(f"Script '{python_script}' failed with return code:", result.returncode)
+
+        stdout_output = result.stdout
+        stderr_output = result.stderr
+
+        print("Standard Output:")
+        print(stdout_output)
+
+        print("Standard Error:")
+        print(stderr_output)
     else:
         raise NameError(label)
     
