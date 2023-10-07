@@ -87,9 +87,9 @@ def T1():
     legend.Draw("")
 
     now = time.strftime("%Y_%m%d_%H%M%S")
-    path = os.path.join("fig", str(now))
+    path = os.path.join("output/fig", str(now))
     os.makedirs(path)
-    c.SaveAs(os.path.join('fig', str(now), 't1.pdf'))
+    c.SaveAs(os.path.join('output/fig', str(now), 't1.pdf'))
 
 if __name__ == '__main__':
     T1()
