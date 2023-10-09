@@ -29,8 +29,6 @@ def main(args):
         scan_iv.main(simname="NJUPIN")
     elif label == 'sicar1.1.8_cv_0-1v':
         devsim_solve.main()
-    elif label == 'sicar1.1.6_cv_0-500v':
-        scan_cv.main()
     elif label == 'sicar1.1.8_cv_v1':
         devsim_solve.main(label)
     elif label == 'si_ir_1d':
