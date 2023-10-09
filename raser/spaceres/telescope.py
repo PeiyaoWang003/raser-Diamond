@@ -128,7 +128,7 @@ class telescope:
         
         Name = "fit"+str(DUT)
         now = time.strftime("%Y_%m%d_%H%M")
-        path = os.path.join("output/fig", str(now),'' )
+        path = os.path.join("fig", str(now),'' )
         #print(path)
         
         """ If the path does not exit, create the path"""
@@ -220,7 +220,7 @@ class telescope:
         label.Draw()
         
         now = time.strftime("%Y_%m%d_%H%M")
-        path = os.path.join("output/fig", str(now),'' )
+        path = os.path.join("fig", str(now),'' )
         #print(path)
         
         """ If the path does not exit, create the path"""

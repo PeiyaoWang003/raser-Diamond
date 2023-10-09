@@ -29,7 +29,7 @@ class Setting:
         ---------
             2021/09/02
         """
-        with open('setting/setting.json') as f:
+        with open('setting/labels.json') as f:
             self._pardic = json.load(f)
 
         self.detector_name = self._pardic['detector']
@@ -47,7 +47,7 @@ class Setting:
 
         self.total_events = int(self.geant4_paras['total_events'])
         #self.g4seed = 0 
-        self.g4seed = random.randint(0,1e7)
+        self.g4seed = 1
 
     def read_par_detector(self,jsonfile):
         "Read the setting.json file and save the input parameters in paras"
