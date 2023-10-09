@@ -289,27 +289,7 @@ def CreateImpactGeneration(device, region):
     node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Electrons")
     node_in_2d.CreateEdgeModelDerivatives(device, region, "ImpactGen_p", ImpactGen_p, "Holes")
     #devsim.edge_model(device=device,region=region,name="ImpactGen_p:Potential",equation="-ImpactGen_n:Potential")
-'''
-#Netgeneration
-def CreateNetGeneration(device, region):
 
-    Gn = "-q * (USRH - 1e12)"
-    Gp = "+q * (USRH - 1e12)"
-
-    #Gn = "-q * (USRH - 1e18*x*x)"
-    #Gp = "+q * (USRH - 1e18*x*x)"
-
-    #Gn = "-q * (USRH)"
-    #Gp = "+q * (USRH)"
-
-    node_in_2d.CreateNodeModel(device, region, "ElectronGeneration", Gn)
-    node_in_2d.CreateNodeModel(device, region, "HoleGeneration", Gp)
-
-    for i in ("Electrons", "Holes"):
-        node_in_2d.CreateNodeModelDerivative(device, region, "ElectronGeneration", Gn, i)
-        node_in_2d.CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
-
-'''
 
 
 def CreateECE(device, region, mu_n):
@@ -331,58 +311,6 @@ def CreateECE(device, region, mu_n):
              node_model="ElectronGeneration", 
              edge_volume_model="ImpactGen_n"
              )
-
-'''
-#addirrdefect
-
-def CreateIrradiatedCharge(device, region, Neutron_eq=1e9):
-
-    #Add Deep Levels from Irradiated Defect 
-    #able to Catch Carriers Directly and Keep Them Trapped
-  
-    
-    names        = ["E30K"   , "V3"      , "Ip"      , "H220"    , "CiOi"    ]
-    E_ts_ev      = [0.56-0.1 , 0.56-0.458, 0.56-0.545, -0.56+0.48, -0.56+0.36]
-    g_ints       = [0.0497   , 0.6447    , 0.4335    , 0.5978    , 0.3780    ] # cm^-1
-    sigma_n_irrs = [2.300e-14, 2.551e-14 , 4.478e-15 , 4.166e-15 , 3.230e-17 ]
-    sigma_p_irrs = [2.920e-16, 1.551e-13 , 6.709e-15 , 1.965e-16 , 2.036e-14 ]
-
-    n_t_irr_n = "0"
-    n_t_irr_p = "0"
-    R_t_irr = "0"
-    
-    for nametype, E_t_ev, g_int, sigma_n_irr, sigma_p_irr in zip(names, E_ts_ev, g_ints, sigma_n_irrs, sigma_p_irrs):
-        E_t = E_t_ev * q
-        N_t_irr = g_int*Neutron_eq
-        
-
-        devsim.set_parameter(device=device, region=region, name="sigma_n_irr_{nametype}".format(nametype=nametype), value=sigma_n_irr)
-        devsim.set_parameter(device=device, region=region, name="sigma_p_irr_{nametype}".format(nametype=nametype), value=sigma_p_irr)
-        devsim.set_parameter(device=device, region=region, name="N_t_irr_{nametype}".format(nametype=nametype), value=N_t_irr)
-        devsim.set_parameter(device=device, region=region, name="E_t_{nametype}".format(nametype=nametype), value=E_t)
-       
-        r_n = "(v_T * sigma_n_irr_{name})".format(name=nametype)#c_n
-        n_1 = "(N_c * exp(-(E_g/2 - E_t_{name})/k_T0))".format(name=nametype)#e_n
-        r_p = "(v_T * sigma_p_irr_{name})".format(name=nametype)#c_p
-        p_1 = "(N_v * exp(-(E_t_{name} - (-E_g/2))/k_T0))".format(name=nametype)#e_p
-
-        #n_t_irr_n += "+(N_t_irr_{name}".format(name=name)
-        n_t_irr_n += "+(N_t_irr_{name}*(Electrons*{r_n}+{p_1}*{r_p})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=nametype,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
-        n_t_irr_p += "+(N_t_irr_{name} - {n_t_irr_n})".format(name=nametype,n_t_irr_n=n_t_irr_n)
-        #R_t_irr += "+(N_t_irr_{name} * ({c_n} * Electrons * {c_p} * Holes - {e_n} * {e_p})/({c_n} * Electrons + {e_n} + {c_p} * Holes + {e_p}))".format(name=name,c_n=c_n,e_n=e_n,c_p=c_p,e_p=e_p)
-        R_t_irr += "+(sigma_n_irr_{name}*sigma_p_irr_{name}*v_T*N_t_irr_{name}*(Electrons*Holes - n_i^2))/(sigma_n_irr_{name}*(Electrons - n1*exp(-(E_g/2 - E_t_{name})/k_T0)) + sigma_p_irr_{name}*(Holes + p1*exp(-(E_t_{name} - (-E_g/2))/k_T0)))".format(name=nametype)
-
-    node_in_2d.CreateNodeModel(device, region, "TrappedElectrons", n_t_irr_n)
-    node_in_2d.CreateNodeModel(device, region, "TrappedHoles", n_t_irr_p)
-    node_in_2d.CreateNodeModel(device, region, "R_t_irr", R_t_irr)
-    for i in ("Electrons", "Holes", "Potential"):
-        node_in_2d.CreateNodeModelDerivative(device, region, "TrappedElectrons", n_t_irr_n, i)
-        node_in_2d.CreateNodeModelDerivative(device, region, "TrappedHoles", n_t_irr_p, i)
-        node_in_2d.CreateNodeModelDerivative(device, region, "R_t_irr", R_t_irr, i)
-
-
-'''
-
 
 
 
@@ -408,7 +336,7 @@ def CreateHCE(device, region, mu_p):
 
 
 def CreatePE(device, region):
-    #CreateIrradiatedCharge(device,region)
+    
     pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
     #pne = "-q*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
     node_in_2d.CreateNodeModel(device, region, "PotentialNodeCharge", pne)
@@ -422,7 +350,7 @@ def CreatePE(device, region):
 
 
 def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
-    #CreateIrradiatedCharge(device,region)
+   
     CreatePE(device, region)
     driftdiffusion_2d.CreateBernoulli(device, region)
     CreateSRH(device, region)
@@ -430,7 +358,7 @@ def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
     CreateECE(device, region, mu_n)
     CreateHCE(device, region, mu_p)
     
-    #CreateImpactGeneration(device, region)
+   
 
 
 def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
