@@ -62,14 +62,14 @@ def main(args):
     if "pixeldetector" in args:
         my_f = pyf.FenicsCal(my_d,dset.fenics)
         #my_f = 0
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
         #draw_save.draw_charge(my_charge)
         return  
     
     if "beammonitor" in args:
         my_f = pyf.FenicsCal(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.get_beam_number(my_g4p,ele_current)
@@ -86,7 +86,7 @@ def main(args):
 
     if "Carrier" in args:
         my_f = pyf.FenicsCal1D(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.get_beam_number(my_g4p,ele_current)
@@ -94,7 +94,7 @@ def main(args):
 
     if "reactor" in args:
         my_f = pyf.FenicsCal(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
@@ -102,7 +102,7 @@ def main(args):
     
     if "Si_Strip"==dset.detector_name:
         my_f = stripfield.FieldCal(my_d, dset.detector_name, dset.detector, dset.fenics)
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
@@ -120,7 +120,7 @@ def main(args):
         print("using fenics to build the field")
         my_f = pyf.FenicsCal(my_d,dset.fenics)
         
-    my_g4p = g4s.Particles(my_d, my_f, dset)
+    my_g4p = g4s.Particles(my_d, dset)
     if "scan=True" not in args:
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
         #if "lgad" in dset.det_model:
