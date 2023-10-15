@@ -6,10 +6,28 @@ import acts
 import acts.examples
 from acts.examples.simulation import (
     addParticleGun,
+    addDigitization,
+    MomentumConfig,
     EtaConfig,
     PhiConfig,
     ParticleConfig,
     addFatras,
+)
+
+from acts.examples.reconstruction import (
+    addSeeding,
+    TruthSeedRanges,
+    ParticleSmearingSigmas,
+    SeedFinderConfigArg,
+    SeedFinderOptionsArg,
+    SeedingAlgorithm,
+    TruthEstimatedSeedingAlgorithmConfigArg,
+    addCKFTracks,
+    addAmbiguityResolution,
+    AmbiguityResolutionConfig,
+    addVertexFitting,
+    VertexFinder,
+    TrackSelectorConfig,
 )
 
 u = acts.UnitConstants
@@ -21,12 +39,13 @@ if "__main__" == __name__:
         binValue=2,
     )
 
-    field = acts.ConstantBField(acts.Vector3(0, 0, 0 * u.T))
+    field = acts.ConstantBField(acts.Vector3(0, 0, 0.2 * u.T))
 
     outputDir = Path.cwd() / "output/telescope_simulation"
     if not outputDir.exists():
         outputDir.mkdir()
-
+    inputDir = Path.cwd() / "setting"
+    
     rnd = acts.examples.RandomNumbers(seed=42)
 
     s = acts.examples.Sequencer(events=1, numThreads=1, logLevel=acts.logging.INFO)
@@ -35,7 +54,8 @@ if "__main__" == __name__:
     
     addParticleGun(
         s,
-        EtaConfig(-10.0, 10.0),
+        MomentumConfig(4.0 * u.GeV, 5.0 * u.GeV, transverse=True),
+        EtaConfig(0, 3.0),
         PhiConfig(0.0, 360.0 * u.degree),
         ParticleConfig(1000, acts.PdgParticle.eMuon, False),
         multiplicity=1,
@@ -51,6 +71,56 @@ if "__main__" == __name__:
         outputDirRoot=outputDir / postfix,
     )
     
+    addDigitization(
+        s,
+        trackingGeometry,
+        field,
+        digiConfigFile= inputDir/"smear.json",
+        rnd=rnd,
+        outputDirRoot=outputDir / postfix,
+    )
+
+    addSeeding(
+        s,
+        trackingGeometry,
+        field,
+        TruthSeedRanges(pt=(500 * u.MeV, None), nHits=(6, None)),
+        ParticleSmearingSigmas(pRel=0.01),  # only used by SeedingAlgorithm.TruthSmeared
+        SeedFinderConfigArg(
+            r=(33 * u.mm, 200 * u.mm),
+            deltaR=(1 * u.mm, 60 * u.mm),
+            collisionRegion=(-250 * u.mm, 250 * u.mm),
+            z=(-2000 * u.mm, 2000 * u.mm),
+            maxSeedsPerSpM=1,
+            sigmaScattering=5,
+            radLengthPerSeed=0.1,
+            minPt=500 * u.MeV,
+            impactMax=3 * u.mm,
+        ),
+        SeedFinderOptionsArg(bFieldInZ=0.2 * u.T),
+        TruthEstimatedSeedingAlgorithmConfigArg(deltaR=(10.0 * u.mm, None)),
+        seedingAlgorithm=SeedingAlgorithm.Orthogonal,
+        geoSelectionConfigFile=inputDir/"seed.json",
+        rnd=rnd,  # only used by SeedingAlgorithm.TruthSmeared
+        outputDirRoot=outputDir / postfix,
+    )
     
+    addCKFTracks(
+        s,
+        trackingGeometry,
+        field,
+        TrackSelectorConfig(
+            pt=(500 * u.MeV, None),
+            loc0=(-4.0 * u.mm, 4.0 * u.mm),
+            nMeasurementsMin=6,
+        ),
+        outputDirRoot=outputDir / postfix,
+    )
+    
+    addAmbiguityResolution(
+        s,
+        AmbiguityResolutionConfig(maximumSharedHits=6),
+        outputDirRoot=outputDir / postfix,
+    )
 
     s.run()
