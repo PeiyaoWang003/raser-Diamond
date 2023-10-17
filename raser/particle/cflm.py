@@ -3,32 +3,28 @@ import geant4_pybind as g4b
 import sys
 import os
 
-# Choose specific analysis manager
 G4AnalysisManager = g4b.G4RootAnalysisManager
 
-
-class B4DetectorConstruction(g4b.G4VUserDetectorConstruction):
+class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
 
     def __init__(self):
         super().__init__()
         self.fCheckOverlaps = True
 
     def DefineMaterials(self):
-        # Lead material defined using NIST Manager
+
         nistManager = g4b.G4NistManager.Instance()
         nistManager.FindOrBuildMaterial("G4_Cu")
 
         g4b.G4Material("silicon", z=14, a=28.08*g4b.g/g4b.mole, density=2.330*g4b.g/g4b.cm3)
 
-        # Vacuum
         g4b.G4Material("Galactic", z=1, a=1.01*g4b.g/g4b.mole, density=g4b.universe_mean_density,
                    state=g4b.kStateGas, temp=2.73*g4b.kelvin, pressure=3e-18*g4b.pascal)
 
-        # Print materials
         print(g4b.G4Material.GetMaterialTable())
 
     def DefineVolumes(self):
-        # Geometry parameters
+
         nofLayers = 1
         pipeThickness = 2*g4b.mm
         detectorThickness = 0.5*g4b.mm
@@ -39,14 +35,13 @@ class B4DetectorConstruction(g4b.G4VUserDetectorConstruction):
         worldSizeXY = 1.2 * calorSizeXY
         worldSizeZ = 1.2 * calorThickness
 
-        # Get materials
         defaultMaterial = g4b.G4Material.GetMaterial("Galactic")
         pipeMaterial = g4b.G4Material.GetMaterial("G4_Cu")
         detectorMaterial = g4b.G4Material.GetMaterial("silicon")
 
         if defaultMaterial == None or pipeMaterial == None or detectorMaterial == None:
             msg = "Cannot retrieve materials already defined."
-            g4b.G4Exception("B4DetectorConstruction::DefineVolumes()",
+            g4b.G4Exception("cflmDetectorConstruction::DefineVolumes()",
                         "MyCode0001", FatalException, msg)
 
         # World
@@ -132,7 +127,6 @@ class B4DetectorConstruction(g4b.G4VUserDetectorConstruction):
                                     0,                                     # copy number
                                     self.fCheckOverlaps)                   # checking overlaps
 
-        # print parameters
         print("")
         print("------------------------------------------------------------")
         print("---> The calorimeter is", nofLayers, "layers of: [", end="")
@@ -140,14 +134,12 @@ class B4DetectorConstruction(g4b.G4VUserDetectorConstruction):
         print(detectorThickness/g4b.mm, "mm of", detectorMaterial.GetName(), "]")
         print("------------------------------------------------------------")
 
-        # Visualization attributes
         worldLV.SetVisAttributes(g4b.G4VisAttributes.GetInvisible())
 
         simpleBoxVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 1))
         simpleBoxVisAtt.SetVisibility(True)
         calorLV.SetVisAttributes(simpleBoxVisAtt)
 
-        # Always return the physical World
         return worldPV
 
     def Construct(self):
@@ -155,37 +147,29 @@ class B4DetectorConstruction(g4b.G4VUserDetectorConstruction):
         return self.DefineVolumes()
 
     def ConstructSDandField(self):
-        # Create global magnetic field messenger.
-        # Uniform magnetic field is then created automatically if
-        # the field value is not zero.
+
         fieldValue = g4b.G4ThreeVector()
         self.fMagFieldMessenger = g4b.G4GlobalMagFieldMessenger(fieldValue)
         self.fMagFieldMessenger.SetVerboseLevel(1)
 
 
-class B4PrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
+class cflmPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
 
     def __init__(self):
         super().__init__()
         nofParticles = 1
         self.fParticleGun = g4b.G4ParticleGun(nofParticles)
 
-        # default particle kinematic
         particleDefinition = g4b.G4ParticleTable.GetParticleTable().FindParticle("e-")
         self.fParticleGun.SetParticleDefinition(particleDefinition)
         self.fParticleGun.SetParticleMomentumDirection(g4b.G4ThreeVector(0, 10, 1))
         self.fParticleGun.SetParticleEnergy(24*g4b.GeV)
 
     def GeneratePrimaries(self, anEvent):
-        # This function is called at the begining of an event
 
-        # In order to avoid dependence of PrimaryGeneratorAction
-        # on DetectorConstruction class we get world volume
-        # from G4LogicalVolumeStore
         worldZHalfLength = 0
         worldLV = g4b.G4LogicalVolumeStore.GetInstance().GetVolume("World")
 
-        # Check that the world volume has box shape
         worldBox = None
         if worldLV != None:
             worldBox = worldLV.GetSolid()
@@ -196,43 +180,37 @@ class B4PrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
             msg = "World volume of box shape not found."
             msg += "Perhaps you have changed geometry."
             msg += "The gun will be place in the center."
-            g4b.G4Exception("B4PrimaryGeneratorAction::GeneratePrimaries()",
+            g4b.G4Exception("cflmPrimaryGeneratorAction::GeneratePrimaries()",
                         "MyCode0002", JustWarning, msg)
 
-        # Set gun position
         self.fParticleGun.SetParticlePosition(g4b.G4ThreeVector(0, 0, -worldZHalfLength))
         self.fParticleGun.GeneratePrimaryVertex(anEvent)
 
 
-class B4aEventAction(g4b.G4UserEventAction):
+class cflmaEventAction(g4b.G4UserEventAction):
 
     def BeginOfEventAction(self, event):
-        # initialisation per event
+
         self.fEnergyPipe = 0
         self.fEnergyDetector = 0
         self.fTrackLPipe = 0
         self.fTrackLDetector = 0
 
     def EndOfEventAction(self, event):
-        # Accumulate statistics
 
-        # get analysis manager
         analysisManager = g4b.G4AnalysisManager.Instance()
 
-        # fill histograms
         analysisManager.FillH1(0, self.fEnergyPipe)
         analysisManager.FillH1(1, self.fEnergyDetector)
         analysisManager.FillH1(2, self.fTrackLPipe)
         analysisManager.FillH1(3, self.fTrackLDetector)
 
-        # fill ntuple
         analysisManager.FillNtupleDColumn(0, self.fEnergyPipe)
         analysisManager.FillNtupleDColumn(1, self.fEnergyDetector)
         analysisManager.FillNtupleDColumn(2, self.fTrackLPipe)
         analysisManager.FillNtupleDColumn(3, self.fTrackLDetector)
         analysisManager.AddNtupleRow()
 
-        # Print per event (modulo n)
         eventID = event.GetEventID()
         printModulo = g4b.G4RunManager.GetRunManager().GetPrintProgress()
         if printModulo > 0 and eventID % printModulo == 0:
@@ -251,7 +229,7 @@ class B4aEventAction(g4b.G4UserEventAction):
         self.fTrackLDetector += dl
 
 
-class B4aSteppingAction(g4b.G4UserSteppingAction):
+class cflmaSteppingAction(g4b.G4UserSteppingAction):
 
     def __init__(self, detectorConstruction, eventAction):
         super().__init__()
@@ -259,15 +237,11 @@ class B4aSteppingAction(g4b.G4UserSteppingAction):
         self.fEventAction = eventAction
 
     def UserSteppingAction(self, step):
-        # Collect energy and track length step by step
 
-        # get volume of the current step
         volume = step.GetPreStepPoint().GetTouchable().GetVolume()
 
-        # energy deposit
         edep = step.GetTotalEnergyDeposit()
 
-        # step length
         stepLength = 0
         if step.GetTrack().GetDefinition().GetPDGCharge() != 0:
             stepLength = step.GetStepLength()
@@ -279,55 +253,40 @@ class B4aSteppingAction(g4b.G4UserSteppingAction):
             self.fEventAction.AddDetector(edep, stepLength)
 
 
-class B4RunAction(g4b.G4UserRunAction):
+class cflmRunAction(g4b.G4UserRunAction):
 
     def __init__(self):
         super().__init__()
 
-        # set printing event number per each event
         g4b.G4RunManager.GetRunManager().SetPrintProgress(1)
 
-        # Create analysis manager
         analysisManager = g4b.G4AnalysisManager.Instance()
         print("Using", analysisManager.GetType())
 
-        # Create directories
-        # analysisManager.SetHistoDirectoryName("histograms")
-        # analysisManager.SetNtupleDirectoryName("ntuple")
         analysisManager.SetVerboseLevel(1)
         analysisManager.SetNtupleMerging(True)
-        # Note: merging ntuples is available only with Root output
 
-        # Book histograms, ntuple
-        # Creating histograms
         analysisManager.CreateH1("Epipe", "Edep in pipe", 100, 0, 1000*g4b.MeV)
         analysisManager.CreateH1("Edetector", "Edep in detector", 100, 0, 100*g4b.MeV)
 
-        # Creating ntuple
-        analysisManager.CreateNtuple("FLM", "Edep")
+        analysisManager.CreateNtuple("cflm", "Edep")
         analysisManager.CreateNtupleDColumn("Epipe")
         analysisManager.CreateNtupleDColumn("Edetector")
         analysisManager.FinishNtuple()
 
     def BeginOfRunAction(self, run):
-        # inform the runManager to save random number seed
-        # G4RunManager.GetRunManager().SetRandomNumberStore(True)
 
-        # Get analysis manager
         analysisManager = g4b.G4AnalysisManager.Instance()
-
-        # Open an output file
         try:
-            os.mkdir('output/FLM')
+            os.mkdir('output/cflm')
         except:
             print('path already exist')
 
-        fileName = "output/FLM/energy_deposition.root"
+        fileName = "output/cflm/energy_deposition.root"
         analysisManager.OpenFile(fileName)
 
     def EndOfRunAction(self, run):
 
-        # print histogram statistics
         analysisManager = g4b.G4AnalysisManager.Instance()
         if analysisManager.GetH1(1) != None:
             print("\n ----> print histograms statistic ", end="")
@@ -348,50 +307,38 @@ class B4RunAction(g4b.G4UserRunAction):
         analysisManager.Write()
 
 
-class B4aActionInitialization(g4b.G4VUserActionInitialization):
+class cflmaActionInitialization(g4b.G4VUserActionInitialization):
 
     def __init__(self, detConstruction):
         super().__init__()
         self.fDetConstruction = detConstruction
 
     def BuildForMaster(self):
-        self.SetUserAction(B4RunAction())
+        self.SetUserAction(cflmRunAction())
 
     def Build(self):
-        self.SetUserAction(B4PrimaryGeneratorAction())
-        self.SetUserAction(B4RunAction())
-        eventAction = B4aEventAction()
+        self.SetUserAction(cflmPrimaryGeneratorAction())
+        self.SetUserAction(cflmRunAction())
+        eventAction = cflmaEventAction()
         self.SetUserAction(eventAction)
-        self.SetUserAction(B4aSteppingAction(self.fDetConstruction, eventAction))
-
-
-def PrintUsage():
-    print(" Usage: ", file=sys.stderr)
-    print(" python exampleB4a.py [-m macro ] [-u UIsession] [-t nThreads]", file=sys.stderr)
-    print("   note: -t option is available only for multi-threaded mode.", file=sys.stderr)
+        self.SetUserAction(cflmaSteppingAction(self.fDetConstruction, eventAction))
 
 def main():
 
-    # Construct the default run manager
     runManager = g4b.G4RunManagerFactory.CreateRunManager(g4b.G4RunManagerType.Serial)
 
-    # Set mandatory initialization classes
-    detConstruction = B4DetectorConstruction()
+    detConstruction = cflmDetectorConstruction()
     runManager.SetUserInitialization(detConstruction)
 
     physicsList = g4b.FTFP_BERT()
     runManager.SetUserInitialization(physicsList)
 
-    actionInitialization = B4aActionInitialization(detConstruction)
+    actionInitialization = cflmaActionInitialization(detConstruction)
     runManager.SetUserInitialization(actionInitialization)
 
-    # Initialize visualization
     visManager = g4b.G4VisExecutive()
-    # G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-    # visManager = G4VisExecutive("Quiet")
     visManager.Initialize()
 
-    # Get the User Interface manager
     UImanager = g4b.G4UImanager.GetUIpointer()
 
     UImanager.ApplyCommand("/control/execute cfg/init_vis.mac")
@@ -401,7 +348,7 @@ def main():
     UImanager.ApplyCommand('/run/beamOn 1')
     UImanager.ApplyCommand('/vis/ogl/set/printSize 2000 2000')
 
-    UImanager.ApplyCommand('/vis/ogl/export output/FLM/image.pdf')
+    UImanager.ApplyCommand('/vis/ogl/export output/cflm/image.pdf')
 
 if __name__ == '__main__':
     main()
