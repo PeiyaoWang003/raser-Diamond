@@ -24,15 +24,17 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
 
     def DefineVolumes(self):
 
-        nofLayers = 1
         pipeThickness = 2*g4b.mm
         detectorThickness = 0.5*g4b.mm
-        calorSizeXY = 100*g4b.mm
-        detectorSizeX = 100*g4b.mm
-        detectorSizeY = 100*g4b.mm
+        pipeRmin = 28*g4b.mm
+        pipeRmax = 30*g4b.mm
+        pipeDz = 100*g4b.mm
+        pipeSphi = 0*g4b.deg
+        pipeDphi = 360*g4b.deg
+        detectorSizeX = 50*g4b.mm
+        detectorSizeY = 0.5*g4b.mm
+        detectorSizeZ = 100*g4b.mm
 
-        layerThickness = pipeThickness + detectorThickness
-        calorThickness = nofLayers * layerThickness
         worldSizeXY = 200 * g4b.mm
         worldSizeZ = 200 * g4b.mm
 
@@ -61,51 +63,20 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
                                 0,                    # copy number
                                 self.fCheckOverlaps)  # checking overlaps
 
-        # Calorimeter
-        calorimeterS = g4b.G4Box("Calorimeter",                                   # its name
-                             calorSizeXY/2, calorSizeXY/2, calorThickness/2)  # its size
-
-        calorLV = g4b.G4LogicalVolume(calorimeterS,     # its solid
-                                  defaultMaterial,  # its material
-                                  "Calorimeter")    # its name
-
-        g4b.G4PVPlacement(None,                 # no rotation
-                      g4b.G4ThreeVector(),      # at (0,0,0)
-                      calorLV,              # its logical volume
-                      "Calorimeter",        # its name
-                      worldLV,              # its mother  volume
-                      False,                # no boolean operation
-                      0,                    # copy number
-                      self.fCheckOverlaps)  # checking overlaps
-
-        # Layer
-        layerS = g4b.G4Box("Layer",                                         # its name
-                       calorSizeXY/2, calorSizeXY/2, layerThickness/2)  # its size
-
-        layerLV = g4b.G4LogicalVolume(layerS,           # its solid
-                                  defaultMaterial,  # its material
-                                  "Layer")          # its name
-
-        g4b.G4PVReplica("Layer",         # its name
-                    layerLV,         # its logical volume
-                    calorLV,         # its mother
-                    g4b.kZAxis,          # axis of replication
-                    nofLayers,       # number of replica
-                    layerThickness)  # width of replica
 
         # Pipe
-        pipeS = g4b.G4Box("Pipe",                                         # its name
-                          calorSizeXY/2, calorSizeXY/2, pipeThickness/2)  # its size
+        pipeS = g4b.G4Tubs("Pipe",                                         # its name
+                          pipeRmin, pipeRmax, pipeDz/2,pipeSphi,pipeDphi)  # its size
 
         pipeLV = g4b.G4LogicalVolume(pipeS,         # its solid
                                      pipeMaterial,  # its material
                                      "Pipe")            # its name
 
         self.fpipePV = g4b.G4PVPlacement(None,                                  # no rotation
-                                         g4b.G4ThreeVector(0, 0, -detectorThickness/2),  # its position
+                                         g4b.G4ThreeVector(0, 0, 0),  # its position
                                          pipeLV,                            # its logical volume
                                          "Pipe",                                # its name
-                                         layerLV,                               # its mother  volume
+                                         worldLV,                               # its mother  volume
                                          False,                                 # no boolean operation
                                          0,                                     # copy number
                                          self.fCheckOverlaps)                   # checking overlaps
@@ -128,17 +99,17 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
         detectorMaterial.AddElement(material_2,silicon_carbide['natoms_2']*g4b.perCent)
 
         detectorS = g4b.G4Box("Detector",                                         # its name
-                     detectorSizeX/2, detectorSizeY/2, detectorThickness/2)  # its size
+                     detectorSizeX/2, detectorSizeY/2, detectorSizeZ/2)  # its size
 
         detectorLV = g4b.G4LogicalVolume(detectorS,         # its solid
                                 detectorMaterial,  # its material
                                 "Detector")        # its name
 
         self.fdetectorPV = g4b.G4PVPlacement(None,                                  # no rotation
-                                    g4b.G4ThreeVector(0, 0, pipeThickness/2),  # its position
+                                    g4b.G4ThreeVector(0, 30*g4b.mm, 0),  # its position
                                     detectorLV,                                 # its logical volume
                                     "Detector",                                 # its name
-                                    layerLV,                               # its mother volume
+                                    worldLV,                               # its mother volume
                                     False,                                 # no boolean operation
                                     0,                                     # copy number
                                     self.fCheckOverlaps)                   # checking overlaps
@@ -147,7 +118,6 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
 
         simpleBoxVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 1))
         simpleBoxVisAtt.SetVisibility(True)
-        # calorLV.SetVisAttributes(simpleBoxVisAtt)
 
         return worldPV
 
@@ -170,28 +140,12 @@ class cflmPrimaryGeneratorAction(g4b.G4VUserPrimaryGeneratorAction):
 
         particleDefinition = g4b.G4ParticleTable.GetParticleTable().FindParticle("e-")
         self.fParticleGun.SetParticleDefinition(particleDefinition)
-        self.fParticleGun.SetParticleMomentumDirection(g4b.G4ThreeVector(0, 10, 1))
+        self.fParticleGun.SetParticleMomentumDirection(g4b.G4ThreeVector(0, 0.01, 1))
         self.fParticleGun.SetParticleEnergy(24*g4b.GeV)
 
     def GeneratePrimaries(self, anEvent):
 
-        worldZHalfLength = 0
-        worldLV = g4b.G4LogicalVolumeStore.GetInstance().GetVolume("World")
-
-        worldBox = None
-        if worldLV != None:
-            worldBox = worldLV.GetSolid()
-
-        if worldBox != None:
-            worldZHalfLength = worldBox.GetZHalfLength()
-        else:
-            msg = "World volume of box shape not found."
-            msg += "Perhaps you have changed geometry."
-            msg += "The gun will be place in the center."
-            g4b.G4Exception("cflmPrimaryGeneratorAction::GeneratePrimaries()",
-                        "MyCode0002", JustWarning, msg)
-
-        self.fParticleGun.SetParticlePosition(g4b.G4ThreeVector(0, 0, -2.1*g4b.mm))
+        self.fParticleGun.SetParticlePosition(g4b.G4ThreeVector(0, 26.9*g4b.mm, -100*g4b.mm))
         self.fParticleGun.GeneratePrimaryVertex(anEvent)
 
 class cflmaEventAction(g4b.G4UserEventAction):
