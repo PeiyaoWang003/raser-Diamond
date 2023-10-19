@@ -114,7 +114,6 @@ class cflmDetectorConstruction(g4b.G4VUserDetectorConstruction):
 
         worldLV.SetVisAttributes(g4b.G4VisAttributes.GetInvisible())
 
-        boxVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 1))
         pipeVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 1, 0))
         detectorVisAtt = g4b.G4VisAttributes(g4b.G4Colour(1, 0, 0))
 
