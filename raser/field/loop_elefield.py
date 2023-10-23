@@ -29,11 +29,18 @@ voltage= float(params["voltage"])
 devsim.set_parameter(name = "extended_solver", value=True)
 devsim.set_parameter(name = "extended_model", value=True)
 devsim.set_parameter(name = "extended_equation", value=True)
-
-pixel_3d_mesh.Create3DSICARFromGmesh(device,region)
-pixel_3d_mesh.SetDoping(device,region)
-build_2d_device.SetParameters(device=device, region=region)
-
+if simname =="3d_pixel":
+    pixel_3d_mesh.Create3DSICARFromGmesh(device,region)
+    pixel_3d_mesh.SetDoping(device,region)
+    build_2d_device.SetParameters(device=device, region=region)
+elif simname =="3d_time":
+    build_2d_device.Create2DMesh(device, region,simname)
+    build_2d_device.SetParameters(device=device, region=region)
+    build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
+elif simname =="3d_ringcontact":
+    build_2d_device.Create2DMesh(device, region,simname)
+    build_2d_device.SetParameters(device=device, region=region)
+    build_2d_device.SetNetDoping(device=device, region=region,simname=simname)
     
 physics_2d.InitialSolution(device, region, circuit_contacts="top")
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")
@@ -42,27 +49,54 @@ physics_2d.InitialSolution(device, region, circuit_contacts="top")
 devsim.solve(type="dc", absolute_error=1e30, relative_error=1e-3, maximum_iterations=1500)
 
 
-physics_2d.SiDriftDiffusionInitialSolution(device, region, circuit_contacts=["top"])
+physics_2d.DriftDiffusionInitialSolution(device, region, circuit_contacts=["top"])
 #diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
 devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")
 
 devsim.solve(type="dc", absolute_error=1e30, relative_error=1e-3, maximum_iterations=1500)
+folder_path="./output/{0}".format(simname)
+if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
 
 def loop(bias_v,voltage):
     
     while bias_v < voltage:
         
-        devsim.circuit_alter(name="V1", value=bias_v)
+        devsim.circuit_alter(name="V1", value=0-bias_v)
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-3, maximum_iterations=1500)
 
         # TODO: 获取电路信息
 
         devsim.solve(type="ac", frequency=1e6)
         
-        bias_v += 1
-        devsim.write_devices(file="./output/pixel/{0}_{1}_2d_dd".format(simname,bias_v), type="tecplot")
-      
+        
+        if bias_v % 50== 0:
+            if simname == "3d_ringcontact":
+                x=devsim.get_node_model_values(device=device,region=region,name="x")
+                y=devsim.get_node_model_values(device=device,region=region,name="y")
+                z=devsim.get_node_model_values(device=device,region=region,name="z")
+                potential=devsim.get_node_model_values(device=device,region=region,name="Potential")
+                data = [x, y,z, potential]
+                names = ["x", "y", "z","potential"]
+
+                for i in range(len(data)):
+                    with open('./output/{}/{}_{}.pkl'.format(simname, names[i],bias_v), 'wb') as file:
+                        pickle.dump(data[i], file)
+                
+            else:
+                x=devsim.get_node_model_values(device=device,region=region,name="x")
+                y=devsim.get_node_model_values(device=device,region=region,name="y")
+                potential=devsim.get_node_model_values(device=device,region=region,name="Potential")
+                data = [x, y,potential]
+                names = ["x", "y","potential"]
+
+                for i in range(len(data)):
+                    with open('./output/{}/{}_{}.pkl'.format(simname, names[i],bias_v), 'wb') as file:
+                        pickle.dump(data[i], file)
+
+        bias_v += 1      
+
 
 
 loop(bias_v,voltage)

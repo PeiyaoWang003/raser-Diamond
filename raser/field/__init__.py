@@ -8,6 +8,7 @@ from . import si_diode_2d
 from . import diode_element_2d
 from . import scan_iv
 from . import scan_elefield
+from . import test4hsic
 def main(args):
     label = vars(args)['label']
     verbose = vars(args)['verbose'] 
@@ -52,5 +53,13 @@ def main(args):
         scan_elefield.main("3d_pixel")
     elif label == "3d_lgad_cv_v1":
         scan_cv.main("3d_lgad")
+    elif label == "3d_time_potential":
+        scan_elefield.main("3d_time")
+    elif label == "3d_ringcontact_potential":
+        scan_elefield.main("3d_ringcontact")
+    elif label == "3d_time_field":
+        test4hsic.main("2dfield_4HSiC")
+    elif label == "3d_ringcontact_ELefield":
+        test4hsic.main("3d_ringcontact")
     else:
         raise NameError(label)
