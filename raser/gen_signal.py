@@ -51,7 +51,7 @@ def main(args):
         dset.paras.update({key:value})
     det_dic = dset.detector
     if "plugin3D" in det_dic['det_model']:
-        if det_dic['custom_electrode'] == "Falsse":
+        if det_dic['custom_electrode'] == "False":
             pass
         elif det_dic['custom_electrode'] == "True":
             set_electrodes(det_dic,dset)
@@ -59,16 +59,6 @@ def main(args):
             print("The electrode model is wrong.")
     my_d = geo.R3dDetector(dset)
     
-<<<<<<< HEAD
-    #if "pixeldetector" in args:
-    #    my_f = pyf.FenicsCal(my_d,dset.fenics)
-    #    #my_f = 0
-    #    my_g4p = g4s.Particles(my_d, dset)
-    #    my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
-    #    if "draw_charge" in args:
-    #        draw_save.draw_charge(my_charge)
-    #    return  
-=======
     # if "pixeldetector" in args:
     #     my_f = pyf.FenicsCal(my_d,dset.fenics)
     #     #my_f = 0
@@ -77,7 +67,6 @@ def main(args):
     #     if "draw_charge" in args:
     #         draw_save.draw_charge(my_charge)
     #     return  
->>>>>>> e17950b30f1298f999966f76b11f449e2ad924e0
     
     # if "beammonitor" in args:
     #     my_f = pyf.FenicsCal(my_d,dset.fenics)
