@@ -51,7 +51,7 @@ def main(args):
         dset.paras.update({key:value})
     det_dic = dset.detector
     if "plugin3D" in det_dic['det_model']:
-        if det_dic['custom_electrode'] == "False":
+        if det_dic['custom_electrode'] == "Falsse":
             pass
         elif det_dic['custom_electrode'] == "True":
             set_electrodes(det_dic,dset)
