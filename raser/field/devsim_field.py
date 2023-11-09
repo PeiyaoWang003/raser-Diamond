@@ -14,7 +14,12 @@ import pickle
 import ROOT
 import numpy as np
 
+import ROOT
+import numpy as np
 
+
+class Devsim_field:
+    def __init__(self, my_d,det_name,det_dic,dev_dic,dimension):
 class Devsim_field:
     def __init__(self, my_d,det_name,det_dic,dev_dic):
         self.voltage = my_d.voltage
@@ -78,6 +83,8 @@ class Devsim_field:
             return 0, 0, f_e
     
     def get_w_p(self, x, y, depth, i):
+        if self.name == 'Si_Strip':
+            return self.w_p[i].Interpolate(x,depth)
         if self.name == 'Si_Strip':
             return self.w_p[i].Interpolate(x,depth)
         else:

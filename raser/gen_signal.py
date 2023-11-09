@@ -59,57 +59,41 @@ def main(args):
             print("The electrode model is wrong.")
     my_d = geo.R3dDetector(dset)
     
-    if "pixeldetector" in args:
-        my_f = pyf.FenicsCal(my_d,dset.fenics)
-        #my_f = 0
-        my_g4p = g4s.Particles(my_d, dset)
-        my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
-        if "draw_charge" in args:
-            draw_save.draw_charge(my_charge)
-        return  
+    # if "pixeldetector" in args:
+    #     my_f = pyf.FenicsCal(my_d,dset.fenics)
+    #     #my_f = 0
+    #     my_g4p = g4s.Particles(my_d, dset)
+    #     my_charge = ccrt.CalCurrentPixel(my_d,my_f,my_g4p, dset.total_events,6)
+    #     if "draw_charge" in args:
+    #         draw_save.draw_charge(my_charge)
+    #     return  
     
-    if "beammonitor" in args:
-        my_f = pyf.FenicsCal(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, dset)
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        draw_save.get_beam_number(my_g4p,ele_current)
-        return  
+    # if "beammonitor" in args:
+    #     my_f = pyf.FenicsCal(my_d,dset.fenics)
+    #     my_g4p = g4s.Particles(my_d, dset)
+    #     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+    #     ele_current = rdout.Amplifier(my_current, dset.amplifier)
+    #     draw_save.get_beam_number(my_g4p,ele_current)
+    #     return  
 
-    if "proton-irrad" in args:
-        my_f = pyf.FenicsCal2D(my_d,dset.fenics)
-        my_g4p = g4s.SiITk(my_d, my_f, dset)
-        #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        #ele_current = raser.Amplifier(my_current, dset.amplifier)
-        draw_save.get1_beam_number(my_g4p)
-        #draw_save.cce(my_d,my_f,my_current)
-        return
-
-    if "Carrier" in args:
-        my_f = pyf.FenicsCal1D(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, dset)
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        draw_save.get_beam_number(my_g4p,ele_current)
-        return  
-
-    if "reactor" in args:
-        my_f = pyf.FenicsCal(my_d,dset.fenics)
-        my_g4p = g4s.Particles(my_d, dset)
-        my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)
-        ele_current = rdout.Amplifier(my_current, dset.amplifier)
-        draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
-        return
+    # if "proton-irrad" in args:
+    #     my_f = pyf.FenicsCal2D(my_d,dset.fenics)
+    #     my_g4p = g4s.SiITk(my_d, my_f, dset)
+    #     #my_current = raser.CalCurrentG4P(my_d, my_f, my_g4p, 0)
+    #     #ele_current = raser.Amplifier(my_current, dset.amplifier)
+    #     draw_save.get1_beam_number(my_g4p)
+    #     #draw_save.cce(my_d,my_f,my_current)
+    #     return
     
     if "Si_Strip"==dset.detector_name:
         my_f = stripfield.FieldCal(my_d, dset.detector_name, dset.detector, dset.fenics)
-        my_g4p = g4s.Particles(my_d, my_f, dset)
+        my_g4p = g4s.Particles(my_d, dset)
         my_current = ccrt.CalCurrentStrip(my_d, my_f, my_g4p, 0)
         ele_current = rdout.Amplifier(my_current, dset.amplifier)
         draw_save.draw_plots(my_d,ele_current,my_f,my_g4p,my_current)
         draw_save.cce(my_d,my_f,my_current)
         return
-    
+   
     if "SICAR-1" == dset.detector_name:
         my_f = devfield.Devsim_field(my_d, dset.detector_name, dset.detector, dset.fenics)
         my_g4p = g4s.Particles(my_d, dset)   
@@ -121,13 +105,25 @@ def main(args):
         
     elif "NJU-PIN" == dset.detector_name:
         my_f = devfield.Devsim_field(my_d, dset.detector_name, dset.detector, dset.fenics)  
-        my_g4p = g4s.Particles(my_d, dset)
+        my_g4p = g4s.Particles(my_d, dset)   
         my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, 0)        
         draw_save.save_current(dset, my_d, my_current, my_f, "fz_abs")
         input_p=draw_save.set_input(dset, my_current, my_d, "fz_abs")
         input_c=','.join(input_p)
         ngspice(input_c, input_p)
+        
     else:
+        if('devsim' in args):
+            print("using devsim to build the field")
+            try:
+                my_f = devfield.DevsimCal(my_d, dset.det_name, dset.detector, dset.fenics)
+            except:
+                print("Please run 1.3.3 first to get efield(make sure run 1.3.1 once before you run 1.3.3)")
+                exit(0)
+        else:
+            print("using fenics to build the field")
+            my_f = pyf.FenicsCal(my_d,dset.fenics)
+            
         my_g4p = g4s.Particles(my_d, dset)
 
     if "scan=True" not in args:
