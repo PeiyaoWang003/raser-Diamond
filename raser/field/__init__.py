@@ -43,5 +43,7 @@ def main(args):
         devsim_solve.main(label)
     elif label == 'itkatlas18_iv_v1':
         devsim_solve.main(label)
+    elif label == 'nju_pin_get_efield':
+        scan_iv.main(simname="NJUPIN", field_flag=True)
     else:
         raise NameError(label)
