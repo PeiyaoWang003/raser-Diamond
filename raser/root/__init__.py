@@ -46,6 +46,10 @@ def convert_csv_to_root(input_dir, output_dir, label):
             else:
                 df.Snapshot("myTree", output_file, {"Voltage", "Capacitance", "Capacitance^-2"})
 
+        if name.endswith('Wfm'):
+            df = ROOT.RDF.MakeCsvDataFrame(input_file, True, ',')
+            df.Snapshot("myTree", output_file, {"Time", "Volt"})
+
         
         sys.stdout.write('Saved as {}\n'.format(output_file))
 
@@ -80,6 +84,9 @@ def main(args):
     elif label == 'njupin_cv_v1':
         input_dir = "/afs/ihep.ac.cn/users/s/senzhao/njupin/cv"
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/zhaosen/njupin_cv'
+    elif label == 'sicar1.1.8_beta':
+        input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8/time_1.1.8-8/20231116/si/beta_'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/beta'
     else:
         raise NameError(label)
 
