@@ -59,13 +59,13 @@ def main(args):
 
     if label == 'sicar1.1.8':
         input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8'
-        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/iv_cv'
     elif label == 'sicar1.1.8-1':
         input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8'
-        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/iv_cv'
     elif label == 'sicar1.1.8-2':
         input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8'
-        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/iv_cv'
     elif label == 'itk_md8_data_v1':
         input_dir = '/afs/ihep.ac.cn/users/l/lizhan/disk/scrathfs/sensorsimanddata/itkmd8/itkmd8data'
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/lizhan/itkmd8/itkmd8data'
@@ -84,6 +84,9 @@ def main(args):
     elif label == 'njupin_cv_v1':
         input_dir = "/afs/ihep.ac.cn/users/s/senzhao/njupin/cv"
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/zhaosen/njupin_cv'
+    elif label == 'sicar1.1.8_alpha_v1':
+        input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8/CCE_1.1.8-8-1/400v'
+        output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/alpha/1/400V'
     elif label == 'sicar1.1.8_beta':
         input_dir = '/scratchfs/bes/wangkeqi/wangkeqi/data/SICAR1.1.8/time_1.1.8-8/20231116/si/beta_'
         output_dir = '/publicfs/atlas/atlasnew/silicondet/itk/raser/wangkeqi/sicar1.1.8/beta'
