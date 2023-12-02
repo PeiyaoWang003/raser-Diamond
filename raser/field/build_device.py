@@ -39,9 +39,9 @@ def CreateGmshMesh(device, region, device_dict):
     mesh = device_dict["mesh"]["gmsh_mesh"]
     devsim.create_gmsh_mesh (mesh=device, file=mesh['file'])
     for region in mesh["region"]:
-        devsim.add_2d_region   (mesh=device, **region)
+        devsim.add_gmsh_region   (mesh=device, **region)
     for contact in mesh["contact"]:
-        devsim.add_2d_contact  (mesh=device, **contact)
+        devsim.add_gmsh_contact  (mesh=device, **contact)
     devsim.finalize_mesh    (mesh=device)
     devsim.create_device    (mesh=device, device=device)
 
