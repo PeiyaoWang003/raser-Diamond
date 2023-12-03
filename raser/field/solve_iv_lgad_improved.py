@@ -19,15 +19,15 @@ import csv
 if not (os.path.exists("./output/devsim")):
     os.makedirs("./output/devsim")
 
-device="SICAR-1"
-region="SICAR-1"
+device="SICAR-1.1.8"
+region="SICAR-1.1.8"
 
 # Area factor
 # 1D 1cm*1cm
 # DUT 5mm* 5mm
 area_factor = 4.0
 
-MyDetector = Detector("SICAR-1", 1)
+MyDetector = Detector("SICAR-1.1.8", 1)
 
 devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
 # Extended precision

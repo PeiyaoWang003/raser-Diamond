@@ -24,11 +24,11 @@ def main(args):
     if label == 'gen_devsim_db':
         gen_devsim_db.main()
     elif label == 'sicar1.1.6_cv_v1':
-        scan_cv.main(simname="SICAR-1")
+        scan_cv.main(simname="SICAR-1.1.6")
     elif label == "NJUPIN_cv_v1":
         scan_cv.main(simname="NJU-PIN")
     elif label == 'sicar1.1.6_iv_v1':
-        scan_iv.main(simname="SICAR-1")
+        scan_iv.main(simname="SICAR-1.1.6")
     elif label == 'NJUPIN_iv_v1':
         scan_iv.main(simname="NJU-PIN")
     elif label == 'NJUPIN_defect_iv_v1':

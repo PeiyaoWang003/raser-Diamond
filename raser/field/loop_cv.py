@@ -32,6 +32,7 @@ devsim.set_parameter(name = "extended_equation", value=True)
 
 MyDetector = Detector(simname)
 
+physics_2d.SetSiliconParameters(device, region, 300)
     
 physics_2d.InitialSolution(device, region, circuit_contacts="top")
 #diode_common.InitialSolution(device, region, circuit_contacts="bot")

@@ -23,8 +23,8 @@ if not (os.path.exists("./output/devsim")):
 def main(label=None,v_max = 400):
     devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
     if label=='sicar1.1.8_cv_v1':
-        device = "SICAR-1"
-        region = "SICAR-1"
+        device = "SICAR-1.1.8"
+        region = "SICAR-1.1.8"
         area_factor = 100.0
         set_mesh(device,region)
         extend_set()
@@ -77,7 +77,7 @@ def set_para(para_list):
     return para_dict
 
 def set_mesh(device,region):
-    if device == "SICAR-1":
+    if device == "SICAR-1.1.8":
         MyDetector = Detector(device, 1)
     elif device == "itk-md8" or device == "Si-Strip":
         MyDetector = Detector(device, 1)
@@ -413,7 +413,7 @@ def draw_ele_field(device, positions,intensities, bias_voltages,condition):
     matplotlib.pyplot.ylabel('E (V/cm)')
     matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
     ax1.legend(loc='upper right')
-    if device == "SICAR-1":
+    if device == "SICAR-1.1.8":
         ax1.set_xlim(0,5e-4)
     fig1.show()
     fig1.savefig("./output/devsim/{}_reverse_electricfield.png".format(device+condition))
@@ -428,7 +428,7 @@ def draw_electrons(device, positions, electrons, bias_voltages, condition):
     matplotlib.pyplot.ylabel('Electron Density [cm^{-3}]')
     matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
     ax1.legend(loc='upper right')
-    if device == "SICAR-1":
+    if device == "SICAR-1.1.8":
         ax1.set_xlim(0,5e-4)
     fig1.show()
     fig1.savefig("./output/devsim/{}_reverse_electrons.png".format(device+condition))
@@ -443,7 +443,7 @@ def draw_holes(device, positions, holes, bias_voltages, condition):
     matplotlib.pyplot.ylabel('Hole Density [cm^{-3}]')
     matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
     ax1.legend(loc='upper right')
-    if device == "SICAR-1":
+    if device == "SICAR-1.1.8":
         ax1.set_xlim(0,5e-4)
     fig1.show()
     fig1.savefig("./output/devsim/{}_reverse_holes.png".format(device+condition))
