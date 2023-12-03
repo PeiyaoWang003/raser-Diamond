@@ -32,14 +32,14 @@
             ],
             "region" : [
                 {
+                    "material" : "Silicon", 
+                    "region" : "Si-Strip"
+                },
+                {
                     "material" : "air",
                     "region" : "air1",
                     "xl" : -1e-8,
                     "xh" : 0
-                },
-                {
-                    "material" : "Silicon", 
-                    "region" : "Si-Strip"
                 },
                 {
                     "material" : "air",

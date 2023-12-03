@@ -50,14 +50,14 @@
             ],
             "region" : [
                 {
+                    "material" : "SiliconCarbide", 
+                    "region" : "NJU-PIN"
+                },
+                {
                     "material" : "air",
                     "region" : "air1",
                     "xl" : -0.1e-4,
                     "xh" : 0
-                },
-                {
-                    "material" : "SiliconCarbide", 
-                    "region" : "NJU-PIN"
                 },
                 {
                     "material" : "air",
