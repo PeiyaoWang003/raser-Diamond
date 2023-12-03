@@ -10,6 +10,8 @@ from . import node
 from . import initial
 # import Setting
 
+from .build_device import Detector
+
 import matplotlib 
 import matplotlib.pyplot
 import csv
@@ -21,8 +23,8 @@ if not (os.path.exists("./output/devsim")):
 def main(label=None,v_max = 400):
     devsim.open_db(filename="./output/devsim/SICARDB", permission="readonly")
     if label=='sicar1.1.8_cv_v1':
-        device = "1D_SICAR1_LGAD"
-        region = "1D_SICAR1_LGAD"
+        device = "SICAR-1"
+        region = "SICAR-1"
         area_factor = 100.0
         set_mesh(device,region)
         extend_set()
@@ -31,8 +33,8 @@ def main(label=None,v_max = 400):
         solve_cv(device,region,v_max,para_dict,area_factor,frequency=1e3)
     elif label=='itkmd8_cv_v1':
         area_factor=1.0/(0.76*0.76)
-        device = "1D_ITK_MD8"
-        region = "1D_ITK_MD8"
+        device = "itk-md8"
+        region = "itk-md8"
         para_dict=[]
         set_mesh(device,region)
         extend_set()
@@ -42,8 +44,8 @@ def main(label=None,v_max = 400):
     elif label=='itkmd8_iv_v1':
         area_factor=1.0/(0.76*0.76)
         v_max=700
-        device = "1D_ITK_MD8"
-        region = "1D_ITK_MD8"
+        device = "itk-md8"
+        region = "itk-md8"
         para_dict=[]
         devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
         devsim.set_parameter(device=device,   name="tau_p",  value=3e-2)
@@ -54,8 +56,8 @@ def main(label=None,v_max = 400):
     elif label=='itkatlas18_iv_v1':
         area_factor=1.0/(10.0*10.0)
         v_max=700
-        device = "1D_ITK_ATLAS18"
-        region = "1D_ITK_ATLAS18"
+        device = "Si-Strip"
+        region = "Si-Strip"
         para_dict=[]
         set_mesh(device,region)
         devsim.set_parameter(device=device,   name="tau_n",  value=3e-2)
@@ -75,15 +77,12 @@ def set_para(para_list):
     return para_dict
 
 def set_mesh(device,region):
-    if device == "1D_SICAR1_LGAD":
-        device_mesh = sicar1_lgad_mesh
-    elif device == "1D_ITK_MD8" or device == "1D_ITK_ATLAS18":
-        device_mesh = itk_md8_mesh
+    if device == "SICAR-1":
+        MyDetector = Detector(device, 1)
+    elif device == "itk-md8" or device == "Si-Strip":
+        MyDetector = Detector(device, 1)
     else: 
         raise NameError
-    device_mesh.Create1DMesh(device=device, region=region)
-    device_mesh.SetDoping(device=device, region=region)
-    device_mesh.Draw_Doping(device=device, region=region, path="./output/devsim/{}_doping.png".format(device))
 
 def extend_set():
     devsim.set_parameter(name = "extended_solver", value=True)
@@ -97,7 +96,7 @@ def initial_solution(device,region,para_dict):
     devsim.solve(type="dc", absolute_error=1.0, relative_error=1e-10, maximum_iterations=50)
 
     if "irradiation" in para_dict:
-        if device == "1D_ITK_MD8":
+        if device == "itk-md8":
             initial.DriftDiffusionInitialSolutionSiIrradiated(
                 device, region, circuit_contacts="top")
             devsim.set_parameter(device=device, 
@@ -241,7 +240,7 @@ def solve_iv_backtest(device,region,v_max,para_dict,backthickness,back_doping):
             holes.append(p)
 
 
-        if device == "1D_ITK_MD8":
+        if device == "itk-md8":
             reverse_voltage.append(reverse_v)
         else:
             reverse_voltage.append(0-reverse_v)
@@ -312,7 +311,7 @@ def solve_iv_Rirr(device,region,Rirr,v_max,area_factor,para_dict):
             holes.append(p)
 
 
-        if device == "1D_ITK_MD8":
+        if device == "itk-md8":
             reverse_voltage.append(reverse_v)
         else:
             reverse_voltage.append(0-reverse_v)
@@ -414,7 +413,7 @@ def draw_ele_field(device, positions,intensities, bias_voltages,condition):
     matplotlib.pyplot.ylabel('E (V/cm)')
     matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
     ax1.legend(loc='upper right')
-    if device == "1D_SICAR1_LGAD":
+    if device == "SICAR-1":
         ax1.set_xlim(0,5e-4)
     fig1.show()
     fig1.savefig("./output/devsim/{}_reverse_electricfield.png".format(device+condition))
@@ -429,7 +428,7 @@ def draw_electrons(device, positions, electrons, bias_voltages, condition):
     matplotlib.pyplot.ylabel('Electron Density [cm^{-3}]')
     matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
     ax1.legend(loc='upper right')
-    if device == "1D_SICAR1_LGAD":
+    if device == "SICAR-1":
         ax1.set_xlim(0,5e-4)
     fig1.show()
     fig1.savefig("./output/devsim/{}_reverse_electrons.png".format(device+condition))
@@ -444,7 +443,7 @@ def draw_holes(device, positions, holes, bias_voltages, condition):
     matplotlib.pyplot.ylabel('Hole Density [cm^{-3}]')
     matplotlib.pyplot.ticklabel_format(axis="y", style="sci", scilimits=(0,0))
     ax1.legend(loc='upper right')
-    if device == "1D_SICAR1_LGAD":
+    if device == "SICAR-1":
         ax1.set_xlim(0,5e-4)
     fig1.show()
     fig1.savefig("./output/devsim/{}_reverse_holes.png".format(device+condition))

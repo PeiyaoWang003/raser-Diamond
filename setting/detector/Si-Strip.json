@@ -1,5 +1,5 @@
 {
-    "det_name" : "Si_Strip",
+    "det_name" : "Si-Strip",
     "det_model" : "planar3D",
     "material" : "Si",
 
