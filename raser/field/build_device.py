@@ -2,8 +2,7 @@
 # -*- encoding: utf-8 -*-
 
 import devsim
-from . import node
-from . import node_in_2d
+from . import model_create
 
 from util.output import output
 import json
@@ -35,15 +34,14 @@ class Detector:
 
         if dimension == 1:
             self.create1DMesh()
-            self.set1DDoping()
         elif dimension == 2:
             self.create2DMesh()
-            self.set2DDoping()
         elif dimension == 3:
             self.createGmshMesh()
-            self.set2DDoping()
         else:
             raise ValueError(dimension)
+
+        self.setDoping()
 
         path = output(__file__, device_name)
         self.drawDoping(path)
@@ -87,24 +85,13 @@ class Detector:
         devsim.finalize_mesh(mesh=mesh_name)
         devsim.create_device(mesh=mesh_name, device=mesh_name)
 
-    def set1DDoping(self):
+    def setDoping(self):
         '''
         Doping
         '''
-        node.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])      
-        node.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors'])
-        node.CreateNodeModel(self.device, self.region, "NetDoping", "Donors-Acceptors")
-        devsim.edge_from_node_model(device=self.device, region=self.region, node_model="Acceptors")
-        devsim.edge_from_node_model(device=self.device, region=self.region, node_model="NetDoping")
-        devsim.edge_from_node_model(device=self.device, region=self.region, node_model="Donors")
-
-    def set2DDoping(self):
-        '''
-        Doping
-        '''
-        node_in_2d.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])      
-        node_in_2d.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors'])
-        node_in_2d.CreateNodeModel(self.device, self.region, "NetDoping", "Donors-Acceptors")
+        model_create.CreateNodeModel(self.device, self.region, "Acceptors", self.device_dict['doping']['Acceptors'])      
+        model_create.CreateNodeModel(self.device, self.region, "Donors",    self.device_dict['doping']['Donors'])
+        model_create.CreateNodeModel(self.device, self.region, "NetDoping", "Donors-Acceptors")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="Acceptors")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="NetDoping")
         devsim.edge_from_node_model(device=self.device, region=self.region, node_model="Donors")
