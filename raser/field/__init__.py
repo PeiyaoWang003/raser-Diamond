@@ -59,7 +59,7 @@ def main(args):
         scan_elefield.main("3d_ringcontact")
     elif label == "3d_plugin_field":
         test4hsic.main("2dfield_4HSiC")
-    elif label == "3d_ringcontact_ELefield":
+    elif label == "3d_ringcontact_Elefield":
         test4hsic.main("3d_ringcontact")
     elif label == 'nju_pin_get_efield':
         scan_iv.main(simname="NJU-PIN", field_flag=True)
