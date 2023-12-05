@@ -223,7 +223,7 @@ def CreatePE(device, region):
              time_node_model="", variable_update="log_damp")
 
 
-def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradiation_label="test", impact_label="Noavalanche"):
+def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradiation_label="test", impact_label="test"):
     CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region, irradiation_label)

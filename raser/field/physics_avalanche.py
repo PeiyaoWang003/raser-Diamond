@@ -4,8 +4,8 @@
 '''
 Description:  physics_avalanche.py
 @Date       : 2022/10/25 16:40:46
-@Author     : Tao Yang
-@version    : 1.0
+@Author     : Tao Yang, Zaiyi Li
+@version    : 2.0
 '''
 
 import devsim
@@ -18,17 +18,14 @@ def CreateImpactGeneration(device, region, custom_ion_n='0', custom_ion_p='0', l
         Ion_coeff_rate = '0'
     else:
         material = devsim.get_material(device=device, region=region)
-        if material == 'Silicon':
+        if material == 'Silicon' and label != "CustomAvalanche":
             Ion_coeff_n, Ion_coeff_p = CreateImpactModel_vanOvenstraeten(device, region)
-        elif material == 'SiliconCarbide':
+        elif material == 'SiliconCarbide' and label != "CustomAvalanche":
             Ion_coeff_n, Ion_coeff_p = CreateImpactModel_Hatakeyama(device, region)
         else:
             Ion_coeff_n, Ion_coeff_p = custom_ion_n, custom_ion_p
 
-        if Ion_coeff_n == '0' and Ion_coeff_p =='0':
-            Ion_coeff_rate = '0'
-        else:
-            Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/ElectronCharge"
+        Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/ElectronCharge"
 
     if label == 'Tunnel':
         Ion_coeff_rate += CreateTunnelModel_Zaiyi(device, region)
