@@ -51,91 +51,10 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ###
     ### Set up equations
     ###
-    if device == "ITk-md8":
-        CreateSiDriftDiffusion(device, region)
-    else:
-        CreateSiliconDriftDiffusion(device, region)
+    CreateSiliconDriftDiffusion(device, region)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
             CreateSiliconDriftDiffusionAtContact(device, region, i, True)
         else:
             CreateSiliconDriftDiffusionAtContact(device, region, i)
 
-def DriftDiffusionInitialSolutionIrradiated(device, region, circuit_contacts=None):
-    ####
-    #### drift diffusion solution variables
-    ####
-    CreateSolution(device, region, "Electrons")
-    CreateSolution(device, region, "Holes")
-
-    ####
-    #### create initial guess from dc only solution
-    ####
-    devsim.set_node_values(device=device, region=region, name="Electrons", init_from="IntrinsicElectrons")
-    devsim.set_node_values(device=device, region=region, name="Holes",     init_from="IntrinsicHoles")
-    #devsim.set_node_values(device=device, region=region, name="Electrons", init_from="InitialElectron")
-    #devsim.set_node_values(device=device, region=region, name="Holes",     init_from="InitialHole")
-
-    ###
-    ### Set up equations
-    ###
-    if device == "ITk-md8":
-        CreateSiDriftDiffusionIrradiated(device, region)
-    else:
-        CreateSiliconDriftDiffusionIrradiated(device, region)
-    for i in devsim.get_contact_list(device=device):
-        if circuit_contacts and i in circuit_contacts:
-            CreateSiliconDriftDiffusionAtContact(device, region, i, True)
-        else:
-            CreateSiliconDriftDiffusionAtContact(device, region, i)
-
-def DriftDiffusionInitialSolutionSiIrradiated(device, region, Rirr=None,circuit_contacts=None):
-    ####
-    #### drift diffusion solution variables
-    ####
-    CreateSolution(device, region, "Electrons")
-    CreateSolution(device, region, "Holes")
-
-    ####
-    #### create initial guess from dc only solution
-    ####
-    devsim.set_node_values(device=device, region=region, name="Electrons", init_from="IntrinsicElectrons")
-    devsim.set_node_values(device=device, region=region, name="Holes",     init_from="IntrinsicHoles")
-    #devsim.set_node_values(device=device, region=region, name="Electrons", init_from="InitialElectron")
-    #devsim.set_node_values(device=device, region=region, name="Holes",     init_from="InitialHole")
-
-    ###
-    ### Set up equations
-    ###
-    CreateSiDriftDiffusionIrradiated(device, region,Rirr)
-    for i in devsim.get_contact_list(device=device):
-        if circuit_contacts and i in circuit_contacts:
-            CreateSiliconDriftDiffusionAtContact(device, region, i, True)
-        else:
-            CreateSiliconDriftDiffusionAtContact(device, region, i)
-
-
-def ImprovedDriftDiffusionInitialSolution(device, region, circuit_contacts=None):
-    ####
-    #### drift diffusion solution variables
-    ####
-    CreateSolution(device, region, "Electrons")
-    CreateSolution(device, region, "Holes")
-
-    ####
-    #### create initial guess from dc only solution
-    ####
-    devsim.set_node_values(device=device, region=region, name="Electrons", init_from="IntrinsicElectrons")
-    devsim.set_node_values(device=device, region=region, name="Holes",     init_from="IntrinsicHoles")
-    #devsim.set_node_values(device=device, region=region, name="Electrons", init_from="InitialElectron")
-    #devsim.set_node_values(device=device, region=region, name="Holes",     init_from="InitialHole")
-
-    ###
-    ### Set up equations
-    ###
-    CreateImprovedDriftDiffusion(device, region)
-    for i in devsim.get_contact_list(device=device):
-        if circuit_contacts and i in circuit_contacts:
-            CreateSiliconDriftDiffusionAtContact(device, region, i, True)
-        else:
-            CreateSiliconDriftDiffusionAtContact(device, region, i)

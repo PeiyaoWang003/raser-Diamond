@@ -12,26 +12,26 @@ import devsim
 from .model_create import *
 import math
 
-def CreateImpactGeneration(device, region, custom_ion_n='', custom_ion_p=''):
+def CreateImpactGeneration(device, region, custom_ion_n='0', custom_ion_p='0', label=""):
 
-    # if not InEdgeModelList(device, region, "ElectricField"):
-    #     CreateEdgeModel(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength")
-    #     CreateEdgeModelDerivatives(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength", "Potential")
-
-    material = devsim.get_material(device=device, region=region)
-    if material == 'Silicon':
-        Ion_coeff_n, Ion_coeff_p = CreateImpactModel_vanOvenstraeten(device, region)
-    elif material == 'SiliconCarbide':
-        Ion_coeff_n, Ion_coeff_p = CreateImpactModel_Hatakeyama(device, region)
+    if label == "NoAvalanche":
+        Ion_coeff_rate = '0'
     else:
-        Ion_coeff_n, Ion_coeff_p = custom_ion_n, custom_ion_p
+        material = devsim.get_material(device=device, region=region)
+        if material == 'Silicon':
+            Ion_coeff_n, Ion_coeff_p = CreateImpactModel_vanOvenstraeten(device, region)
+        elif material == 'SiliconCarbide':
+            Ion_coeff_n, Ion_coeff_p = CreateImpactModel_Hatakeyama(device, region)
+        else:
+            Ion_coeff_n, Ion_coeff_p = custom_ion_n, custom_ion_p
 
-    if Ion_coeff_n == '' or Ion_coeff_p =='':
-        raise ValueError(Ion_coeff_n, Ion_coeff_p)
+        if Ion_coeff_n == '0' and Ion_coeff_p =='0':
+            Ion_coeff_rate = '0'
+        else:
+            Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/ElectronCharge"
 
-    #Ion_coeff_n  = "gamma * n_a * exp( - gamma * n_b / (ElectricField))"
-    #Ion_coeff_p  = "gamma * p_a * exp( - gamma * p_b / (ElectricField))"
-    Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/q"
+    if label == 'Tunnel':
+        Ion_coeff_rate += CreateTunnelModel_Zaiyi(device, region)
 
     CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
     CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
@@ -45,8 +45,8 @@ def CreateImpactGeneration(device, region, custom_ion_n='', custom_ion_p=''):
     #CreateEdgeModelDerivatives(device, region, "Ion_coeff_rate", Ion_coeff_rate, "Potential")
     
     
-    ImpactGen_n = "+q*%s"%(Ion_coeff_rate)
-    ImpactGen_p = "-q*%s"%(Ion_coeff_rate)
+    ImpactGen_n = "+ElectronCharge*%s"%(Ion_coeff_rate)
+    ImpactGen_p = "-ElectronCharge*%s"%(Ion_coeff_rate)
 
     CreateEdgeModel(device, region, "ImpactGen_n", ImpactGen_n)
     CreateEdgeModelDerivatives(device, region, "ImpactGen_n", ImpactGen_n, "Potential")
@@ -63,6 +63,7 @@ def CreateImpactModel_vanOvenstraeten(device, region):
     """
     van Ovenstraeten Model
     """
+    # constants in gen_devsim_db.py
 
     Ion_coeff_n  = "ifelse(abs(ElectricField)>1.75e4, (ifelse(abs(ElectricField)>4e5, gamma * n_a_high * exp( - gamma * n_b_high / (abs(ElectricField)+1)),  gamma * n_a_low * exp( - gamma * n_b_low / (abs(ElectricField)+1)))), 1)"
     Ion_coeff_p  = "ifelse(abs(ElectricField)>1.75e4, (ifelse(abs(ElectricField)>4e5, gamma * p_a_high * exp( - gamma * p_b_high / (abs(ElectricField)+1)),  gamma * p_a_low * exp( - gamma * p_b_low / (abs(ElectricField)+1)))), 1)"
@@ -72,16 +73,7 @@ def CreateImpactModel_vanOvenstraeten(device, region):
 def CreateImpactModel_Hatakeyama(device, region, cutoff_angle = 4):
     """
     Hatakeyama Model for cutoff angle of 4°
-    Ref : https://onlinelibrary.wiley.com/doi/abs/10.1002/pssa.200925213
     """
-
-    #hbarOmega = 0.19 # eV
-    #k_T0_ev = 0.0257 # eV
-    # gamma = math.tanh(0.19/(2*0.0257))/math.tanh(0.19/(2*0.0257*T/T0))
-    
-    # if not InEdgeModelList(device, region, "ElectricField"):
-    #     CreateEdgeModel(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength")
-    #     CreateEdgeModelDerivatives(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength", "Potential")
 
     sin_cutoff_angle = math.sin(math.radians(cutoff_angle))
     cos_cutoff_angle = math.cos(math.radians(cutoff_angle))
@@ -124,3 +116,24 @@ def CreateImpactModel_Hatakeyama(device, region, cutoff_angle = 4):
     Ion_coeff_p  = "ifelse(abs(ElectricField)>1e4, {0} * p_a_aniso * exp( - {1} * p_b_aniso / (abs(ElectricField)+1)), 1)".format(gamma_str,gamma_str)
 
     return Ion_coeff_n, Ion_coeff_p
+
+
+def CreateTunnelModel_Zaiyi(device, region):
+
+    R_improved="3.11*abs(ElectricField)^2.5*exp(abs(ElectricField)/3e4)"
+    CreateEdgeModel(device,region,"R_improved",R_improved)
+    CreateEdgeModelDerivatives(device,region,"R_improved",R_improved,"Potential")
+
+    R_BTBT="1e21*abs(ElectricField)^2.5*exp(-0.8e7/(1+abs(ElectricField)))"
+    CreateEdgeModel(device,region,"R_BTBT",R_BTBT)
+    CreateEdgeModelDerivatives(device,region,"R_BTBT",R_BTBT,"Potential")
+    devsim.edge_from_node_model(device=device,region=region,node_model="USRH")
+
+    R_TAT="2*(3*3.14159)^0.5*abs(ElectricField)/3.9e4*exp((abs(ElectricField)/3.9e4)^2)*USRH@n1"
+    CreateEdgeModel(device,region,"R_TAT",R_TAT)
+    CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Potential")
+    CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Electrons")
+    CreateEdgeModelDerivatives(device,region,"R_TAT",R_TAT,"Holes")
+
+    return "+R_improved"
+

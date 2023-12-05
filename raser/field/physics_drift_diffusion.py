@@ -11,6 +11,8 @@ Description:  physics_drift_diffusion.py
 
 from devsim import *
 from .model_create import *
+from .physics_avalanche import CreateImpactGeneration
+from .physics_irradiation import CreateIrradiation
 
 contactcharge_edge="contactcharge_edge"
 ece_name="ElectronContinuityEquation"
@@ -169,10 +171,11 @@ def PrintCurrents(device, contact):
     print("{0}\t{1}\t{2}\t{3}\t{4}".format(contact, voltage, electron_current, hole_current, total_current))
 
 
-def CreateSRH(device, region):
+def CreateSRH(device, region, irrdiation_label):
     USRH="(Electrons*Holes - n_i^2)/(taup*(Electrons + n1) + taun*(Holes + p1))"
-    Gn = "-ElectronCharge * USRH"
-    Gp = "+ElectronCharge * USRH"
+    CreateIrradiation(device, region, label=irrdiation_label)
+    Gn = "-ElectronCharge * (USRH+U_r)"
+    Gp = "+ElectronCharge * (USRH+U_r)"
     CreateNodeModel(device, region, "USRH", USRH)
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
@@ -182,27 +185,31 @@ def CreateSRH(device, region):
         CreateNodeModelDerivative(device, region, "HoleGeneration", Gp, i)
 
 
-def CreateECE(device, region, mu_n):
+def CreateECE(device, region, mu_n, impact_label):
     CreateElectronCurrent(device, region, mu_n)
 
     NCharge = "-ElectronCharge * Electrons"
     CreateNodeModel(device, region, "NCharge", NCharge)
     CreateNodeModelDerivative(device, region, "NCharge", NCharge, "Electrons")
+    CreateImpactGeneration(device, region, impact_label)
 
     equation(device=device, region=region, name="ElectronContinuityEquation", variable_name="Electrons",
              time_node_model = "NCharge",
-             edge_model="ElectronCurrent", variable_update="positive", node_model="ElectronGeneration")
+             edge_model="ElectronCurrent", variable_update="positive", node_model="ElectronGeneration",
+             edge_volume_model="ImpactGen_n")
     
 
-def CreateHCE(device, region, mu_p):
+def CreateHCE(device, region, mu_p, impact_label):
     CreateHoleCurrent(device, region, mu_p)
     PCharge = "ElectronCharge * Holes"
     CreateNodeModel(device, region, "PCharge", PCharge)
     CreateNodeModelDerivative(device, region, "PCharge", PCharge, "Holes")
+    CreateImpactGeneration(device, region, impact_label)
 
     equation(device=device, region=region, name="HoleContinuityEquation", variable_name="Holes",
              time_node_model = "PCharge",
-             edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration")
+             edge_model="HoleCurrent", variable_update="positive", node_model="HoleGeneration",
+             edge_volume_model="ImpactGen_p")
     
 
 def CreatePE(device, region):
@@ -216,12 +223,12 @@ def CreatePE(device, region):
              time_node_model="", variable_update="log_damp")
 
 
-def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p"):
+def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradiation_label="test", impact_label="Noavalanche"):
     CreatePE(device, region)
     CreateBernoulli(device, region)
-    CreateSRH(device, region)
-    CreateECE(device, region, mu_n)
-    CreateHCE(device, region, mu_p)
+    CreateSRH(device, region, irradiation_label)
+    CreateECE(device, region, mu_n, impact_label)
+    CreateHCE(device, region, mu_p, impact_label)
 
 
 def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=False): 

@@ -11,7 +11,7 @@ Description:  physics_irradiation.py
 import devsim
 from .model_create import *
 
-def CreateIrradiation(device, region, label="Xingchen", custom_defect = {}, flux=1e15):
+def CreateIrradiation(device, region, label="Xingchen", flux=1e15, custom_defect = {}):
 
     # if not InEdgeModelList(device, region, "ElectricField"):
     #     CreateEdgeModel(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength")
@@ -29,13 +29,11 @@ def CreateIrradiation(device, region, label="Xingchen", custom_defect = {}, flux
     else:
         defects = custom_defect
 
-    if defects == {}:
-        raise KeyError(defects)
-
-    TrappedElectrons=""
-    TrappedHoles=""
-    Trappingtime_n=""
-    Trappingtime_p=""
+    TrappedElectrons="0"
+    TrappedHoles="0"
+    Trappingtime_n="0"
+    Trappingtime_p="0"
+    U_r = "0"
 
     for defect in defects:
         name, E_t_ev, g_int, sigma_n_irr, sigma_p_irr = defect['name'], defect['E_t_ev'], defect['g_int'], defect['sigma_n_irr'], defect['sigma_p_irr']
@@ -56,12 +54,13 @@ def CreateIrradiation(device, region, label="Xingchen", custom_defect = {}, flux
         n_t_irr_p = "+(N_t_irr_{name}*(Holes*{r_p}+{n_1}*{r_n})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
         trap_n = "+(v_T * sigma_n_irr_{name})*(N_t_irr_{name}*(Electrons*{r_n}+{p_1}*{r_p})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
         trap_p = "+(v_T * sigma_p_irr_{name})*(N_t_irr_{name}*(Holes*{r_p}+{n_1}*{r_n})/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
-        U_r="+(N_t_irr_{name}*{r_n}*{r_p}*(Electrons*Holes-n_i^2)/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
+        U_r_i="+(N_t_irr_{name}*{r_n}*{r_p}*(Electrons*Holes-n_i^2)/({r_n}*(Electrons+{n_1})+{r_p}*(Holes+{p_1})))".format(name=name,r_n=r_n,n_1=n_1,r_p=r_p,p_1=p_1)
 
         TrappedElectrons=TrappedElectrons+n_t_irr_n
         TrappedHoles=TrappedHoles+n_t_irr_p
         Trappingtime_n=Trappingtime_n+trap_n
         Trappingtime_p=Trappingtime_p+trap_p
+        U_r = U_r+U_r_i
 
     CreateNodeModel(device, region, "TrappedElectrons", TrappedElectrons)
     CreateNodeModel(device, region, "TrappedHoles", TrappedHoles)
