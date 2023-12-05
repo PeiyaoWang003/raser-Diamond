@@ -4,6 +4,7 @@
 import devsim
 from . import physics_drift_diffusion
 from .build_device import Detector
+from . import initial
 import math
 import sys
 from array import array
