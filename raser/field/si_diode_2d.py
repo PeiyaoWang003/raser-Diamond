@@ -23,12 +23,13 @@ import pickle
 # in dio2 add recombination
 #
 def main():
+    open_db(filename="./output/devsim/SICARDB.db", permission="readonly")
     device="MyDevice"
     region="MyRegion"
 
     si_diode_common.Create2DMesh(device, region)
 
-    si_diode_common.SetParameters(device=device, region=region)
+    #si_diode_common.SetParameters(device=device, region=region)
 
     si_diode_common.SetNetDoping(device=device, region=region)
 
