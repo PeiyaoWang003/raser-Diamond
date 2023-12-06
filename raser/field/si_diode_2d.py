@@ -36,7 +36,7 @@ def main():
     solve(type="dc", absolute_error=1e1, relative_error=1e-7, maximum_iterations=1000)
     #solve(type="dc", absolute_error=1.0, relative_error=1e-12, maximum_iterations=30)
 
-    DriftDiffusionInitialSolution(device, region)
+    DriftDiffusionInitialSolution(device, region, irradiation_label="XingChen")
     ###
     ### Drift diffusion simulation at equilibrium
     ###
