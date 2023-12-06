@@ -158,15 +158,15 @@ def CreateVanOvenstraetenImpact():
     p_b_high = 1.693e6 # cm-1
 
     devsim.add_db_entry(material="Silicon",   parameter="gamma",  value=gamma,   unit="1",     description="gamma for van Ovenstraeten Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="n_a_high",  value=n_a_high,   unit="cm-1",     description="n_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="n_b_high",  value=n_b_high,   unit="V/cm",     description="n_b for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="p_a_high",  value=p_a_high,   unit="cm-1",     description="p_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="p_b_high",  value=p_b_high,   unit="V/cm",     description="p_b for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="n_a_high",  value=n_a_high,   unit="cm-1",     description="n_a for van Ovenstraeten Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="n_b_high",  value=n_b_high,   unit="V/cm",     description="n_b for van Ovenstraeten Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="p_a_high",  value=p_a_high,   unit="cm-1",     description="p_a for van Ovenstraeten Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="p_b_high",  value=p_b_high,   unit="V/cm",     description="p_b for van Ovenstraeten Avalanche Model")
 
-    devsim.add_db_entry(material="Silicon",   parameter="n_a_low",  value=n_a_low,   unit="cm-1",     description="n_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="n_b_low",  value=n_b_low,   unit="V/cm",     description="n_b for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="p_a_low",  value=p_a_low,   unit="cm-1",     description="p_a for Hatakeyyama Avalanche Model")
-    devsim.add_db_entry(material="Silicon",   parameter="p_b_low",  value=p_b_low,   unit="V/cm",     description="p_b for Hatakeyyama Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="n_a_low",  value=n_a_low,   unit="cm-1",     description="n_a for van Ovenstraeten Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="n_b_low",  value=n_b_low,   unit="V/cm",     description="n_b for van Ovenstraeten Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="p_a_low",  value=p_a_low,   unit="cm-1",     description="p_a for van Ovenstraeten Avalanche Model")
+    devsim.add_db_entry(material="Silicon",   parameter="p_b_low",  value=p_b_low,   unit="V/cm",     description="p_b for van Ovenstraeten Avalanche Model")
 
 
 def SaveDataBase():
