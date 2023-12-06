@@ -82,10 +82,10 @@ def CreateIrradiationModel_XingChen(device, region):
     """
     
     defects = []
-    defects.append({"name" : "DA1", "E_ts_ev" : 0.56-0.42,  "g_ints" : 0.239*2, "sigma_n_irrs" : 1e-15,     "sigma_p_irrs" : 1e-14})
-    defects.append({"name" : "DA2", "E_ts_ev" : 0.56-0.46,  "g_ints" : 0.09*2,  "sigma_n_irrs" : 7e-15,     "sigma_p_irrs" : 7e-14})
-    defects.append({"name" : "DD1", "E_ts_ev" : -0.56+0.36, "g_ints" : 0.025*2, "sigma_n_irrs" : 3.23e-13,  "sigma_p_irrs" : 3.23e-14})
-    defects.append({"name" : "DD2", "E_ts_ev" : -0.56+0.48, "g_ints" : 0.321*2, "sigma_n_irrs" : 4.166e-15, "sigma_p_irrs" : 1.965e-16})
+    defects.append({"name" : "DA1", "E_t_ev" : 0.56-0.42,  "g_int" : 0.239*2, "sigma_n_irr" : 1e-15,     "sigma_p_irr" : 1e-14})
+    defects.append({"name" : "DA2", "E_t_ev" : 0.56-0.46,  "g_int" : 0.09*2,  "sigma_n_irr" : 7e-15,     "sigma_p_irr" : 7e-14})
+    defects.append({"name" : "DD1", "E_t_ev" : -0.56+0.36, "g_int" : 0.025*2, "sigma_n_irr" : 3.23e-13,  "sigma_p_irr" : 3.23e-14})
+    defects.append({"name" : "DD2", "E_t_ev" : -0.56+0.48, "g_int" : 0.321*2, "sigma_n_irr" : 4.166e-15, "sigma_p_irr" : 1.965e-16})
 
     return defects
 
@@ -96,9 +96,9 @@ def CreateIrradiationModel_Perugia(device, region):
     """
 
     defects = []
-    defects.append({"name" : "DA1", "E_ts_ev" : 4.05-0.42, "g_ints" : 1.613, "sigma_n_irrs" : 1e-15,     "sigma_p_irrs" : 1e-14})
-    defects.append({"name" : "DA2", "E_ts_ev" : 4.05-0.46, "g_ints" : 0.9,   "sigma_n_irrs" : 7e-15,     "sigma_p_irrs" : 7e-14})
-    defects.append({"name" : "DD",  "E_ts_ev" : 5.17+0.36, "g_ints" : 0.9,   "sigma_n_irrs" : 3.23e-13,  "sigma_p_irrs" : 3.23e-14})
+    defects.append({"name" : "DA1", "E_t_ev" : 4.05-0.42, "g_int" : 1.613, "sigma_n_irr" : 1e-15,     "sigma_p_irr" : 1e-14})
+    defects.append({"name" : "DA2", "E_t_ev" : 4.05-0.46, "g_int" : 0.9,   "sigma_n_irr" : 7e-15,     "sigma_p_irr" : 7e-14})
+    defects.append({"name" : "DD",  "E_t_ev" : 5.17+0.36, "g_int" : 0.9,   "sigma_n_irr" : 3.23e-13,  "sigma_p_irr" : 3.23e-14})
 
     return defects
 
@@ -109,11 +109,11 @@ def CreateIrradiationModel_Schwandt(device, region):
     """
 
     defects = []
-    defects.append({"name" : "E30K", "E_ts_ev" : 0.56-0.1,   "g_ints" : 0.0497, "sigma_n_irrs" : 2.300e-14, "sigma_p_irrs" : 2.920e-16})
-    defects.append({"name" : "V3",   "E_ts_ev" : 0.56-0.458, "g_ints" : 0.6447, "sigma_n_irrs" : 2.551e-14, "sigma_p_irrs" : 1.551e-13})
-    defects.append({"name" : "Ip",   "E_ts_ev" : 0.56-0.545, "g_ints" : 0.4335, "sigma_n_irrs" : 4.478e-15, "sigma_p_irrs" : 6.709e-15})
-    defects.append({"name" : "H220", "E_ts_ev" : -0.56+0.48, "g_ints" : 0.5978, "sigma_n_irrs" : 4.166e-15, "sigma_p_irrs" : 1.965e-16})
-    defects.append({"name" : "CiOi", "E_ts_ev" : -0.56+0.36, "g_ints" : 0.3780, "sigma_n_irrs" : 3.230e-17, "sigma_p_irrs" : 2.036e-14})
+    defects.append({"name" : "E30K", "E_t_ev" : 0.56-0.1,   "g_int" : 0.0497, "sigma_n_irr" : 2.300e-14, "sigma_p_irr" : 2.920e-16})
+    defects.append({"name" : "V3",   "E_t_ev" : 0.56-0.458, "g_int" : 0.6447, "sigma_n_irr" : 2.551e-14, "sigma_p_irr" : 1.551e-13})
+    defects.append({"name" : "Ip",   "E_t_ev" : 0.56-0.545, "g_int" : 0.4335, "sigma_n_irr" : 4.478e-15, "sigma_p_irr" : 6.709e-15})
+    defects.append({"name" : "H220", "E_t_ev" : -0.56+0.48, "g_int" : 0.5978, "sigma_n_irr" : 4.166e-15, "sigma_p_irr" : 1.965e-16})
+    defects.append({"name" : "CiOi", "E_t_ev" : -0.56+0.36, "g_int" : 0.3780, "sigma_n_irr" : 3.230e-17, "sigma_p_irr" : 2.036e-14})
 
     return defects
 
