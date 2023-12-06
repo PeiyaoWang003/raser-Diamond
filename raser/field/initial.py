@@ -51,7 +51,7 @@ def DriftDiffusionInitialSolution(device, region, irradiation_label="test", irra
     ###
     ### Set up equations
     ###
-    CreateSiliconDriftDiffusion(device, region, irradiation_label, irradiation_flux, impact_label)
+    CreateSiliconDriftDiffusion(device, region, irradiation_label=irradiation_label, irradiation_flux=irradiation_flux, impact_label=impact_label)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
             CreateSiliconDriftDiffusionAtContact(device, region, i, True)
