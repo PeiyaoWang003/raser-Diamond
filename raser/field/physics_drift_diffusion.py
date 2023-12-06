@@ -224,11 +224,11 @@ def CreatePE(device, region):
 
 
 def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradiation_label="test", irradiation_flux=1e15, impact_label="test"):
-    CreatePE(device, region)
     CreateBernoulli(device, region)
     CreateSRH(device, region, irradiation_label, irradiation_flux)
     CreateECE(device, region, mu_n, impact_label)
     CreateHCE(device, region, mu_p, impact_label)
+    CreatePE(device, region)
 
 
 def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
