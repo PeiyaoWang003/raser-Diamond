@@ -27,6 +27,9 @@ def CreateGlobalConstant():
     devsim.add_db_entry(material="global",   parameter="k_T0",    value=k*T0,       unit="J",        description="k*T0")
     devsim.add_db_entry(material="global",   parameter="V_t",    value=k*T0/q,     unit="J/coul",   description="k*T0/q")
 
+    v_T = 1e7
+    devsim.add_db_entry(material="global",   parameter="v_T",     value=v_T,   unit="cm/s",     description="Thermal average velocity")
+
     T = 300.0         # K
     devsim.add_db_entry(material="global",   parameter="T",    value=T,     unit="K",   description="T")
 
