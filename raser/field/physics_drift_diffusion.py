@@ -213,7 +213,7 @@ def CreateHCE(device, region, mu_p, impact_label):
     
 
 def CreatePE(device, region):
-    pne = "-ElectronCharge*kahan3(Holes, -Electrons, NetDoping)"
+    pne = "-ElectronCharge*kahan3(Holes, -Electrons, kahan3(NetDoping, TrappedHoles, -TrappedElectrons))"
     CreateNodeModel(device, region, "PotentialNodeCharge", pne)
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Electrons")
     CreateNodeModelDerivative(device, region, "PotentialNodeCharge", pne, "Holes")
