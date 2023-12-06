@@ -25,22 +25,21 @@ def CreateImpactGeneration(device, region, custom_ion_n='0', custom_ion_p='0', l
         else:
             Ion_coeff_n, Ion_coeff_p = custom_ion_n, custom_ion_p
 
+        CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
+        CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
+        #CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Electrons")
+        #CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Holes")
+        CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
+        CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
+        #CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Electrons")
+        #CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Holes")
+        #CreateEdgeModel(device, region, "Ion_coeff_rate", Ion_coeff_rate)
+        #CreateEdgeModelDerivatives(device, region, "Ion_coeff_rate", Ion_coeff_rate, "Potential")
+    
         Ion_coeff_rate = "(Ion_coeff_n*(abs(ElectronCurrent))+Ion_coeff_p*(abs(HoleCurrent)))/ElectronCharge"
 
     if label == 'Tunnel':
         Ion_coeff_rate += CreateTunnelModel_Zaiyi(device, region)
-
-    CreateEdgeModel(device, region, "Ion_coeff_n", Ion_coeff_n)
-    CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Potential")
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Electrons")
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_n", Ion_coeff_n, "Holes")
-    CreateEdgeModel(device, region, "Ion_coeff_p", Ion_coeff_p)
-    CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Potential")
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Electrons")
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_p", Ion_coeff_p, "Holes")
-    #CreateEdgeModel(device, region, "Ion_coeff_rate", Ion_coeff_rate)
-    #CreateEdgeModelDerivatives(device, region, "Ion_coeff_rate", Ion_coeff_rate, "Potential")
-    
     
     ImpactGen_n = "+ElectronCharge*%s"%(Ion_coeff_rate)
     ImpactGen_p = "-ElectronCharge*%s"%(Ion_coeff_rate)
