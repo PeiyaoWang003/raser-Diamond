@@ -4,7 +4,8 @@ import numpy as np
 import pickle
 import ROOT
 import devsim
-from . import physics2d
+from .model_create import *
+from .physics_drift_diffusion import *
 #####
 # dio1
 #
@@ -36,30 +37,19 @@ def Create2DMesh(device, region):
     devsim.finalize_mesh   (mesh="dog")
     devsim.create_device   (mesh="dog", device=device)
 
-
-
-
-
-def SetParameters(device, region):
-    '''
-      Set parameters for 300 K
-    '''
-    physics2d.SetSiliconParameters(device, region, 300)
-
-
 def SetNetDoping(device, region,type1):
     
     if type1=="PNjuction":
-        physics2d.CreateNodeModel(device, region, "Acceptors", "1.0e19*step(0.3e-4-x)")
-        physics2d.CreateNodeModel(device, region, "Donors",    "7.96e13*( step((1.3e-4)-x) -step((3e-5)-x) ) + 5.6e12*( step((1e-2)-x) - step((1.3e-4)-x) ) ")
-        physics2d.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
+        CreateNodeModel(device, region, "Acceptors", "1.0e19*step(0.3e-4-x)")
+        CreateNodeModel(device, region, "Donors",    "7.96e13*( step((1.3e-4)-x) -step((3e-5)-x) ) + 5.6e12*( step((1e-2)-x) - step((1.3e-4)-x) ) ")
+        CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
         devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
         devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")
         devsim.edge_from_node_model(device=device,region=region,node_model="Donors")
     elif type1 =="PNwithGainlayer":
-        physics2d.CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")
-        physics2d.CreateNodeModel(device, region, "Donors",    "1.0e17*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.0e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 1.0e19*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
-        physics2d.CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
+        CreateNodeModel(device, region, "Acceptors", "2.0e19*step(3e-5-x)")
+        CreateNodeModel(device, region, "Donors",    "1.0e17*( step((1.3e-4)-x) -step((3e-5)-x) ) + 1.0e14*( step((51.3e-4)-x) - step((1.3e-4)-x) ) + 1.0e18*( step((56.3e-4)-x) - step((51.3e-4)-x) )+ 1.0e19*( step((66.3e-4)-x) - step((56.3e-4)-x) )")
+        CreateNodeModel(device, region, "NetDoping", "Donors-Acceptors")
         devsim.edge_from_node_model(device=device,region=region,node_model="Acceptors")
         devsim.edge_from_node_model(device=device,region=region,node_model="NetDoping")
         devsim.edge_from_node_model(device=device,region=region,node_model="Donors")
@@ -67,29 +57,29 @@ def SetNetDoping(device, region,type1):
     
 def InitialSolution(device, region, circuit_contacts=None):
     # Create Potential, Potential@n0, Potential@n1
-    physics2d.CreateSolution(device, region, "Potential")
+    CreateSolution(device, region, "Potential")
 
     # Create potential only physical models
-    physics2d.CreateSiliconPotentialOnly(device, region)
+    CreateSiliconPotentialOnly(device, region)
 
 
     # Set up the contacts applying a bias
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
-            physics2d.CreateSiliconPotentialOnlyContact(device, region, i, True)
+            CreateSiliconPotentialOnlyContact(device, region, i, True)
         else:
             ###print "FIX THIS"
             ### it is more correct for the bias to be 0, and it looks like there is side effects
-            devsim.set_parameter(device=device, name=physics2d.GetContactBiasName(i), value=0.0)
-            physics2d.CreateSiliconPotentialOnlyContact(device, region, i)
+            devsim.set_parameter(device=device, name=GetContactBiasName(i), value=0.0)
+            CreateSiliconPotentialOnlyContact(device, region, i)
 
 
 def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ####
     #### drift diffusion solution variables
     ####
-    physics2d.CreateSolution(device, region, "Electrons")
-    physics2d.CreateSolution(device, region, "Holes")
+    CreateSolution(device, region, "Electrons")
+    CreateSolution(device, region, "Holes")
 
     ####
     #### create initial guess from dc only solution
@@ -100,12 +90,12 @@ def DriftDiffusionInitialSolution(device, region, circuit_contacts=None):
     ###
     ### Set up equations
     ###
-    physics2d.CreateSiliconDriftDiffusion(device, region)
+    CreateSiliconDriftDiffusion(device, region)
     for i in devsim.get_contact_list(device=device):
         if circuit_contacts and i in circuit_contacts:
-            physics2d.CreateSiliconDriftDiffusionAtContact(device, region, i, True)
+            CreateSiliconDriftDiffusionAtContact(device, region, i, True)
         else:
-            physics2d.CreateSiliconDriftDiffusionAtContact(device, region, i)
+            CreateSiliconDriftDiffusionAtContact(device, region, i)
 
 
 def save_values(device, region):
