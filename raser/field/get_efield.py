@@ -2,8 +2,8 @@
 # -*- encoding: utf-8 -*-
 
 import devsim
-from . import physics_2d
-from . import diode_common
+from . import physics_drift_diffusion
+from . import initial
 from .build_device import Detector
 import math
 import sys
@@ -36,15 +36,12 @@ devsim.set_parameter(name = "extended_equation", value=True)
 
 MyDetector = Detector(simname)
 
-#build_2d_device.InitialSolution(device, region, circuit_contacts=False)
-diode_common.InitialSolution(device, region, circuit_contacts="bot")
+initial.InitialSolution(device, region, circuit_contacts="bot")
 
 # Initial DC solution
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
-
-#build_2d_device.DriftDiffusionInitialSolution(device, region, circuit_contacts=False)
-diode_common.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
+initial.DriftDiffusionInitialSolution(device, region, circuit_contacts=["bot"])
 devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-10, maximum_iterations=1500)
 
 
@@ -54,10 +51,10 @@ intensities=[]
 positions=[]
 def loop(bias_v,voltage):   
     while bias_v < voltage:
-        devsim.set_parameter(device=device, name=physics_2d.GetContactBiasName("top"), value=0-bias_v)
+        devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName("top"), value=0-bias_v)
         devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-6, maximum_iterations=1500)
-        physics_2d.PrintCurrents(device, "top")
-        physics_2d.PrintCurrents(device, "bot")
+        physics_drift_diffusion.PrintCurrents(device, "top")
+        physics_drift_diffusion.PrintCurrents(device, "bot")
         reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
         reverse_top_hole_current    = devsim.get_contact_current(device=device, contact="top", equation="HoleContinuityEquation")
         #reverse_bot_electron_current= devsim.get_contact_current(device=device, contact="bot", equation="ElectronContinuityEquation")

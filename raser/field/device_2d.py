@@ -42,8 +42,8 @@ def createMesh(device, region):
 
 
 
-device=simname
-region=simname
+device=type
+region=type
 
 createMesh(device,region)
 
