@@ -171,9 +171,8 @@ def PrintCurrents(device, contact):
     print("{0}\t{1}\t{2}\t{3}\t{4}".format(contact, voltage, electron_current, hole_current, total_current))
 
 
-def CreateSRH(device, region, irrdiation_label, irradiation_flux):
+def CreateSRH(device, region):
     USRH="(Electrons*Holes - n_i^2)/(taup*(Electrons + n1) + taun*(Holes + p1))"
-    CreateIrradiation(device, region, label=irrdiation_label, flux=irradiation_flux)
     Gn = "-ElectronCharge * (USRH+U_r)"
     Gp = "+ElectronCharge * (USRH+U_r)"
     CreateNodeModel(device, region, "USRH", USRH)
@@ -224,11 +223,12 @@ def CreatePE(device, region):
 
 
 def CreateSiliconDriftDiffusion(device, region, mu_n="mu_n", mu_p="mu_p", irradiation_label="test", irradiation_flux=1e15, impact_label="test"):
+    CreateIrradiation(device, region, label=irradiation_label, flux=irradiation_flux)
+    CreatePE(device, region)
     CreateBernoulli(device, region)
-    CreateSRH(device, region, irradiation_label, irradiation_flux)
+    CreateSRH(device, region)
     CreateECE(device, region, mu_n, impact_label)
     CreateHCE(device, region, mu_p, impact_label)
-    CreatePE(device, region)
 
 
 def CreateSiliconDriftDiffusionAtContact(device, region, contact, is_circuit=False): 
