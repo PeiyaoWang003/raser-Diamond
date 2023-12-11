@@ -123,7 +123,7 @@ def CreateIntrinsicModel_SiCCommonDefect(device, region):
     """
     
     defects = []
-    defects.append({"name" : "Z1/2",  "E_ts_ev" : 1.63-0.67, "g_ints" : 1, "sigma_n_irrs" : 3e-16, "sigma_p_irrs" : 2e-12})
-    defects.append({"name" : "EH6/7", "E_ts_ev" : 1.63-1.65, "g_ints" : 1, "sigma_n_irrs" : 2e-17, "sigma_p_irrs" : 3e-17})
+    defects.append({"name" : "Z1/2",  "E_t_ev" : 1.63-0.67, "g_int" : 1, "sigma_n_irr" : 3e-16, "sigma_p_irr" : 2e-12})
+    defects.append({"name" : "EH6/7", "E_t_ev" : 1.63-1.65, "g_int" : 1, "sigma_n_irr" : 2e-17, "sigma_p_irr" : 3e-17})
 
     return defects
