@@ -37,6 +37,12 @@ def main(args):
         devsim_solve.main()
     elif label == 'sicar1.1.8_cv_v1':
         devsim_solve.main(label)
+    elif label == 'sicar1.1.8_iv_v1':
+        devsim_solve.main(label)
+    elif label == 'njupin_cv_v1':
+        devsim_solve.main(label)
+    elif label == 'njupin_iv_v1':
+        devsim_solve.main(label)
     elif label == 'si_ir_1d':
         si_diode_1d.main()
     elif label == 'si_ir_2d':
