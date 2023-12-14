@@ -31,6 +31,18 @@ def main(label=None,v_max = 400):
         para_dict = []
         initial_solution(device,region,para_dict)  
         solve_cv(device,region,v_max,para_dict,area_factor,frequency=1e3)
+    elif label=='sicar1.1.8_iv_v1':
+        area_factor=1.0/(0.1*0.1)
+        v_max=510
+        device = "SICAR-1.1.8"
+        region = "SICAR-1.1.8"
+        para_dict=[]
+        set_mesh(device,region)
+        # devsim.set_parameter(device=device,   name="tau_n",  value=2.5e-6)
+        # devsim.set_parameter(device=device,   name="tau_p",  value=0.5e-6)
+        extend_set()
+        initial_solution(device,region,para_dict)
+        solve_iv(device,region,v_max,para_dict,area_factor)
     elif label=='1d_njupin_1.5mm_cv':
         area_factor=44.44
         device = "NJU-PIN"
@@ -39,8 +51,7 @@ def main(label=None,v_max = 400):
         set_mesh(device,region)
         extend_set()
         initial_solution(device,region,para_dict)
-        solve_cv(device,region,v_max,para_dict,area_factor,frequency=1.0)
-        
+        solve_cv(device,region,v_max,para_dict,area_factor,frequency=1.0)    
     elif label=='itkmd8_cv_v1':
         area_factor=1.0/(0.76*0.76)
         device = "ITk-md8"
@@ -75,6 +86,15 @@ def main(label=None,v_max = 400):
         extend_set()
         initial_solution(device,region,para_dict)
         solve_iv(device,region,v_max,para_dict,area_factor)
+    if label=='njupin_cv_v1':
+        device = "NJU-PIN"
+        region = "NJU-PIN"
+        area_factor = 4
+        set_mesh(device,region)
+        extend_set()
+        para_dict = []
+        initial_solution(device,region,para_dict)  
+        solve_cv(device,region,v_max,para_dict,area_factor,frequency=1)
     else:
         raise KeyError
         
@@ -90,6 +110,8 @@ def set_mesh(device,region):
     if device == "SICAR-1.1.8" or "NJU-PIN":
         MyDetector = Detector(device, 1)
     elif device == "ITk-md8" or device == "ITk-Si-strip":
+        MyDetector = Detector(device, 1)
+    elif device == "NJU-PIN":
         MyDetector = Detector(device, 1)
     else: 
         raise NameError
