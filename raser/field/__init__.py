@@ -3,9 +3,6 @@ import devsim
 from . import gen_devsim_db
 from . import scan_cv
 from . import devsim_solve
-from . import si_diode_1d
-from . import si_diode_2d
-from . import diode_element_2d
 from . import scan_iv
 from . import scan_elefield
 from . import test4hsic
@@ -46,11 +43,9 @@ def main(args):
     elif label == 'njupin_iv_v1':
         devsim_solve.main(label)
     elif label == 'si_ir_1d':
-        si_diode_1d.main()
+        devsim_solve.main(label)
     elif label == 'si_ir_2d':
-        si_diode_2d.main()
-    elif label == 'simple_2d_pnjunction_simulate':
-        diode_element_2d.main()
+        devsim_solve.main(label)
     elif label == 'itkmd8_cv_v1':
         devsim_solve.main(label)
     elif label == 'itkmd8_iv_v1':
