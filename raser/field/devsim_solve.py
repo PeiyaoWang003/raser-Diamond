@@ -14,7 +14,10 @@ from .build_device import Detector
 
 import matplotlib 
 import matplotlib.pyplot
+import ROOT
+import numpy as np
 import csv
+import pickle
 import math
 
 if not (os.path.exists("./output/devsim")):
@@ -86,7 +89,7 @@ def main(label=None,v_max = 400):
         extend_set()
         initial_solution(device,region,para_dict)
         solve_iv(device,region,v_max,para_dict,area_factor)
-    if label=='njupin_cv_v1':
+    elif label=='njupin_cv_v1':
         device = "NJU-PIN"
         region = "NJU-PIN"
         area_factor = 4
@@ -95,6 +98,91 @@ def main(label=None,v_max = 400):
         para_dict = []
         initial_solution(device,region,para_dict)  
         solve_cv(device,region,v_max,para_dict,area_factor,frequency=1)
+    elif label == "si_ir_1d":
+        v=v_max
+        device = 'HPK-Si-PIN'
+        region = 'HPK-Si-PIN'
+        area_factor = 1
+        set_mesh(device,region)
+        extend_set()
+        para_dict = []
+        initial_solution(device,region,para_dict)
+        devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
+        devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")  
+        solve_iv(device,region,v_max,para_dict,area_factor)
+        
+        x = np.array(devsim.get_node_model_values(device=device, region=region, name="x"))
+        potential = np.array(devsim.get_node_model_values(device=device, region=region, name="Potential")) # get the potential dat
+        NetDoping= np.array(devsim.get_node_model_values(device=device, region=region, name="NetDoping"))
+        PotentialNodeCharge = np.array(devsim.get_node_model_values(device=device, region=region, name="PotentialNodeCharge"))
+        Electrons = np.array(devsim.get_node_model_values(device=device, region=region, name="Electrons"))
+        Holes = np.array(devsim.get_node_model_values(device=device, region=region, name="Holes"))
+        devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
+        x_mid = devsim.get_edge_model_values(device=device, region=region, name="xmid") # get x-node values 
+        ElectricField = devsim.get_edge_model_values(device=device, region=region, name="ElectricField") # get y-node values
+        TrappingRate_n = np.array(devsim.get_node_model_values(device=device, region=region, name="TrappingRate_n"))
+        TrappingRate_p = np.array(devsim.get_node_model_values(device=device, region=region, name="TrappingRate_p"))
+
+        if not os.access('output/testdiode', os.F_OK):
+                os.makedirs('output/testdiode', exist_ok=True)
+
+        draw1D(x,potential,"Potential","Depth[cm]","Potential[V]",v)
+        draw1D(x_mid,ElectricField,"ElectricField","Depth[cm]","ElectricField[V/cm]",v)
+        draw1D(x,TrappingRate_n,"TrappingRate_n","Depth[cm]","TrappingRate_n[s]",v)
+        draw1D(x,TrappingRate_p,"TrappingRate_p","Depth[cm]","TrappingRate_p[s]",v)
+
+        devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons:Potential")
+        devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles:Potential")
+        devsim.write_devices(file="./output/testdiode/si_diode_1d", type="tecplot")
+
+    elif label == "si_ir_2d":
+        v=v_max
+        device='ITk-Si-strip'
+        region='ITk-Si-strip'
+        area_factor = 1
+        set_mesh(device,region)
+        extend_set()
+        para_dict = []
+        initial_solution(device,region,para_dict)
+        devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons")
+        devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles")  
+        solve_iv(device,region,v_max,para_dict,area_factor)
+        if not os.access('output/strip', os.F_OK):
+            os.makedirs('output/strip', exist_ok=True)
+        
+        x = np.array(devsim.get_node_model_values(device=device, region=region, name="x")) # get x-node values
+        y = np.array(devsim.get_node_model_values(device=device, region=region, name="y")) # get y-node values
+        potential = np.array(devsim.get_node_model_values(device=device, region=region, name="Potential")) # get the potential data
+        TrappingRate_n = np.array(devsim.get_node_model_values(device=device, region=region, name="TrappingRate_n"))
+        TrappingRate_p = np.array(devsim.get_node_model_values(device=device, region=region, name="TrappingRate_p"))
+
+        devsim.element_from_edge_model(edge_model="ElectricField",   device=device, region=region)
+        devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
+        devsim.edge_average_model(device=device, region=region, node_model="y", edge_model="ymid")
+        ElectricField=np.array(devsim.get_edge_model_values(device=device, region=region, name="ElectricField"))
+        x_mid = np.array(devsim.get_edge_model_values(device=device, region=region, name="xmid")) 
+        y_mid = np.array(devsim.get_edge_model_values(device=device, region=region, name="ymid")) 
+
+        draw2D(x,y,potential,"potential",v)
+        draw2D(x_mid,y_mid,ElectricField,"ElectricField",v)
+        draw2D(x,y,TrappingRate_n,"TrappingRate_n",v)
+        draw2D(x,y,TrappingRate_p,"TrappingRate_p",v)
+
+        devsim.delete_node_model(device=device, region=region, name="IntrinsicElectrons:Potential")
+        devsim.delete_node_model(device=device, region=region, name="IntrinsicHoles:Potential")
+
+        devsim.write_devices(file="./output/strip/si_diode_2d", type="tecplot")
+
+        with open("./output/strip/potential_{}_1e15_.pkl".format(v),'wb') as file:
+            pickle.dump(potential, file)
+        with open("./output/strip/x.pkl",'wb') as file:
+            pickle.dump(x, file)
+        with open("./output/strip/y.pkl",'wb') as file:
+            pickle.dump(y, file)
+        with open("./output/strip/TrappingRate_p_1e15_{}.pkl".format(v),'wb') as file:
+            pickle.dump(TrappingRate_p, file)
+        with open("./output/strip/TrappingRate_n_1e15_{}.pkl".format(v),'wb') as file:
+            pickle.dump(TrappingRate_n, file)
     else:
         raise KeyError
         
@@ -107,14 +195,12 @@ def set_para(para_list):
     return para_dict
 
 def set_mesh(device,region):
-    if device == "SICAR-1.1.8" or "NJU-PIN":
+    if device == "SICAR-1.1.8" or device == "NJU-PIN":
         MyDetector = Detector(device, 1)
-    elif device == "ITk-md8" or device == "ITk-Si-strip":
+    elif device == "ITk-md8" or device == "HPK-Si-PIN":
         MyDetector = Detector(device, 1)
-    elif device == "NJU-PIN":
-        MyDetector = Detector(device, 1)
-    else: 
-        raise NameError
+    else:
+        MyDetector = Detector(device, 2)
 
 def extend_set():
     devsim.set_parameter(name = "extended_solver", value=True)
@@ -390,7 +476,7 @@ def solve_cv(device,region,v_max,para_dict,area_factor, frequency):
 
 def solve_iv_single_point(device,region,reverse_v):
     devsim.set_parameter(device=device, name=physics_drift_diffusion.GetContactBiasName("top"), value=0-reverse_v)
-    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=100,maximum_divergence=50)
+    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=1000)
     physics_drift_diffusion.PrintCurrents(device, "top")
     physics_drift_diffusion.PrintCurrents(device, "bot")
     reverse_top_electron_current= devsim.get_contact_current(device=device, contact="top", equation="ElectronContinuityEquation")
@@ -401,7 +487,7 @@ def solve_iv_single_point(device,region,reverse_v):
 
 def solve_cv_single_point(device,region,reverse_v,frequency):
     devsim.circuit_alter(name="V1", value=0-reverse_v)
-    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=200)
+    devsim.solve(type="dc", absolute_error=1e10, relative_error=1e-5, maximum_iterations=1000)
     physics_drift_diffusion.PrintCurrents(device, "bot")
     devsim.solve(type="ac", frequency=frequency)
     cap=devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*math.pi*frequency)
@@ -491,6 +577,31 @@ def save_ele_field(device, positions,intensities, bias_voltages,condition):
         writer_E.writerow(header_iv)
         for (per_x,per_E) in zip(x,E):
             writer_E.writerow([float(per_x),float(per_E)])
+
+def draw1D(x,y,title,xtitle,ytitle,v):
+    graph = ROOT.TGraph()
+    for i in range(len(x)):
+        graph.SetPoint(i, x[i],y[i])
+    graph.SetTitle(title)
+    canvas = ROOT.TCanvas("canvas", title, 1900, 600)
+    graph.Draw("AL") 
+    graph.GetXaxis().SetTitle(xtitle)
+    graph.GetYaxis().SetTitle(ytitle)
+    canvas.Draw()
+    canvas.SaveAs("output/testdiode/"+title+"{}_1d.png".format(v))
+
+def draw2D(x,y,value,title,v):
+    graph = ROOT.TGraph2D()
+    for i in range(len(x)):
+        graph.SetPoint(i, y[i], x[i], value[i]) 
+    canvas = ROOT.TCanvas("canvas", title, 1500, 1000)
+    graph.Draw("CONT4Z")
+    canvas.Draw()
+    graph.GetXaxis().SetTitle("x[um]")
+    graph.GetYaxis().SetTitle("z[um]")
+    graph.SetTitle(title)
+    canvas.SaveAs("output/strip/"+title+"{}_1e15_2d.png".format(v))
+    canvas.SaveAs("output/strip/"+title+"{}_1e15_2d.root".format(v))
 
 if __name__ == "__main__":
     main()
