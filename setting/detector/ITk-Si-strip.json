@@ -11,14 +11,24 @@
     "elelenth" : 20,
     "read_ele_num" : 4,
 
-    "doping":{
+    "doping": {
         "Acceptors" : "3.2e12*step(x-1e-4)",
         "Donors" : "1e19*step(1e-4-x)"
     },
 
-    "voltage" : 600,
+    "bias" : {
+        "electrode" : "bot",
+        "voltage" : -700
+    },
+    
     "temperature" : 263.0,
-    "irradiation" : 0,
+    "irradiation" : {
+        "irradiation_label" : "XingChen",
+        "irradiation_flux" : 1e15
+    },
+
+    "area_factor" : 0.01,
+    "default_dimension" : 2,
 
     "mesh" : {
         "2D_mesh" : {
