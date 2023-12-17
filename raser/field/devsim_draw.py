@@ -169,8 +169,6 @@ def draw_field(device, positions,intensities, bias_voltages):
     fig1.clear()
 
 def save_field(device, positions, intensities, bias_voltages):
-    if not (os.path.exists("./output/devsim/{}/".format(device))):
-        os.makedirs("./output/devsim/{}/".format(device))
     for (x,E,V) in zip(positions,intensities, bias_voltages):
         header_iv = ["Depth [cm]","E (V/cm)"]
         path = output(__file__, device)
