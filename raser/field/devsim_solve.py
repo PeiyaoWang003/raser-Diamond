@@ -226,7 +226,7 @@ def milestone_save_3D(device, region, v, path):
     y=devsim.get_node_model_values(device=device,region=region,name="y")
     z=devsim.get_node_model_values(device=device,region=region,name="z")
     potential=devsim.get_node_model_values(device=device,region=region,name="Potential")
-    data = [x, y,z, potential]
+    data = [x, y, z, potential]
     names = ["x", "y", "z","potential"]
 
     for i in range(len(data)):
