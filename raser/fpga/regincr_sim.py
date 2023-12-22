@@ -15,7 +15,7 @@ def main():
 
     # Add three zero values to end of list of input values
 
-    input_values.extend( [0]*3 )
+    input_values.extend([0]*3)
     print(input_values)
 
     # Instantiate and elaborate the model
@@ -27,7 +27,8 @@ def main():
 
     if not os.access('output/fpga', os.F_OK):
         os.makedirs('output/fpga', exist_ok=True) 
-    model.apply( mtl.DefaultPassGroup(vcdwave='output/fpga/regincr_sim') )
+    model.apply( mtl.DefaultPassGroup(textwave=True, linetrace=True,vcdwave='output/fpga/regincr_sim') )
+    print('vcd file has been saved in output/fpga/regincr_sim')
 
     # Reset simulator
 
@@ -44,8 +45,9 @@ def main():
 
         # Display input and output ports
 
-        print( f" cycle = {model.sim_cycle_count()}: in = {model.in_}, out = {model.out}")
+        print(f" cycle = {model.sim_cycle_count()}: in = {model.in_}, out = {model.out}")
 
         # Tick simulator one cycle
 
         model.sim_tick()
+    model.print_textwave()

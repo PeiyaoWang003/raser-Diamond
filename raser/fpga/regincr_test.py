@@ -21,11 +21,11 @@ def test_basic(cmdline_opts):
 
     # Config the model
 
-    model = config_model_with_cmdline_opts(model,cmdline_opts,duts=[] )
+    model = config_model_with_cmdline_opts(model,cmdline_opts,duts=[])
 
     # Create and reset simulator
 
-    model.apply( mtl.DefaultPassGroup(linetrace=True) )
+    model.apply(mtl.DefaultPassGroup(linetrace=True))
     model.sim_reset()
 
     # Helper function

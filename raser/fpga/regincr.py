@@ -7,15 +7,15 @@
 
 import pymtl3 as mtl
 
-class RegIncr( mtl.Component ):
-    def construct( s ):
+class RegIncr(mtl.Component):
+    def construct(s):
         # Port-based interface
-        s.in_ = mtl.InPort ( mtl.Bits8 )
-        s.out = mtl.OutPort( mtl.Bits8 )
+        s.in_ = mtl.InPort (mtl.Bits8)
+        s.out = mtl.OutPort(mtl.Bits8)
 
         # update_ff block modeling register
 
-        s.reg_out = mtl.Wire( 8 )
+        s.reg_out = mtl.Wire(8)
 
         @mtl.update_ff
         def block1():
@@ -29,3 +29,6 @@ class RegIncr( mtl.Component ):
         @mtl.update
         def block2():
             s.out @= s.reg_out + 1
+
+    def line_trace(s):
+        return "{}({}){}".format(s.in_,s.reg_out,s.out)
