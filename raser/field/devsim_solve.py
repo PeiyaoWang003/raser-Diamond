@@ -49,12 +49,14 @@ def main(simname):
 
     if "parameter_alter" in MyDetector.device_dict:
         for material in MyDetector.device_dict["parameter_alter"]:
-            for parameter in material:
-                devsim.devsim.add_db_entry(material=material,
-                                           parameter=parameter['name'],
-                                           value=parameter['value'],
-                                           unit=parameter['unit'],
-                                           description=parameter['name'])
+            print (material)
+            for parameter in MyDetector.device_dict["parameter_alter"][material]:
+                print (parameter)
+                devsim.add_db_entry(material=material,
+                                    parameter=parameter['name'],
+                                    value=parameter['value'],
+                                    unit=parameter['unit'],
+                                    description=parameter['name'])
 
     electrode = MyDetector.device_dict['bias']['electrode']
 
@@ -124,7 +126,7 @@ def main(simname):
         writer_iv.writerow([v,abs(total_current/area_factor)])
 
         devsim.circuit_alter(name="V1", value=v)
-        devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
+        #devsim.solve(type="dc", absolute_error=paras['absolute_error'], relative_error=paras['relative_error'], maximum_iterations=paras['maximum_iterations'])
         devsim.solve(type="ac", frequency=frequency)
         cap=devsim.get_circuit_node_value(node="V1.I", solution="ssac_imag")/ (-2*np.pi*frequency)
 
@@ -169,7 +171,7 @@ def main(simname):
 
 def milestone_save_1D(device, region, v, path):
     x = np.array(devsim.get_node_model_values(device=device, region=region, name="x"))
-    potential = np.array(devsim.get_node_model_values(device=device, region=region, name="Potential")) # get the potential dat
+    Potential = np.array(devsim.get_node_model_values(device=device, region=region, name="Potential")) # get the potential dat
     NetDoping= np.array(devsim.get_node_model_values(device=device, region=region, name="NetDoping"))
     PotentialNodeCharge = np.array(devsim.get_node_model_values(device=device, region=region, name="PotentialNodeCharge"))
     Electrons = np.array(devsim.get_node_model_values(device=device, region=region, name="Electrons"))
@@ -180,13 +182,27 @@ def milestone_save_1D(device, region, v, path):
     TrappingRate_n = np.array(devsim.get_node_model_values(device=device, region=region, name="TrappingRate_n"))
     TrappingRate_p = np.array(devsim.get_node_model_values(device=device, region=region, name="TrappingRate_p"))
 
-    draw1D(x,potential,"Potential","Depth[cm]","Potential[V]", v, path)
+    draw1D(x,Potential,"Potential","Depth[cm]","Potential[V]", v, path)
     draw1D(x_mid,ElectricField,"ElectricField","Depth[cm]","ElectricField[V/cm]",v, path)
     draw1D(x,TrappingRate_n,"TrappingRate_n","Depth[cm]","TrappingRate_n[s]",v, path)
     draw1D(x,TrappingRate_p,"TrappingRate_p","Depth[cm]","TrappingRate_p[s]",v, path)
 
     dd = os.path.join(path, str(v)+'V.dd')
     devsim.write_devices(file=dd, type="tecplot")
+
+    metadata = {}
+    metadata['voltage'] = v
+    metadata['dimension'] = 1
+
+    for name in ['Potential', 'TrappingRate_p', 'TrappingRate_n']: # scalar field on mesh point (instead of on edge)
+        with open(os.path.join(path, "{}_{}V.pkl".format(name,v)),'wb') as file:
+            data = {}
+            value = eval(name) # refer to the object with given name
+            merged_list = [value, x]
+            transposed_list = list(map(list, zip(*merged_list)))
+            data[name] = transposed_list
+            data['metadata'] = metadata
+            pickle.dump(data, file)
 
 def milestone_save_2D(device, region, v, path):
     x = np.array(devsim.get_node_model_values(device=device, region=region, name="x")) # get x-node values
@@ -214,30 +230,15 @@ def milestone_save_2D(device, region, v, path):
     metadata['voltage'] = v
     metadata['dimension'] = 2
 
-    with open(os.path.join(path, "ElectricField_{}V.pkl".format(v)),'wb') as file:
-        data = {}
-        ElectricFieldFunction = zip(ElectricField, x_mid, y_mid)
-        data['ElectricField'] = zip(*ElectricFieldFunction)
-        data['metadata'] = metadata
-        pickle.dump(data, file)
-    with open(os.path.join(path, "Potential_{}V.pkl".format(v)),'wb') as file:
-        data = {}
-        PotentialFunction = zip(Potential, x, y)
-        data['Potential'] = zip(*PotentialFunction)
-        data['metadata'] = metadata
-        pickle.dump(data, file)
-    with open(os.path.join(path, "TrappingRate_p_{}V.pkl".format(v)),'wb') as file:
-        data = {}
-        TrappingRate_pFunction = zip(TrappingRate_p, x, y)
-        data['TrappingRate_p'] = zip(*TrappingRate_pFunction)
-        data['metadata'] = metadata
-        pickle.dump(data, file)
-    with open(os.path.join(path, "TrappingRate_n_{}V.pkl".format(v)),'wb') as file:
-        data = {}
-        TrappingRate_nFunction = zip(TrappingRate_n, x, y)
-        data['TrappingRate_n'] = zip(*TrappingRate_nFunction)
-        data['metadata'] = metadata
-        pickle.dump(data, file)
+    for name in ['Potential', 'TrappingRate_p', 'TrappingRate_n']: # scalar field on mesh point (instead of on edge)
+        with open(os.path.join(path, "{}_{}V.pkl".format(name,v)),'wb') as file:
+            data = {}
+            value = eval(name) # refer to the object with given name
+            merged_list = [value, x, y]
+            transposed_list = list(map(list, zip(*merged_list)))
+            data[name] = transposed_list
+            data['metadata'] = metadata
+            pickle.dump(data, file)
 
 def milestone_save_3D(device, region, v, path):
     x=devsim.get_node_model_values(device=device,region=region,name="x")
@@ -249,12 +250,15 @@ def milestone_save_3D(device, region, v, path):
     metadata['voltage'] = v
     metadata['dimension'] = 3
 
-    with open(os.path.join(path, "Potential_{}V.pkl".format(v)),'wb') as file:
-        data = {}
-        PotentialFunction = zip(Potential, x, y, z)
-        data['Potential'] = zip(*PotentialFunction)
-        data['metadata'] = metadata
-        pickle.dump(data, file)
+    for name in ['Potential']: # scalar field on mesh point (instead of on edge)
+        with open(os.path.join(path, "{}_{}V.pkl".format(name,v)),'wb') as file:
+            data = {}
+            value = eval(name) # refer to the object with given name
+            merged_list = [value, x, y, z]
+            transposed_list = list(map(list, zip(*merged_list)))
+            data[name] = transposed_list
+            data['metadata'] = metadata
+            pickle.dump(data, file)
 
 if __name__ == "__main__":
     main(simname = sys.argv[1])
