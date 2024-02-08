@@ -13,6 +13,8 @@ import numpy as np
 from scipy.interpolate import interp1d as p1d
 from scipy.interpolate import LinearNDInterpolator as LNDI
 
+diff_res = 1e-5 # difference resolution in cm
+
 class DevsimField:
     def __init__(self, device_name, dimension, voltage, read_ele_num = 1):
         self.name = device_name
@@ -51,9 +53,6 @@ class DevsimField:
             PotentialUniform =get_common_interpolate_3d(PotentialNotUniform)
 
         self.Potential = PotentialUniform
-
-        # Electric field intensity
-        gradient = 0
 
     def set_w_p(self):
         self.WeightingPotentials = [] #length = ele_num
@@ -124,16 +123,72 @@ class DevsimField:
     
     def get_e_field(self, x, y, z):    
         if self.dimension == 1:
-            E_z = self.zEField(z)
+            try:
+                E_z = (self.Potential(z+diff_res/2) - self.Potential(z-diff_res/2)) / diff_res
+            except ValueError:
+                try:
+                    E_z = (self.Potential(z+diff_res) - self.Potential(z)) / diff_res
+                except ValueError:
+                    try:
+                        E_z = (self.Potential(z) - self.Potential(z-diff_res)) / diff_res
+                    except ValueError:
+                        raise ValueError("Point might be out of bound z")
             return (0, 0, E_z)
+        
         elif self.dimension == 2:
-            E_z = self.zEField(z, x)
-            E_x = self.xEField(z, x)
+            try:
+                E_z = (self.Potential(z+diff_res/2, x) - self.Potential(z-diff_res/2, x)) / diff_res
+            except ValueError:
+                try:
+                    E_z = (self.Potential(z+diff_res, x) - self.Potential(z, x)) / diff_res
+                except ValueError:
+                    try:
+                        E_z = (self.Potential(z, x) - self.Potential(z-diff_res, x)) / diff_res
+                    except ValueError:
+                        raise ValueError("Point might be out of bound z")
+            try:
+                E_x = (self.Potential(z, x+diff_res/2) - self.Potential(z, x-diff_res/2)) / diff_res
+            except ValueError:
+                try:
+                    E_x = (self.Potential(z, x+diff_res) - self.Potential(z, x)) / diff_res
+                except ValueError:
+                    try:
+                        E_x = (self.Potential(z, x) - self.Potential(z, x-diff_res)) / diff_res
+                    except ValueError:
+                        raise ValueError("Point might be out of bound x")
             return (E_x, 0, E_z)
+        
         elif self.dimension == 3:
-            E_z = self.zEField(z, x, y)
-            E_x = self.xEField(z, x, y)
-            E_y = self.yEField(z, x, y)
+            try:
+                E_z = (self.Potential(z+diff_res/2, x, y) - self.Potential(z-diff_res/2, x, y)) / diff_res
+            except ValueError:
+                try:
+                    E_z = (self.Potential(z+diff_res, x, y) - self.Potential(z, x, y)) / diff_res
+                except ValueError:
+                    try:
+                        E_z = (self.Potential(z, x, y) - self.Potential(z-diff_res, x, y)) / diff_res
+                    except ValueError:
+                        raise ValueError("Point might be out of bound z")
+            try:
+                E_x = (self.Potential(z, x+diff_res/2, y) - self.Potential(z, x-diff_res/2, y)) / diff_res
+            except ValueError:
+                try:
+                    E_x = (self.Potential(z, x+diff_res, y) - self.Potential(z, x, y)) / diff_res
+                except ValueError:
+                    try:
+                        E_x = (self.Potential(z, x, y) - self.Potential(z, x-diff_res, y)) / diff_res
+                    except ValueError:
+                        raise ValueError("Point might be out of bound x")
+            try:
+                E_y = (self.Potential(z, x, y+diff_res/2) - self.Potential(z, x, y-diff_res/2)) / diff_res
+            except ValueError:
+                try:
+                    E_y = (self.Potential(z, x, y+diff_res) - self.Potential(z, x, y)) / diff_res
+                except ValueError:
+                    try:
+                        E_y = (self.Potential(z, x, y) - self.Potential(z, x, y-diff_res)) / diff_res
+                    except ValueError:
+                        raise ValueError("Point might be out of bound y")
             return (E_x, E_y, E_z)
 
     def get_w_p(self, x, y, z, i):
@@ -216,4 +271,4 @@ def strip_w_p(ele_number):
 
 if __name__ == "__main__":
     testField = DevsimField("NJU-PIN", 1, -500.0)
-    print(testField.get_potential(1,1,0.01))
+    print(testField.get_e_field(0.01,0.01,0.005))
