@@ -270,5 +270,5 @@ def strip_w_p(ele_number):
     return w_potential
 
 if __name__ == "__main__":
-    testField = DevsimField("NJU-PIN", 1, -500.0)
+    testField = DevsimField("ITk-Si-strip", 2, -500.0)
     print(testField.get_e_field(0.01,0.01,0.005))
