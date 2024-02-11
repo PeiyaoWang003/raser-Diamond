@@ -48,7 +48,7 @@ def main(kwargs):
 
     my_d = bdv.Detector(det_name)
     if "strip" in det_name:
-        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, 2)
+        my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_ele_num)
     else: 
         my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage)
 

@@ -16,7 +16,7 @@ from scipy.interpolate import LinearNDInterpolator as LNDI
 diff_res = 1e-5 # difference resolution in cm
 
 class DevsimField:
-    def __init__(self, device_name, dimension, voltage, read_ele_num = 1):
+    def __init__(self, device_name, dimension, voltage, read_ele_num):
         self.name = device_name
         self.voltage = voltage # float
         self.dimension = dimension
@@ -197,7 +197,7 @@ class DevsimField:
         if self.read_ele_num == 1:
             return linear_w_p(z, self.l_z)
         elif self.read_ele_num > 1:
-            return get_common_interpolate_2d(self.WeightingPotentials[i], z, x)
+            return self.WeightingPotentials[i].Interpolate(z, x)
     
     def get_trap_e(self, x, y, z):
         x, y, z = x/1e4, y/1e4, z/1e4 # um to cm
