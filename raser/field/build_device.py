@@ -62,7 +62,6 @@ class Detector:
         if "lgad3D" in self.det_model:
             self.avalanche_bond = self.device_dict['avalanche_bond']
             self.avalanche_model = self.device_dict['avalanche_model']
-            self.doping_cpp = self.device_dict['doping_cpp']
             
         if 'plugin3D' in self.det_model: 
             self.e_r = self.device_dict['e_r']
@@ -72,6 +71,9 @@ class Detector:
         if "planarRing" in self.det_model:
             self.e_r_inner = self.device_dict['e_r_inner']
             self.e_r_outer = self.device_dict['e_r_outer']
+
+        if "strip" in self.det_model:
+            self.read_ele_num = self.device_dict['read_ele_num']
             
         if "pixeldetector" in self.det_model:
             self.p_x = self.device_dict['px']
