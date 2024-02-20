@@ -73,7 +73,7 @@ class Carrier:
         intensity = Vector(e_field[0],e_field[1],e_field[2]).get_length()
         mobility = Material(my_d.material)
         #mu = mobility.cal_mobility(my_d.temperature, my_d.doping_function(self.d_z+delta_z), self.charge, average_intensity)
-        mu = mobility.cal_mobility(my_d.temperature, 1, self.charge, intensity)
+        mu = mobility.cal_mobility(my_d.temperature, 1e12, self.charge, intensity)
         # TODO: rebuild the doping function or admit this as an approximation
         velocity_vector = [e_field[0]*mu, e_field[1]*mu, e_field[2]*mu]
 
@@ -458,8 +458,8 @@ class CalCurrentGain(CalCurrent):
         alpha_n_list = np.zeros(n)
         alpha_p_list = np.zeros(n)
         for i in range(n):
-            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in V/um
-            E_field = Vector(Ex,Ey,Ez).get_length() * 1e4 # in V/cm
+            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in V/cm
+            E_field = Vector(Ex,Ey,Ez).get_length()
             alpha_n = cal_coefficient(E_field, -1, my_d.temperature)
             alpha_p = cal_coefficient(E_field, +1, my_d.temperature)
             alpha_n_list[i] = alpha_n

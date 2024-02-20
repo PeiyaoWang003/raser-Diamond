@@ -51,12 +51,12 @@ class Material:
         T = temperature # K
         t = T/300
         E = electric_field  # V/cm
-        Neff = input_doping * 1e12 # um^-3 into cm^-3
+        Neff = input_doping # cm^-3
 
         # SiC mobility
         if(self.mat_name == 'SiC'):
             if self.mobility_model == "Das":
-                Neff = abs(Neff) # um^-3
+                Neff = abs(Neff)
                 if(charge>0):
                     mu_L_p = 124 * math.pow(t, -2)
                     mu_min_p = 15.9
@@ -367,9 +367,9 @@ def main():
     if not (os.path.exists("./output/model")):
         os.makedirs("./output/model")
     mob = Material("Si")
-    mob.draw_velocity(300,5)
+    mob.draw_velocity(300,5e12)
     mob = Material("SiC")
-    mob.draw_velocity(300,50)
+    mob.draw_velocity(300,5e13)
 
 if __name__ == "__main__":
     main()
