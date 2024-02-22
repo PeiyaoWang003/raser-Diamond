@@ -265,8 +265,22 @@ def get_common_interpolate_2d(data):
 
 def get_common_interpolate_3d(data):
     values = data['values']
-    points = data['points']
-    f = LNDI(points, values)
+    points_x = []
+    points_y = []
+    points_z = []
+    for point in data['points']:
+        points_x.append(point[0])
+        points_y.append(point[1])
+        points_z.append(point[2])
+    new_x = np.linspace(min(points_x), max(points_x), x_bin)
+    new_y = np.linspace(min(points_y), max(points_y), y_bin)
+    new_z = np.linspace(min(points_z), max(points_z), z_bin)
+    new_points = np.array(np.meshgrid(new_x, new_y, new_z)).T.reshape(-1, 3)
+    new_values = griddata((points_x, points_y, points_z), values, new_points, method='linear')
+    lndi = LNDI(new_points, new_values)
+    def f(x, y, z):
+        point = [x, y, z]
+        return lndi(point)
     return f
 
 def linear_w_p(z, l_z):
