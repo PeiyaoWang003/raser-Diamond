@@ -102,6 +102,7 @@
                 "rotation_xyz": [0,0,0],
                 "colour" : [0,1,0]
             },
+
             "Layer_4":{
                 "name": "Layer_4",
                 "pixel_type": "Taichu",
@@ -113,6 +114,7 @@
                 "rotation_xyz": [0,0,0],
                 "colour" : [0,1,0]
             },
+
             "Layer_5":{
                 "name": "Layer_5",
                 "pixel_type": "Taichu",
@@ -124,9 +126,9 @@
                 "rotation_xyz": [0,0,0],
                 "colour" : [0,1,0]
             }
-
         }
     },
+    
     "world" : "G4_Galactic",
     "par_type" : "e-",
     "par_energy" : 5000,
