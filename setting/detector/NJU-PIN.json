@@ -14,9 +14,12 @@
         "donors_ir":"0"
     },
 
+    "const_U":-5e10,
+    "avalanche_model":"Hatakeyama",
+
     "bias" : {
         "electrode" : "top",
-        "voltage" : -500
+        "voltage" : -800
     },
 
     "temperature" : 300.0,
