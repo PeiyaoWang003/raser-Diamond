@@ -174,8 +174,8 @@ def PrintCurrents(device, contact):
 def CreateSRH(device, region):
     
     USRH="(Electrons*Holes - n_i^2)/(taup*(Electrons + n1) + taun*(Holes + p1))"
-    Gn = "-ElectronCharge * (USRH+U_r+const_U)"
-    Gp = "+ElectronCharge * (USRH+U_r+const_U)"
+    Gn = "-ElectronCharge * (USRH+U_r+U_const)"
+    Gp = "+ElectronCharge * (USRH+U_r+U_const)"
     CreateNodeModel(device, region, "USRH", USRH)
     CreateNodeModel(device, region, "ElectronGeneration", Gn)
     CreateNodeModel(device, region, "HoleGeneration", Gp)
@@ -186,7 +186,7 @@ def CreateSRH(device, region):
     edge_from_node_model(device=device,region=region,node_model="USRH")
     edge_from_node_model(device=device,region=region,node_model="ElectronGeneration")
     edge_from_node_model(device=device,region=region,node_model="HoleGeneration")
-    edge_from_node_model(device=device,region=region,node_model="const_U")
+    edge_from_node_model(device=device,region=region,node_model="U_const")
     #CreateEdgeModelDerivatives(device,region,)
     
 
