@@ -60,11 +60,12 @@ def main(simname):
                                     description=parameter['name'])
     
     if "parameter" in MyDetector.device_dict:
-      devsim.add_db_entry(material=MyDetector.device_dict['parameter']['material'],parameter=MyDetector.device_dict['parameter']['name'],value=MyDetector.device_dict['parameter']['value'],unit=MyDetector.device_dict['parameter']['unit'],description=MyDetector.device_dict['parameter']['description'])
-    if "U_cosnt" in MyDetector.device_dict:
-      const_U=MyDetector.device_dict["U_const"]
-      model_create.CreateNodeModel(device,region,"U_cosnt",U_const)
-    else model_create.CreateNodeModel(device,region,"U_const",0)
+        devsim.add_db_entry(material=MyDetector.device_dict['parameter']['material'],parameter=MyDetector.device_dict['parameter']['name'],value=MyDetector.device_dict['parameter']['value'],unit=MyDetector.device_dict['parameter']['unit'],description=MyDetector.device_dict['parameter']['description'])
+    if "U_const" in MyDetector.device_dict:
+        U_const=MyDetector.device_dict["U_const"]
+        model_create.CreateNodeModel(device,region,"U_const",U_const)
+    else:
+        model_create.CreateNodeModel(device,region,"U_const",0)
       
     electrode = MyDetector.device_dict['bias']['electrode']
 
