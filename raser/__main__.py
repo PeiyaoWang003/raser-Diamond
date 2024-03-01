@@ -80,16 +80,26 @@ if kwargs['batch'] == True:
     command = command.replace('--batch ', '')
     command = command.replace('-b ', '')
     batchjob.main(destination, command, args)
+
 elif kwargs['shell'] == False: # not in shell
-    command = ' '.join(['-sh']+sys.argv[1:])
-    import os
-    IMGFILE = os.environ.get('IMGFILE')
-    BINDPATH = os.environ.get('BINDPATH')
-    raser_shell = "/usr/bin/apptainer exec --env-file cfg/env -B" + " " \
-                + BINDPATH + " " \
-                + IMGFILE + " " \
-                + "python3 raser"
-    subprocess.run([raser_shell+' '+command], shell=True, executable='/bin/bash')
+    try:
+        for package in ['ROOT', 'geant4_pybind', 'devsim']:
+            # package dependency check
+            import package
+        submodule = importlib.import_module(submodule)
+        submodule.main(kwargs)
+
+    except ModuleNotFoundError:
+        # use apptainer instead
+        command = ' '.join(['-sh']+sys.argv[1:])
+        import os
+        IMGFILE = os.environ.get('IMGFILE')
+        BINDPATH = os.environ.get('BINDPATH')
+        raser_shell = "/usr/bin/apptainer exec --env-file cfg/env -B" + " " \
+                    + BINDPATH + " " \
+                    + IMGFILE + " " \
+                    + "python3 raser"
+        subprocess.run([raser_shell+' '+command], shell=True, executable='/bin/bash')
 
 else: # in shell
     submodule = importlib.import_module(submodule)
