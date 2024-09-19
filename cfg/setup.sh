@@ -42,6 +42,9 @@ export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
 export IMGFILE=/afs/ihep.ac.cn/users/s/shixin/img/raser-2.2.sif
 export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/publicfs,/scratchfs,/workfs2
 
+# temporary solution for scipy import error
+export OPENBLAS_NUM_THREADS=4
+
 alias raser="python3 raser"
 alias raser-test="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE python3 -m unittest discover -v -s tests"
 alias raser-shell="apptainer shell --env-file $cfg_env -B $BINDPATH $IMGFILE"
