@@ -7,11 +7,8 @@
 @version    : 1.0
 
 Usage : 
-source ./run raser
-raser 'python/paper4/field_comparison.py'
+drawfig p4 field_comparison
 '''
-
-# TODO: Need to be rewritten or deleted!
 
 import sys
 import os
