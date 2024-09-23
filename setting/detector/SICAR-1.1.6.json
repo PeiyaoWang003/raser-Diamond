@@ -23,7 +23,7 @@
     "temperature" : 300.0,
 
     "area_factor" : 1,
-    "default_dimension" : 3,
+    "default_dimension" : 2,
 
     "mesh" : {
         "1D_mesh" : {
@@ -91,7 +91,7 @@
             ]
         },
         "gmsh_mesh":{
-            "file" : "./paras/mesh/3d_lgad.msh",
+            "file" : "./param_file/mesh/3d_lgad.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
