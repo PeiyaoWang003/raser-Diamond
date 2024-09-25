@@ -86,7 +86,6 @@
             ]
         }
     },
-    
     "absorber" : "cflm",
     "amplifier" : "ngspice"
 }
