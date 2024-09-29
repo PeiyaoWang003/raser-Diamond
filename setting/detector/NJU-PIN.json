@@ -24,7 +24,7 @@
     "temperature" : 300.0,
 
     "area_factor" : 4,
-    "default_dimension" : 1,
+    "default_dimension" : 2,
 
     "mesh" : {
         "1D_mesh" : {
