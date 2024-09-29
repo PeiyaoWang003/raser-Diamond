@@ -31,7 +31,7 @@
 /vis/drawVolume
 #
 # Specify view angle:
-/vis/viewer/set/viewpointThetaPhi 60 150
+/vis/viewer/set/viewpointThetaPhi 150 140
 #
 # Specify zoom value:
 #/vis/viewer/zoom 2.
@@ -50,6 +50,7 @@
 /vis/modeling/trajectories/create/drawByCharge
 /vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
 /vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 1
+/vis/scene/add/axes
 # (if too many tracks cause core dump => /tracking/storeTrajectory 0)
 #
 # Draw hits at end of event:
@@ -76,7 +77,7 @@
 #
 # To get nice view
 # Make the "World" box invisible
-/vis/geometry/set/visibility world 1 true
+#/vis/geometry/set/visibility world 1 true
 #
 # Re-establish auto refreshing and verbosity:
 /vis/viewer/set/autoRefresh true
