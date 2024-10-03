@@ -11,7 +11,7 @@ cfg_env=$dir_raser/cfg/env
 rm -f $cfg_env
 cat << EOF >> $cfg_env
 # PATH 
-PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:/usr/bin:\$PATH
+PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:/bin:\$PATH
 
 # ROOT 
 ROOTSYS=/usr/local/share/root_install
@@ -39,8 +39,9 @@ PYMTL_VERILATOR_INCLUDE_DIR="/usr/local/share/verilator/include"
 EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
-export IMGFILE=/afs/ihep.ac.cn/users/s/shixin/img/raser-2.2.sif
-export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/publicfs,/scratchfs,/workfs2
+export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/sicar/raser-2.3.sif
+export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor/condor_config,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
+# redhat for hep_job
 
 # temporary solution for scipy import error
 export OPENBLAS_NUM_THREADS=4
