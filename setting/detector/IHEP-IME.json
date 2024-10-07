@@ -19,7 +19,7 @@
     
     "temperature" : 292.0,
     "irradiation" : {
-        "irradiation_label" : "XingChen",
+        "irradiation_model" : "XingChen",
         "irradiation_flux" : 0
     },
 
