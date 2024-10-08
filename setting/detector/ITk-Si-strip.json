@@ -1,6 +1,6 @@
 {
     "det_name" : "ITk-Si-strip",
-    "det_model" : "planar3D",
+    "det_model" : "planar3Dstrip",
     "material" : "Si",
 
     "lx" : 170,
@@ -8,7 +8,7 @@
     "lz" : 305,
 
     "striplenth" : 75,
-    "elelenth" : 20,
+    "elelenth" : 25,
     "read_ele_num" : 3,
 
     "doping": {
@@ -24,7 +24,7 @@
     "temperature" : 254.0,
     "irradiation" : {
         "irradiation_model" : "Schwandt",
-        "irradiation_flux" : 1.6e15
+        "irradiation_flux" : 1.7e15
     },
 
     "area_factor" : 0.01,
@@ -34,12 +34,12 @@
     "mesh" : {
         "2D_mesh" : {
             "mesh_line" : [
-                {"dir" : "x", "pos" : -1e-8,       "ps" : 1e-8},
-                {"dir" : "x", "pos" : 0,           "ps" : 1e-4},
-                {"dir" : "x", "pos" : 3.05e-2,        "ps" : 1e-4},
-                {"dir" : "x", "pos" : 3050.001e-5, "ps" : 1e-8},
+                {"dir" : "x", "pos" : -2e-4,       "ps" : 2e-4},
+                {"dir" : "x", "pos" : 0,           "ps" : 2e-4},
+                {"dir" : "x", "pos" : 3.05e-2,        "ps" : 2e-4},
+                {"dir" : "x", "pos" : 3070e-5, "ps" : 2e-4},
                 {"dir" : "y", "pos" : 0,           "ps" : 2e-4},
-                {"dir" : "y", "pos" : 1.7e-2,      "ps" : 2e-4}
+                {"dir" : "y", "pos" : 1.75e-2,      "ps" : 2e-4}
             ],
             "region" : [
                 {
@@ -49,23 +49,23 @@
                 {
                     "material" : "air",
                     "region" : "air1",
-                    "xl" : -1e-8,
+                    "xl" : -2e-4,
                     "xh" : 0
                 },
                 {
                     "material" : "air",
                     "region" : "air2",
                     "xl" : 3050e-5,
-                    "xh" : 3050.001e-5
+                    "xh" : 3070e-5
                 }
             ],
             "contact" : [
                 {"name" : "top1", "material" : "metal", "region" : "ITk-Si-strip",
-                 "xl" : 0,     "xh" : 0,     "yl" : 0,       "yh" : 0.2e-2,  "bloat" : 1e-10},
+                 "xl" : 0,     "xh" : 0,     "yl" : 0,       "yh" : 0.25e-2,  "bloat" : 1e-10},
                 {"name" : "top2", "material" : "metal", "region" : "ITk-Si-strip",
-                 "xl" : 0,     "xh" : 0,     "yl" : 0.75e-2, "yh" : 0.95e-2, "bloat" : 1e-10},
+                 "xl" : 0,     "xh" : 0,     "yl" : 0.75e-2, "yh" : 1e-2, "bloat" : 1e-10},
                 {"name" : "top3", "material" : "metal", "region" : "ITk-Si-strip",
-                 "xl" : 0,     "xh" : 0,     "yl" : 1.5e-2,  "yh" : 1.7e-2,  "bloat" : 1e-10},
+                 "xl" : 0,     "xh" : 0,     "yl" : 1.5e-2,  "yh" : 1.75e-2,  "bloat" : 1e-10},
                 {"name" : "bot",  "material" : "metal", "region" : "ITk-Si-strip",
                  "xl" : 30.5e-3, "xh" : 30.5e-3, "bloat" : 1e-10}
             ]
