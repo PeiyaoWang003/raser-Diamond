@@ -6,11 +6,15 @@ geo = gmsh.model.geo
 gmsh.initialize()
 gmsh.model.add("CEPC_strip")
 
+lc_up = 5e-5
+lc_down = 5e-4
+lp = 2e-5
+ln = 2e-5
+ln_well = 1e-4
+
 # bulk points
-lc_up = 3e-5
-lc_down = 2e-4
-P1 = geo.addPoint(0, 0, 0, lc_up)
-P2 = geo.addPoint(0, 75.5e-4, 0, lc_up)
+P1 = geo.addPoint(0, 0, 0, lp)
+P2 = geo.addPoint(0, 75.5e-4, 0, lp)
 P3 = geo.addPoint(150e-4, 75.5e-4, 0, lc_down)
 P4 = geo.addPoint(150e-4, 0, 0, lc_down)
 
@@ -18,9 +22,8 @@ P17 = geo.addPoint(147e-4, 75.5e-4, 0, lc_down)
 P18 = geo.addPoint(147e-4, 0, 0, lc_down)
 
 # p stop 1
-lp = 1e-5
 # P1 = geo.addPoint(0, 0, 0, lc_up)
-P6 = geo.addPoint(0, 1e-4, 0, lc_up)
+P6 = geo.addPoint(0, 1e-4, 0, lp)
 P7 = geo.addPoint(-1e-4, 1e-4, 0, lp)
 P8 = geo.addPoint(-1e-4, 0, 0, lp)
 
@@ -33,10 +36,10 @@ loop1 = geo.addCurveLoop([L1, L2, L3, -L15])
 surf1 = geo.addPlaneSurface([loop1])
 
 # p well 1
-P19 = geo.addPoint(2e-4, 0, 0, lc_up)
-P20 = geo.addPoint(2e-4, 1e-4, 0, lc_up)
+P19 = geo.addPoint(2e-4, 0, 0, lp)
+P20 = geo.addPoint(2e-4, 1e-4, 0, lp)
 # P1 = geo.addPoint(0, 0, 0, lc_up)
-# P6 = geo.addPoint(0, 1e-4, 0, lc_up)
+# P6 = geo.addPoint(0, 1e-4, 0, lp)
 
 L21 = geo.addLine(P1, P19)
 L22 = geo.addLine(P19, P20)
@@ -47,7 +50,7 @@ loop2 = geo.addCurveLoop([L21, L22, L23, -L15])
 surf2 = geo.addPlaneSurface([loop2])
 
 # p stop 2
-P9 = geo.addPoint(0,74.5e-4, 0, lc_up)
+P9 = geo.addPoint(0,74.5e-4, 0, lp)
 # P2 = geo.addPoint(0,75.5e-4, 0, lc_up)
 P11 = geo.addPoint(-1e-4,75.5e-4, 0, lp)
 P12 = geo.addPoint(-1e-4,74.5e-4, 0, lp)
@@ -62,9 +65,9 @@ surf3 = geo.addPlaneSurface([loop3])
 
 # p well 2
 
-P21 = geo.addPoint(2e-4,75.5e-4, 0, lc_up)
-P22 = geo.addPoint(2e-4,74.5e-4, 0, lc_up)
-# P9 = geo.addPoint(0,74.5e-4, 0, lc_up)
+P21 = geo.addPoint(2e-4,75.5e-4, 0, lp)
+P22 = geo.addPoint(2e-4,74.5e-4, 0, lp)
+# P9 = geo.addPoint(0,74.5e-4, 0, lp)
 # P2 = geo.addPoint(0,75.5e-4, 0, lc_up)
 
 L24 = geo.addLine(P2, P21)
@@ -76,7 +79,6 @@ loop4 = geo.addCurveLoop([L24, L25, L26, L17])
 surf4 = geo.addPlaneSurface([loop4])
 
 # n stop
-ln = 1e-5
 P13 = geo.addPoint(0, 30.25e-4, 0, ln)
 P14 = geo.addPoint(0, 45.25e-4, 0, ln)
 P23 = geo.addPoint(-0.5e-4, 45.25e-4, 0, ln)
@@ -101,7 +103,7 @@ loop6 = geo.addCurveLoop([L5, -L35, L7, -L28])
 surf6 = geo.addPlaneSurface([loop6])
 
 # n well
-ln_well = 1e-5
+
 P25 = geo.addPoint(2e-4, 46.75e-4, 0, ln_well)
 P26 = geo.addPoint(2e-4, 28.75e-4, 0, ln_well)
 P27 = geo.addPoint(0e-4, 46.75e-4, 0, ln_well)
