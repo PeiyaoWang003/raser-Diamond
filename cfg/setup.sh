@@ -39,18 +39,21 @@ PYMTL_VERILATOR_INCLUDE_DIR="/usr/local/share/verilator/include"
 EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
-export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.3.sif
+export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.4pre2.sif
 export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor/,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
 # redhat for hep_job
 
 # temporary solution for scipy import error
 export OPENBLAS_NUM_THREADS=4
 
-alias raser="python3 raser"
-alias raser-test="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE python3 -m unittest discover -v -s tests"
+raser_python="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE python3"
+
+alias raser="$raser_python raser"
+alias raser-test="$raser_python -m unittest discover -v -s raser/tests"
 alias raser-shell="apptainer shell --env-file $cfg_env -B $BINDPATH $IMGFILE"
 alias pytest="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE pytest"
 alias raser-install="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE pip install -e ."  
 
-alias drawfig="python3 drawfig"
-alias control="python3 control"
+alias drawfig="$raser_python drawfig"
+alias control="$raser_python control"
+alias mesh="$raser_python param_file/mesh"
