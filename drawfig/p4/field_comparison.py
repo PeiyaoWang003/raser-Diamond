@@ -12,11 +12,15 @@ drawfig p4 field_comparison
 
 import sys
 import os
+import math
+import time
+
+import ROOT
+ROOT.gROOT.SetBatch(True)
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import raser
-import time
-import ROOT
-import math
+
 
 def draw_fields(my_pin_field,my_lgad_field,path):
 

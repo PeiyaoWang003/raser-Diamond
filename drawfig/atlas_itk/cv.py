@@ -1,5 +1,7 @@
 import os
+
 import ROOT
+ROOT.gROOT.SetBatch(True)
 
 def draw_cv(input_dir, output_dir, label):
     com_name = []

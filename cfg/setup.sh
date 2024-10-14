@@ -36,6 +36,9 @@ LD_LIBRARY_PATH=$Geant4PATH/install/lib64:/usr/local/share/root_install/lib:/.si
 
 #pyMTL3 Verilator
 PYMTL_VERILATOR_INCLUDE_DIR="/usr/local/share/verilator/include"
+
+# intel MKL potential memory leak
+MKL_DISABLE_FAST_MM=0
 EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
@@ -45,6 +48,9 @@ export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor/,/etc/redhat-release,/publ
 
 # temporary solution for scipy import error
 export OPENBLAS_NUM_THREADS=1
+
+# intel MKL potential memory leak
+export MKL_DISABLE_FAST_MM=0
 
 raser_python="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE python3"
 

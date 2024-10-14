@@ -1,5 +1,8 @@
 import os
+
 import ROOT
+ROOT.gROOT.SetBatch(True)
+
 def draw(input_dir, output_dir, label,xtitle_iv="Reverse Bias Voltage [V]",ytitle_iv="Current [A]",
                 xtitle_cv="Reverse Bias Voltage [V]",ytitle_cv="Capacitance [pF]",
                     xlowerlimit_iv=0,xupperlimit_iv=510,ylowerlimit_iv=1e-11,yupperlimit_iv=1e-5,ylogscale_iv=0,

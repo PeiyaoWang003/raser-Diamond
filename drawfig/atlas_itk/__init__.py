@@ -1,5 +1,8 @@
 import os
+
 import ROOT
+ROOT.gROOT.SetBatch(True)
+
 from . import iv
 from . import cv
 from . import compare_iv

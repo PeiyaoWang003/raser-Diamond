@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 import ROOT
+ROOT.gROOT.SetBatch(True)
 
 def draw_double_iv(path1, path2, start):
     data1=np.loadtxt(path1, skiprows=start-1, comments="END")

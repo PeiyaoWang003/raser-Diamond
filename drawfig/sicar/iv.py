@@ -1,5 +1,7 @@
 import os
+
 import ROOT
+ROOT.gROOT.SetBatch(True)
 
 def draw_iv(input_dir, output_dir, label):
     com_name = []

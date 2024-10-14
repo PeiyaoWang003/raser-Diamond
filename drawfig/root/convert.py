@@ -1,7 +1,9 @@
 import sys
 import os
-import ROOT
 import csv
+
+import ROOT
+ROOT.gROOT.SetBatch(True)
 
 def convert_csv_to_root(input_dir, output_dir, label):
     com_name = []

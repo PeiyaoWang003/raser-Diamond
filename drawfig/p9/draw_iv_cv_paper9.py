@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-import ROOT
 import csv
 import os
 from array import array
+
 import numpy as np
 from scipy.optimize import curve_fit
+import ROOT
+ROOT.gROOT.SetBatch(True)
+
 # 读取CSV文件
 def read_csv(csv_filename):
     data = []
