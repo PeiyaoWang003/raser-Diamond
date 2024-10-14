@@ -1,6 +1,8 @@
+import os
 
 import ROOT
-import os
+ROOT.gROOT.SetBatch(True)
+
 def compare_cv(label,path1,path2):    
     folder_path="./output/draw"
     if not os.path.exists(folder_path):

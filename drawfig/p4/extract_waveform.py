@@ -2,8 +2,10 @@
 import sys
 import os
 import math
-import ROOT
 from array import array
+
+import ROOT
+ROOT.gROOT.SetBatch(True)
 
 def save_experiment_data(Vbias, z_init, z_0, t_init, myt, out):
 

@@ -1,8 +1,10 @@
-import ROOT
 import os
 import numpy
 import sys
 import math
+
+import ROOT
+ROOT.gROOT.SetBatch(True)
 
 def read_file(file_path,wave_name):
 

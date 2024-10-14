@@ -12,8 +12,10 @@ from array import array
 import contextlib
 import os
 import sys
-import ROOT
 import math
+
+import ROOT
+ROOT.gROOT.SetBatch(True)
 import numpy as np
  
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
