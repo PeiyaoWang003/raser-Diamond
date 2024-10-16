@@ -53,9 +53,9 @@ V6 0 Net-_U3-V-_ DC 15
 C3 Net-_C3-Pad1_ 0 100f
 
 .control
-tran 0.1n 30n
+tran 0.1n 100n
 * <step> <stopping time>
-wrdata output/elec/ABCStar_fe.raw v(out)
+wrdata output/elec/ABCStar_fe.raw v(OUT4)
 * save raw data
 .endc
 
