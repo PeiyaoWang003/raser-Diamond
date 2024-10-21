@@ -18,7 +18,7 @@
 
     "bias" : {
         "electrode" : "bot",
-        "voltage" : -700
+        "voltage" : -700.0
     },
     
     "temperature" : 254.0,
@@ -69,5 +69,5 @@
     },
 
     "absorber" : "strip_detector",
-    "amplifier" : "ngspice"
+    "amplifier" : "BB"
 }
