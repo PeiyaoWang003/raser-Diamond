@@ -1,5 +1,5 @@
 {
-    "det_name" : "CMOS_strip_sen",
+    "det_name" : "CMOS_strip_sen_2",
     "det_model" : "planar3D",
     "material" : "Si",
 
@@ -30,17 +30,17 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "param_file/mesh/CMOS-passive.msh",
+            "file" : "param_file/mesh/CMOS-passive_2.msh",
             "region" : [
                 {
                     "material" : "Silicon", 
-                    "region" : "CMOS_strip_sen",
-                    "gmsh_name": "CMOS_strip_sen"
+                    "region" : "CMOS_strip_sen_2",
+                    "gmsh_name": "CMOS_strip_sen_2"
                 }
             ],
             "contact" : [
-                {"name" : "top", "region" : "CMOS_strip_sen", "material" : "metal", "gmsh_name" : "top"},
-                {"name" : "bot", "region" : "CMOS_strip_sen", "material" : "metal", "gmsh_name" : "bot"}
+                {"name" : "top", "region" : "CMOS_strip_sen_2", "material" : "metal", "gmsh_name" : "top"},
+                {"name" : "bot", "region" : "CMOS_strip_sen_2", "material" : "metal", "gmsh_name" : "bot"}
             ]
         }
     },
