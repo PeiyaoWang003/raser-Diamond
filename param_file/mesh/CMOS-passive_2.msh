@@ -5,7 +5,7 @@ $PhysicalNames
 3
 1 1 "bot"
 1 2 "top"
-2 3 "CMOS_strip_sen"
+2 3 "CMOS_strip_sen_2"
 $EndPhysicalNames
 $Nodes
 3165
