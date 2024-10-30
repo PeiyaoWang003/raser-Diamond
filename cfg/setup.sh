@@ -58,3 +58,4 @@ alias raser-install="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE pi
 alias drawfig="$raser_python drawfig"
 alias control="$raser_python control"
 alias mesh="$raser_python param_file/mesh"
+alias umf="$raser_python -mdevsim.umfpack.umfshim raser/__main__.py field"
