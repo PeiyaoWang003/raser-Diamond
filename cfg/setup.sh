@@ -6,7 +6,7 @@ if [ -z "$PS1" ]; then
     echo "Setting up raser ..."
 fi
 
-dir_raser=$(cd $(dirname $(dirname $BASH_SOURCE[0])) && pwd)
+dir_raser=$(cd $(dirname $(dirname $(dirname $BASH_SOURCE[0]))) && pwd)
 dir_geant4_data=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/data
 GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02
 
