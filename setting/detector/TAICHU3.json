@@ -1,0 +1,56 @@
+{
+    "det_name" : "Taichu3",
+    "det_model" : "pixel_detector",
+    "material" : "Si",
+
+    "lx" : 1500,
+    "ly" : 1500,
+    "lz" : 20,
+
+    "doping":{
+        "Acceptors" : "1e12",
+        "Donors" : "0"
+    },
+
+    "bias" : {
+        "electrode" : "top",
+        "voltage" : -1.8
+    },
+
+    "temperature" : 300.0,
+    "irradiation" : {
+        "irradiation_model" : "CommonDefect",
+        "irradiation_flux" : 1e12
+    },
+
+    "area_factor" : 1,
+    "default_dimension" : 3,
+    "read_out_contact" : ["top1", "top2", "top3", "top4", "top5", "top6"],
+
+    "mesh" : {
+        "gmsh_mesh":{
+            "file" : "foo.msh",
+            "region" : [
+                {
+                    "material" : "Silicon", 
+                    "region" : "TAICHU3", 
+                    "tag1" : "top", 
+                    "tag2" : "bot"
+                }
+            ],
+            "contact" : [
+                {"name" : "top", "tag" : "top", "material" : "metal"},
+                {"name" : "bot", "tag" : "bot", "material" : "metal"}
+            ]
+        }
+    },
+
+    "absorber" : "pixel_detector",
+    "px" : 25.0,
+    "py" : 25.0,
+    "pz" : 20.0,
+    "ltz": [20000.0,60000.0,100000.0,140000.0,180000.0,220000.0],
+    "seedcharge": 100,
+
+    "amplifier" : "Broad_Band_UCSC"
+}
