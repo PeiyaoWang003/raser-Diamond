@@ -1,14 +1,10 @@
 # Setup raser environment     
-# Author SHI Xin <shixin@ihep.ac.cn>  
-# Created [2023-08-31 Thu 08:36] 
 
-if [ -z "$PS1" ]; then
-    echo "Setting up raser ..."
-fi
+echo "Setting up raser ..."
 
-dir_raser=$(cd $(dirname $(dirname $(dirname $BASH_SOURCE[0]))) && pwd)
-dir_geant4_data=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02/data
-GEANT4_INSTALL=/cvmfs/common.ihep.ac.cn/software/geant4/10.7.p02
+dir_raser=$(cd $(dirname $(dirname $BASH_SOURCE[0])) && pwd)
+dir_geant4_data=/cvmfs/geant4.cern.ch/share/data
+GEANT4_INSTALL=/cvmfs/geant4.cern.ch/geant4/10.7.p02
 
 cfg_env=$dir_raser/cfg/env
 rm -f $cfg_env
@@ -41,11 +37,11 @@ LD_LIBRARY_PATH=$GEANT4_INSTALL/x86_64-centos7-gcc9-optdeb/lib64:/usr/local/shar
 PYMTL_VERILATOR_INCLUDE_DIR="/usr/local/share/verilator/include"
 EOF
 
-export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
-export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.5.sif
-export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
-# redhat for hep_job
-export RASER_SETTING_PATH=$dir_raser/sicar/setting
+export PATH=/afs/ihep.ac.cn/soft/common/sysgroup/hep_job/bin:$PATH
+export IMGFILE=$dir_raser/img/raser-2.5.sif
+export BINDPATH=$dir_raser,/cvmfs
+
+export RASER_SETTING_PATH=$dir_raser/setting
 
 # temporary solution for scipy import error
 export OPENBLAS_NUM_THREADS=1
@@ -55,11 +51,9 @@ alias raser-shell="apptainer shell --env-file $cfg_env -B $BINDPATH $IMGFILE"
 raser_exec="apptainer exec --env-file $cfg_env -B $BINDPATH $IMGFILE"
 raser_python="$raser_exec python3"
 
-alias raser="$raser_python raser"
+alias raser="$raser_python src/raser"
 alias raser-test="$raser_python -m unittest discover -v -s raser/tests"
 alias pytest="$raser_exec pytest"
 alias raser-install="$raser_exec pip install -e ."  
 
-alias drawfig="$raser_python drawfig"
-alias control="$raser_python control"
-alias mesh="$raser_python sicar/setting/detector"
+alias mesh="$raser_python setting/detector"

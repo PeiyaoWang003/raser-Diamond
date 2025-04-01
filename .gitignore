@@ -1,7 +1,18 @@
 .DS_Store
 .vscode
 
+output
+
+cfg/env
+**/__pycache__
+G4History.macro
 *.msh
 
-**/__pycache__
-control/motor/GUI/*.py
+build
+raser.egg-info
+dist
+
+raser-venv
+img
+
+sicar
