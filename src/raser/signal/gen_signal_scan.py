@@ -17,7 +17,7 @@ import random
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-from ..device import build_device as bdv
+from device import build_device as bdv
 from interaction import g4_time_resolution as g4t
 from field import devsim_field as devfield
 from current import cal_current as ccrt

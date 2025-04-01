@@ -46,16 +46,6 @@ parser_field.add_argument("-v_current", help="Current voltage for step-by-step s
 parser_field.add_argument("-noise", help="Detector Noise simulation", action="store_true")
 parser_field.add_argument('-umf', help='use umf solver', action="store_true")
 
-parser_gen_signal = subparsers.add_parser('gen_signal', help='generate signal')
-parser_gen_signal.add_argument('det_name', help='name of the detector')
-parser_gen_signal.add_argument('-l','--label', help='LABEL to identify signal generation method', default='signal')
-parser_gen_signal.add_argument('-vol', '--voltage', type=str, help='bias voltage')
-parser_gen_signal.add_argument('-abs', '--absorber', type=str, help='model of particle energy absorber')
-parser_gen_signal.add_argument('-amp', '--amplifier', type=str, help='amplifier')
-parser_gen_signal.add_argument('-s', '--scan', type=int, help='instance number for scan mode')
-parser_gen_signal.add_argument('--job', type=int, help='flag of run in job')
-
-
 parser_interaction = subparsers.add_parser('interaction', help='particle-matter interation module')
 parser_interaction.add_argument('label', help='LABEL to identify particle-matter interation')
 parser_interaction.add_argument('-v', '--verbose', help='VERBOSE level', 
@@ -72,6 +62,15 @@ parser_mcu.add_argument('label', help='LABEL to identify Micro Control Unit desi
 parser_resolution = subparsers.add_parser('resolution', help='resolution calculation for time, space and energy')
 parser_resolution.add_argument('det_name', help='name of the detector')
 parser_resolution.add_argument('-tct', type=str, help='specify TCT signal class')
+
+parser_signal = subparsers.add_parser('signal', help='generate signal')
+parser_signal.add_argument('det_name', help='name of the detector')
+parser_signal.add_argument('-l','--label', help='LABEL to identify signal generation method', default='signal')
+parser_signal.add_argument('-vol', '--voltage', type=str, help='bias voltage')
+parser_signal.add_argument('-abs', '--absorber', type=str, help='model of particle energy absorber')
+parser_signal.add_argument('-amp', '--amplifier', type=str, help='amplifier')
+parser_signal.add_argument('-s', '--scan', type=int, help='instance number for scan mode')
+parser_signal.add_argument('--job', type=int, help='flag of run in job')
 
 parser_tct = subparsers.add_parser('tct', help='TCT simulation')
 parser_tct.add_argument('label', help='LABEL to identify TCT options')
