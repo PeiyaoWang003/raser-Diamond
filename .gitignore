@@ -2,13 +2,17 @@
 .vscode
 
 output
-*.msh
-
-**/__pycache__
-control/motor/GUI/*.py
-G4History.macro
 
 cfg/env
+**/__pycache__
+G4History.macro
+*.msh
 
-*.sif
-raser-sandbox
+build
+raser.egg-info
+dist
+
+raser-venv
+img
+
+sicar_new
