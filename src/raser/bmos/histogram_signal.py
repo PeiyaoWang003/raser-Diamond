@@ -61,7 +61,7 @@ def get_signal():
 
         save_current(my_current, output_path, root_name, pwl_name, 1)
 
-        pwlin(os.path.join(output_path, pwl_name), amplifier, output_path, filename_after_ngspice)
+        pwlin(os.path.join(output_path, pwl_name), 'src/raser/bmos/ucsc.cir', os.path.join(output_path, filename_after_ngspice), output_path)
         subprocess.run([f"ngspice -b -r ./xxx.raw output/bmos/ucsc_tmp.cir"], shell=True)
         time_v, volt = read_file_voltage(output_path, filename_after_ngspice)
         signal.append(max(volt))
@@ -161,8 +161,9 @@ def draw(output_path, signal, tag, dirname):
     # wave_graph.Fit("gaus")
     wave_graph.Fit("landau")
 
+    mkdir(os.path.join(output_path, 'histogram', 'pdf', dirname))
     # c.SaveAs(os.path.join(output_path, f"Histogram_{tag}.root"))
-    c.SaveAs(os.path.join(output_path, 'histogram', 'pdf', f"Histogram_{tag}.pdf"))
+    c.SaveAs(os.path.join(output_path, 'histogram', 'pdf', dirname, f"Histogram_{tag}.pdf"))
 
     amplitude.Write()
     wave_graph.Write()

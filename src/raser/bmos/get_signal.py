@@ -57,7 +57,7 @@ def get_signal():
     save_current(my_current, output_path, root_name, pwl_name, 1)
 
     # TODO: fix this
-    pwlin(os.path.join(output_path, pwl_name), amplifier, output_path, filename_after_ngspice)
+    pwlin(os.path.join(output_path, pwl_name), 'src/raser/bmos/ucsc.cir', os.path.join(output_path, filename_after_ngspice), output_path)
     subprocess.run([f"ngspice -b -r ./xxx.raw output/bmos/ucsc_tmp.cir"], shell=True)
 
     draw(output_path, pwl_name, filename_after_ngspice, tag, totalengry)
