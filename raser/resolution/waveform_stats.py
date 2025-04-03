@@ -1,0 +1,339 @@
+import os
+import re
+import json
+
+import ROOT
+
+from util.output import output
+from util.math import is_number, fit_data_normal, fit_data_landau
+
+threshold = 1 # mV
+CFD = 0.5 # partition
+#TODO: get threshold and CFD from electronics setting
+
+class InputWaveform():
+    """
+    ToA : time of arrival
+    ToT : time over threshold
+    amplitude : peak amplitude for charge sensitive preamp
+    charge : total charge for current sensitive preamp
+    ToR : time of ratio (CFD)
+    """
+    def __init__(self, read_ele_num=1, threshold=threshold, CFD=CFD):
+        self.waveforms = [[] for i in range(read_ele_num)]
+        self.read_ele_num = read_ele_num
+        self.CFD = CFD
+        self.ToA = [0 for i in range(read_ele_num)]
+        self.ToT = [0 for i in range(read_ele_num)]
+        self.amplitude = [0 for i in range(read_ele_num)] # for charge sensitive pre amp
+        self.charge = [0 for i in range(read_ele_num)] # for current sensitive pre amp
+        self.ToR = [0 for i in range(read_ele_num)]
+        self.threshold = threshold
+
+    def read(self, path, i):
+        with open(path) as file_in:
+            for line in file_in:
+                if not (is_number(line.strip().split(",")[0])): # strip() for \n
+                    continue
+                self.waveforms[i].append(line.strip().split(","))
+
+        self.ToA[i] = get_ToA(self.waveforms[i], self.threshold)
+        self.ToT[i] = get_ToT(self.waveforms[i], self.threshold)
+        self.amplitude[i] = get_amplitude(self.waveforms[i])
+        self.charge[i] = get_charge(self.waveforms[i])
+        self.ToR[i] = get_ToR(self.waveforms[i], self.amplitude[i], CFD)
+
+    def get_total_data(self):
+        self.data = {}
+        if self.read_ele_num == 1:
+            self.data["gravity_center_ToT"] = 0 # No spacial resolution
+            self.data["gravity_center_amplitude"] = 0
+            self.data["gravity_center_charge"] = 0
+            self.data["ToA"] = self.ToA[0]
+            self.data["ToT"] = self.ToT[0]
+            self.data["amplitude"] = self.amplitude[0]
+            self.data["charge"] = self.charge[0]
+            self.data["ToR"] = self.ToR[0]
+        else:
+            # assume strip, one dimensional spacial resolution
+            self.data["gravity_center_ToT"] = sum([ToT * i for (ToT,i) in zip(self.ToT,range(len(self.ToT)))]) / sum(self.ToT)
+            self.data["gravity_center_amplitude"] = sum([amplitude * i for (amplitude,i) in zip(self.amplitude,range(len(self.amplitude)))]) / sum(self.amplitude)
+            self.data["gravity_center_charge"] = sum([charge * i for (charge,i) in zip(self.charge,range(len(self.charge)))]) / sum(self.charge)
+            self.data["ToA"] = min(self.ToA) # TODO: conjoint measurement
+            self.data["ToT"] = sum(self.ToT)
+            self.data["amplitude"] = sum(self.amplitude)
+            self.data["charge"] = sum(self.charge)
+            self.data["ToR"] = min(self.ToR) # TODO: conjoint measurement
+
+def get_ToA(waveform, threshold):
+    for i in waveform:
+        if abs(float(i[1])) > threshold:
+            return float(i[0])
+
+def get_ToT(waveform, threshold):
+    for i in waveform:
+        if abs(float(i[1])) > threshold:
+            start = float(i[0])
+            break
+    for i in waveform[-1::-1]:
+        if abs(float(i[1])) > threshold:
+            end = float(i[0])
+            break
+    return end - start
+
+
+def get_amplitude(waveform):
+    return max(abs(float(i[1])) for i in waveform)
+
+def get_charge(waveform):
+    return abs(sum(float(i[1]) for i in waveform))
+
+def get_ToR(waveform, amplitude, CFD):
+    # CFD = Constant Fraction Discriminator
+    for i in waveform:
+        if abs(float(i[1])) > amplitude * CFD:
+            return float(i[0])
+
+class WaveformStatistics():
+    def __init__(self, input_path, read_ele_num, output_path):
+        self.ToA_data = []
+        self.ToT_data = []
+        self.amplitude_data = []
+        self.charge_data = []
+        self.ToR_data = []
+        self.gravity_center_ToT_data = []
+        self.gravity_center_amplitude_data = []
+        self.gravity_center_charge_data = []
+        last_event_number = -1
+
+        self.output_path = output_path
+
+        if read_ele_num == 1:
+            for file in os.listdir(input_path):
+                if '.csv' not in file:
+                    continue
+                pattern = r"event([+-]?\d+)" 
+                match = re.search(pattern, file)
+                event_number = int(match.group(1)) 
+                path = os.path.join(input_path, file)
+
+                iw = InputWaveform() 
+                iw.read(path)
+                iw.get_total_data()
+                self.fill_data(iw.data, event_number)
+
+        else: # read_ele_num > 1, "No_" in file, multiple electrodes
+            files = os.listdir(input_path)
+            files.sort()
+            for file in files:
+                if '.csv' not in file:
+                    continue
+                pattern = r"event([+-]?\d+)" 
+                match = re.search(pattern, file)
+                event_number = int(match.group(1)) 
+                pattern = r"No_([+-]?\d+)" 
+                match = re.search(pattern, file)
+                electrode_number = int(match.group(1))
+                if last_event_number != event_number:
+                    if last_event_number != -1:
+                        iw.get_total_data()
+                        self.fill_data(iw.data, last_event_number)
+
+                    path = os.path.join(input_path, file)
+
+                    iw = InputWaveform(read_ele_num)
+                    iw.read(path, electrode_number)
+                else: # assume the same event
+                    path = os.path.join(input_path, file)
+                    iw.read(path, electrode_number)
+
+                print(event_number, electrode_number, file)
+
+                last_event_number = event_number
+
+        self.time_resolution_fit(self.ToA_data, "ToA")
+        self.time_resolution_fit(self.ToR_data, "ToR")
+        self.amplitude_fit(self.amplitude_data, "amplitude")
+        self.amplitude_fit(self.charge_data, "charge")
+        self.amplitude_fit(self.ToT_data, "ToT")
+        self.gravity_center_fit(self.gravity_center_ToT_data, "gravity_center_ToT")
+        self.gravity_center_fit(self.gravity_center_amplitude_data, "gravity_center_amplitude")
+        self.gravity_center_fit(self.gravity_center_charge_data, "gravity_center_charge")
+    
+    def fill_data(self, data, event_number):
+        self.ToA_data.append(data["ToA"])
+        self.ToT_data.append(data["ToT"])
+        self.amplitude_data.append(data["amplitude"])
+        self.charge_data.append(data["charge"])
+        self.ToR_data.append(data["ToR"])
+        self.gravity_center_amplitude_data.append(data["gravity_center_amplitude"])
+        self.gravity_center_charge_data.append(data["gravity_center_charge"])
+        self.gravity_center_ToT_data.append(data["gravity_center_ToT"])
+
+    def time_resolution_fit(self, data, model):
+        x2_min = min(data)
+        x2_max = sorted(data)[int(len(data))-1]
+        n2_bin = 100
+        histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
+        for i in range(0,len(data)):
+            histo.Fill(data[i])
+        fit_func_1,_,_,sigma,sigma_error=fit_data_normal(histo,x2_min,x2_max)# in nanosecond
+        sigma=sigma*1e12 # in picosecond
+        sigma_error=sigma_error*1e12
+
+        c1 = ROOT.TCanvas("c1","c1",200,10,800,600)
+        ROOT.gStyle.SetOptStat(0)
+        c1.SetGrid()
+        c1.SetLeftMargin(0.2)
+        c1.SetTopMargin(0.12)
+        c1.SetBottomMargin(0.2)
+
+        histo.GetXaxis().SetTitle(model+" [ns]")
+        histo.GetYaxis().SetTitle("Events")
+        histo.GetXaxis().SetTitleOffset(1.2)
+        histo.GetXaxis().SetTitleSize(0.07)
+        histo.GetXaxis().SetLabelSize(0.05)
+        histo.GetXaxis().SetNdivisions(510)
+        histo.GetYaxis().SetTitleOffset(1.1)
+        histo.GetYaxis().SetTitleSize(0.07)
+        histo.GetYaxis().SetLabelSize(0.05)
+        histo.GetYaxis().SetNdivisions(505)
+        histo.GetXaxis().CenterTitle()
+        histo.GetYaxis().CenterTitle()
+        histo.SetLineWidth(2)
+
+        # Legend setting
+        leg = ROOT.TLegend(0.75, 0.6, 0.85, 0.8)
+        leg.AddEntry(fit_func_1,"Fit","L")
+        leg.AddEntry(histo,"Sim","L")
+        # Draw
+        histo.Draw()
+        fit_func_1.Draw("same")
+        leg.Draw("same")
+        # Text set
+        tex = ROOT.TLatex()
+        tex.SetNDC(1)
+        tex.SetTextFont(43)
+        tex.SetTextSize(25)
+        #tex.DrawLatexNDC(0.65, 0.7, "CFD=0.5")
+        tex.DrawLatexNDC(0.65, 0.6, "#sigma = %.3f #pm %.3f ps"%(sigma,sigma_error))
+        # Save
+        c1.SaveAs(self.output_path+'/'+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+model+".C")
+
+    def amplitude_fit(self, data, model):
+        x2_min = min(data)
+        x2_max = sorted(data)[int(len(data))-1]
+        n2_bin = 100
+        histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
+        for i in range(0,len(data)):
+            histo.Fill(data[i])
+        fit_func_1,mean,mean_error,sigma,sigma_error=fit_data_landau(histo,x2_min,x2_max)
+
+        c1 = ROOT.TCanvas("c1","c1",200,10,800,600)
+        ROOT.gStyle.SetOptStat(0)
+        c1.SetGrid()
+        c1.SetLeftMargin(0.2)
+        c1.SetTopMargin(0.12)
+        c1.SetBottomMargin(0.2)
+
+        histo.GetXaxis().SetTitle(model+" [a.u.]")
+        histo.GetYaxis().SetTitle("Events")
+        histo.GetXaxis().SetTitleOffset(1.2)
+        histo.GetXaxis().SetTitleSize(0.07)
+        histo.GetXaxis().SetLabelSize(0.05)
+        histo.GetXaxis().SetNdivisions(510)
+        histo.GetYaxis().SetTitleOffset(1.1)
+        histo.GetYaxis().SetTitleSize(0.07)
+        histo.GetYaxis().SetLabelSize(0.05)
+        histo.GetYaxis().SetNdivisions(505)
+        histo.GetXaxis().CenterTitle()
+        histo.GetYaxis().CenterTitle()
+        histo.SetLineWidth(2)
+        histo.SetLineWidth(2)
+
+        # Legend setting
+        leg = ROOT.TLegend(0.75, 0.6, 0.85, 0.8)
+        leg.AddEntry(fit_func_1,"Fit","L")
+        leg.AddEntry(histo,"Sim","L")
+        # Draw
+        histo.Draw()
+        fit_func_1.Draw("same")
+        leg.Draw("same")
+        # Text set
+        tex = ROOT.TLatex()
+        tex.SetNDC(1)
+        tex.SetTextFont(43)
+        tex.SetTextSize(25)
+        tex.DrawLatexNDC(0.65, 0.6, "%.3g #pm %.3g a.u."%(mean,sigma))
+        # Save
+        c1.SaveAs(self.output_path+'/'+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+model+".C")
+
+    def gravity_center_fit(self, data, model):
+        x2_min = min(data)
+        x2_max = sorted(data)[int(len(data))-1]
+        n2_bin = 100
+        histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
+        for i in range(0,len(data)):
+            histo.Fill(data[i])
+        fit_func_1,_,_,sigma,sigma_error=fit_data_normal(histo,x2_min,x2_max)
+        sigma=sigma
+        sigma_error=sigma_error
+
+        c1 = ROOT.TCanvas("c1","c1",200,10,800,600)
+        ROOT.gStyle.SetOptStat(0)
+        c1.SetGrid()
+        c1.SetLeftMargin(0.2)
+        c1.SetTopMargin(0.12)
+        c1.SetBottomMargin(0.2)
+
+        histo.GetXaxis().SetTitle(model)
+        histo.GetYaxis().SetTitle("Events")
+        histo.GetXaxis().SetTitleOffset(1.2)
+        histo.GetXaxis().SetTitleSize(0.07)
+        histo.GetXaxis().SetLabelSize(0.05)
+        histo.GetXaxis().SetNdivisions(510)
+        histo.GetYaxis().SetTitleOffset(1.1)
+        histo.GetYaxis().SetTitleSize(0.07)
+        histo.GetYaxis().SetLabelSize(0.05)
+        histo.GetYaxis().SetNdivisions(505)
+        histo.GetXaxis().CenterTitle()
+        histo.GetYaxis().CenterTitle()
+        histo.SetLineWidth(2)
+
+        # Legend setting
+        leg = ROOT.TLegend(0.75, 0.6, 0.85, 0.8)
+        leg.AddEntry(fit_func_1,"Fit","L")
+        leg.AddEntry(histo,"Sim","L")
+        # Draw
+        histo.Draw()
+        fit_func_1.Draw("same")
+        leg.Draw("same")
+        # Text set
+        tex = ROOT.TLatex()
+        tex.SetNDC(1)
+        tex.SetTextFont(43)
+        tex.SetTextSize(25)
+        #tex.DrawLatexNDC(0.65, 0.7, "CFD=0.5")
+        tex.DrawLatexNDC(0.65, 0.6, "#sigma = %.3f #pm %.3f"%(sigma,sigma_error))
+        # Save
+        c1.SaveAs(self.output_path+'/'+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+model+".C")
+
+
+def main(kwargs):
+    det_name = kwargs['det_name']
+    device_json = "./setting/detector/" + det_name + ".json"
+    with open(device_json) as f:
+        device_dict = json.load(f)
+        read_ele_num = device_dict['read_ele_num']
+
+    tct = kwargs['tct']
+    if tct != None:
+        input_path = "output/tct/" + det_name + "/" + tct
+    else:
+        input_path = "output/gen_signal/" + det_name + "/batch"
+
+    output_path = output(__file__, det_name)
+    WaveformStatistics(input_path, read_ele_num, output_path)
