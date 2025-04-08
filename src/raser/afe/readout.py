@@ -60,7 +60,7 @@ class Amplifier:
     ---------
         2024/09/14
     """
-    def __init__(self, currents: list[ROOT.TH1F], amplifier_name: str, CDet = None, is_cut = False):
+    def __init__(self, currents: list[ROOT.TH1F], amplifier_name: str, seed = 0, CDet = None, is_cut = False):
         self.amplified_currents = []
         self.read_ele_num = len(currents)
         self.time_unit = currents[0].GetXaxis().GetBinWidth(1)
@@ -76,7 +76,7 @@ class Amplifier:
             self.amplifier_define(CDet)
             self.fill_amplifier_output(currents)
             self.set_scope_output(currents)
-            self.add_noise()
+            self.add_noise(seed)
             if is_cut:
                 self.judge_threshold_CFD()
 
@@ -236,9 +236,10 @@ class Amplifier:
             output_Q_max = self.amplified_currents[i].GetMaximum()
             self.amplified_currents[i].Scale(self.scale(output_Q_max, input_Q_tot))
 
-    def add_noise(self):
+    def add_noise(self, seed):
         noise_avg = self.amplifier_parameters["noise_avg"]
         noise_rms = self.amplifier_parameters["noise_rms"]
+        ROOT.gRandom.SetSeed(seed)
         for i in range(self.read_ele_num):
             cu = self.amplified_currents[i]
             for j in range(cu.GetNbinsX()):

@@ -43,8 +43,8 @@ EOF
 
 export PATH=/cvmfs/common.ihep.ac.cn/software/hepjob/bin:$PATH
 export IMGFILE=/afs/ihep.ac.cn/users/f/fuchenxi/img/raser-2.5.sif
-export BINDPATH=/afs,/besfs5,/cefs,/cvmfs,/etc/condor,/etc/redhat-release,/publicfs,/scratchfs,/workfs2
-# redhat for hep_job
+export BINDPATH=/cvmfs,/etc/condor/condor_config,/etc/redhat-release,$dir_raser
+# condor_config and redhat-release for hep_job
 export RASER_SETTING_PATH=$dir_raser/setting
 
 # temporary solution for scipy import error

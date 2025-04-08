@@ -21,45 +21,10 @@ from device import build_device as bdv
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from afe import readout as rdo
-from signal import draw_save
 from util.output import output
 
 from .laser import LaserInjection
 
-
-def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number):
-    """
-    Description:
-        Batch run some events to get time resolution
-    Parameters:
-    ---------
-    start_n : int
-        Start number of the event
-    end_n : int
-        end number of the event 
-    detection_efficiency: float
-        The ration of hit particles/total_particles           
-    @Returns:
-    ---------
-        None
-    @Modify:
-    ---------
-        2021/09/07
-    """
-    start_n = instance_number * total_events
-    end_n = (instance_number + 1) * total_events
-
-    effective_number = 0
-    for event in range(start_n,end_n):
-        print("run events number:%s"%(event))
-        if len(my_g4p.p_steps[event-start_n]) > 5:
-            effective_number += 1
-            my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
-            ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
-            draw_save.save_signal_time_resolution(my_d,event,my_current.sum_cu,ele_current,my_g4p,start_n)
-            del ele_current
-    detection_efficiency =  effective_number/(end_n-start_n) 
-    print("detection_efficiency=%s"%detection_efficiency)
 
 def job_main(kwargs):
     det_name = kwargs['det_name']
@@ -90,7 +55,7 @@ def job_main(kwargs):
     my_current = ccrt.CalCurrentLaser(my_d, my_f, my_l)
     path = output(__file__, my_d.det_name, my_l.model)
 
-    ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
+    ele_current = rdo.Amplifier(my_current.sum_cu, amplifier, seed=int(kwargs['job'])) # job number
     if kwargs['scan'] != None: #assume parameter alter
         # key = my_l.fz_rel
         tag = kwargs['job']

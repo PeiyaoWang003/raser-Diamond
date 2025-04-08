@@ -216,40 +216,6 @@ def root_tex_position_resolution(sigma,error):
     # tex.DrawLatexNDC(0.65, 0.7, "CFD=0.5")
     tex.DrawLatexNDC(0.65, 0.6, "#sigma = %.1f #pm %.1f um"%(sigma,error))
 
-def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number):
-    """
-    Description:
-        Batch run some events to get time resolution
-    Parameters:
-    ---------
-    start_n : int
-        Start number of the event
-    end_n : int
-        end number of the event 
-    detection_efficiency: float
-        The ration of hit particles/total_particles           
-    @Returns:
-    ---------
-        None
-    @Modify:
-    ---------
-        2021/09/07
-    """
-    start_n = instance_number * total_events
-    end_n = (instance_number + 1) * total_events
-
-    effective_number = 0
-    for event in range(start_n,end_n):
-        print("run events number:%s"%(event))
-        if len(my_g4p.p_steps[event-start_n]) > 5:
-            effective_number += 1
-            my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
-            ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
-            draw_save.save_signal_time_resolution(my_d,event,my_current.sum_cu,ele_current,my_g4p,start_n)
-            del ele_current
-    detection_efficiency =  effective_number/(end_n-start_n) 
-    print("detection_efficiency=%s"%detection_efficiency)
-
 def job_main(kwargs):
     det_name = kwargs['det_name']
     my_d = bdv.Detector(det_name)

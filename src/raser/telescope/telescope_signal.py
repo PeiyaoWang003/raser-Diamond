@@ -480,9 +480,9 @@ def main():
     my_g4p = TelescopeParticles(my_d, my_d.g4experiment) #remove my_f
     my_hit_charge = CalCurrentDiffuse(my_d,my_g4p)
     draw_charge(my_hit_charge)
-    my_telescope_charge = Telescope(my_d,my_g4p.ltz,my_hit_charge) 
+    my_telescope_charge = Telescope(my_d,my_g4p,my_hit_charge) 
     my_hit_test = PixelHitTest(my_d, my_g4p)
-    my_telescope_test = Telescope(my_d,my_g4p.ltz,my_hit_test)
+    my_telescope_test = Telescope(my_d,my_g4p,my_hit_test)
 
 def taichu_v2(label=""):
     #virtual object
