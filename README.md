@@ -123,7 +123,7 @@ For signal simulation of HPK devices:
 
     raser field [-cv] <device_name in `setting/detector`>
     raser field -wf <device_name>
-    raser gen_signal <device_name>
+    raser signal <device_name>
     raser tct signal <device_name> <laser_name in `setting/laser`>
 
 For signal simulation of CMOS strip detector:
@@ -131,12 +131,12 @@ For signal simulation of CMOS strip detector:
     mesh CMOS_strip_C
     raser field -umf [-cv] CMOS_strip_C
     raser field -wf CMOS_strip_C
-    raser gen_signal CMOS_strip_C
+    raser signal CMOS_strip_C
     raser tct signal CMOS_strip_C <laser_name in `setting/laser`>
 
 For time resolution of NJU SiC PiN in https://doi.org/10.3389/fphy.2022.718071 :
 
     raser field [-cv] NJU-PIN
     raser field -wf NJU-PIN
-    raser gen_signal -s 20 NJU-PIN
+    raser signal -s 20 NJU-PIN
     raser resolution NJU-PIN

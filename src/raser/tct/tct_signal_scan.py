@@ -104,13 +104,11 @@ def job_main(kwargs):
         
     print('successfully')
 
-# TODO: fix raser path
-
 def main(kwargs):
     scan_number = kwargs['scan']
     for i in range(scan_number):
-        command = ' '.join(['python3', 'raser', '-b', 'tct signal',sys.argv[3],sys.argv[4], '--job', str(i)] + sys.argv[5:]) # 'raser', '-sh', 'gen_signal'
-        # command = ' '.join(['python3', 'raser', 'tct signal',sys.argv[3],sys.argv[4], '--job', str(i)] + sys.argv[5:]) # 'raser', '-sh', 'gen_signal'
+        command = ' '.join(['python3', 'src/raser', '-b', 'tct signal',sys.argv[3],sys.argv[4], '--job', str(i)] + sys.argv[5:]) # 'raser', '-sh', 'signal'
+        # command = ' '.join(['python3', 'raser', 'tct signal',sys.argv[3],sys.argv[4], '--job', str(i)] + sys.argv[5:]) # 'raser', '-sh', 'signal'
         print(command)
         subprocess.run([command], shell=True)
     

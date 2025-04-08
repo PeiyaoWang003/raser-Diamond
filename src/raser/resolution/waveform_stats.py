@@ -1,13 +1,13 @@
 import os
 import re
 import json
+from array import array
 
 import ROOT
 
 from util.output import output
 from util.math import is_number, fit_data_normal, fit_data_landau
 
-threshold = 1 # mV
 CFD = 0.5 # partition
 #TODO: get threshold and CFD from electronics setting
 
@@ -19,7 +19,7 @@ class InputWaveform():
     charge : total charge for current sensitive preamp
     ToR : time of ratio (CFD)
     """
-    def __init__(self, read_ele_num=1, threshold=threshold, CFD=CFD):
+    def __init__(self, threshold, read_ele_num=1, CFD=CFD):
         self.waveforms = [[] for i in range(read_ele_num)]
         self.read_ele_num = read_ele_num
         self.CFD = CFD
@@ -45,7 +45,16 @@ class InputWaveform():
 
     def get_total_data(self):
         self.data = {}
-        if self.read_ele_num == 1:
+        if max([abs(a) for a in self.amplitude]) < self.threshold:
+            self.data["gravity_center_ToT"] = None
+            self.data["gravity_center_amplitude"] = None
+            self.data["gravity_center_charge"] = None
+            self.data["ToA"] = None
+            self.data["ToT"] = None
+            self.data["amplitude"] = None
+            self.data["charge"] = None
+            self.data["ToR"] = None
+        elif self.read_ele_num == 1:
             self.data["gravity_center_ToT"] = 0 # No spacial resolution
             self.data["gravity_center_amplitude"] = 0
             self.data["gravity_center_charge"] = 0
@@ -56,14 +65,14 @@ class InputWaveform():
             self.data["ToR"] = self.ToR[0]
         else:
             # assume strip, one dimensional spacial resolution
-            self.data["gravity_center_ToT"] = sum([ToT * i for (ToT,i) in zip(self.ToT,range(len(self.ToT)))]) / sum(self.ToT)
-            self.data["gravity_center_amplitude"] = sum([amplitude * i for (amplitude,i) in zip(self.amplitude,range(len(self.amplitude)))]) / sum(self.amplitude)
-            self.data["gravity_center_charge"] = sum([charge * i for (charge,i) in zip(self.charge,range(len(self.charge)))]) / sum(self.charge)
-            self.data["ToA"] = min(self.ToA) # TODO: conjoint measurement
-            self.data["ToT"] = sum(self.ToT)
-            self.data["amplitude"] = sum(self.amplitude)
-            self.data["charge"] = sum(self.charge)
-            self.data["ToR"] = min(self.ToR) # TODO: conjoint measurement
+            self.data["gravity_center_ToT"] = get_gravity_center(self.ToT)
+            self.data["gravity_center_amplitude"] = get_gravity_center(self.amplitude)
+            self.data["gravity_center_charge"] = get_gravity_center(self.charge)
+            self.data["ToA"] = get_conjoined_time(self.ToA) # TODO: conjoint measurement
+            self.data["ToT"] = get_total_amp(self.ToT)
+            self.data["amplitude"] = get_total_amp(self.amplitude)
+            self.data["charge"] = get_total_amp(self.charge)
+            self.data["ToR"] = get_conjoined_time(self.ToR) # TODO: conjoint measurement
 
 def get_ToA(waveform, threshold):
     for i in waveform:
@@ -75,12 +84,15 @@ def get_ToT(waveform, threshold):
         if abs(float(i[1])) > threshold:
             start = float(i[0])
             break
-    for i in waveform[-1::-1]:
+        else:
+            return None
+    for i in waveform[::-1]:
         if abs(float(i[1])) > threshold:
             end = float(i[0])
             break
+        else:
+            return None
     return end - start
-
 
 def get_amplitude(waveform):
     return max(abs(float(i[1])) for i in waveform)
@@ -93,9 +105,43 @@ def get_ToR(waveform, amplitude, CFD):
     for i in waveform:
         if abs(float(i[1])) > amplitude * CFD:
             return float(i[0])
+        
+def get_conjoined_time(time_list):
+    # TODO: conjoint measurement
+    new_list = remove_none(time_list)
+    if len(new_list) == 0:
+        return None
+    return min(new_list)
+
+def get_total_amp(amp_list):
+    # TODO: conjoint measurement
+    new_list = remove_none(amp_list)
+    if len(new_list) == 0:
+        return None
+    return sum(new_list)
+
+def get_gravity_center(amp_list):
+    zip_list = zip(amp_list,range(len(amp_list)))
+    new_zip = []
+    for (amp,i) in zip_list:
+        if amp == None:
+            continue
+        else:
+            new_zip.append((amp,i))
+    if len(new_zip) == 0:
+        return None
+    return sum([amp * i for (amp,i) in new_zip]) / sum([amp for (amp,i) in new_zip])
+
+def remove_none(list):
+    new_list = []
+    for i in list:
+        if i == None:
+            continue
+        new_list.append(i)
+    return new_list
 
 class WaveformStatistics():
-    def __init__(self, input_path, read_ele_num, output_path):
+    def __init__(self, input_path, read_ele_num, threshold, output_path):
         self.ToA_data = []
         self.ToT_data = []
         self.amplitude_data = []
@@ -104,11 +150,12 @@ class WaveformStatistics():
         self.gravity_center_ToT_data = []
         self.gravity_center_amplitude_data = []
         self.gravity_center_charge_data = []
-        last_event_number = -1
+        self.waveforms = [[] for i in range(read_ele_num)]
+        last_event_tag = None
 
         self.output_path = output_path
 
-        if read_ele_num == 1:
+        if read_ele_num == 1:        
             for file in os.listdir(input_path):
                 if '.csv' not in file:
                     continue
@@ -117,10 +164,22 @@ class WaveformStatistics():
                 event_number = int(match.group(1)) 
                 path = os.path.join(input_path, file)
 
-                iw = InputWaveform() 
+                iw = InputWaveform(threshold) 
                 iw.read(path)
                 iw.get_total_data()
+                self.waveforms[0].append(iw.waveforms[0])
                 self.fill_data(iw.data, event_number)
+
+            x = [float(i[0]) for i in self.waveforms[0][0]]
+            canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+            multigraph = ROOT.TMultiGraph("mg","")
+            for waveform in (self.waveforms[0]):
+                y = [float(i[1]) for i in waveform]
+                graph = ROOT.TGraph(len(x), array('f', x), array('f', y))
+                multigraph.Add(graph)
+            multigraph.Draw("APL")
+            canvas.SaveAs(os.path.join(output_path, "waveform.pdf"))
+            canvas.SaveAs(os.path.join(output_path, "waveform.png"))
 
         else: # read_ele_num > 1, "No_" in file, multiple electrodes
             files = os.listdir(input_path)
@@ -128,28 +187,34 @@ class WaveformStatistics():
             for file in files:
                 if '.csv' not in file:
                     continue
-                pattern = r"event([+-]?\d+)" 
-                match = re.search(pattern, file)
-                event_number = int(match.group(1)) 
                 pattern = r"No_([+-]?\d+)" 
                 match = re.search(pattern, file)
                 electrode_number = int(match.group(1))
-                if last_event_number != event_number:
-                    if last_event_number != -1:
+                event_tag = re.sub(pattern, '', file)
+                if last_event_tag != event_tag:
+                    if last_event_tag != None:
                         iw.get_total_data()
-                        self.fill_data(iw.data, last_event_number)
+                        self.fill_data(iw.data, last_event_tag)
+                    iw = InputWaveform(threshold, read_ele_num)
+                else:
+                    pass
 
-                    path = os.path.join(input_path, file)
+                path = os.path.join(input_path, file)
+                iw.read(path, electrode_number)
+                self.waveforms[electrode_number].append(iw.waveforms[electrode_number])
+                last_event_tag = event_tag
 
-                    iw = InputWaveform(read_ele_num)
-                    iw.read(path, electrode_number)
-                else: # assume the same event
-                    path = os.path.join(input_path, file)
-                    iw.read(path, electrode_number)
-
-                print(event_number, electrode_number, file)
-
-                last_event_number = event_number
+            for j in range(read_ele_num):
+                canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
+                multigraph = ROOT.TMultiGraph("mg","")
+                x = [float(i[0]) for i in self.waveforms[j][0]]
+                for waveform in (self.waveforms[j]):
+                    y = [float(i[1]) for i in waveform]
+                    graph = ROOT.TGraph(len(x), array('f', x), array('f', y))
+                    multigraph.Add(graph)
+                multigraph.Draw("APL")
+                canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.pdf".format(j)))
+                canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.png".format(j)))
 
         self.time_resolution_fit(self.ToA_data, "ToA")
         self.time_resolution_fit(self.ToR_data, "ToR")
@@ -160,7 +225,7 @@ class WaveformStatistics():
         self.gravity_center_fit(self.gravity_center_amplitude_data, "gravity_center_amplitude")
         self.gravity_center_fit(self.gravity_center_charge_data, "gravity_center_charge")
     
-    def fill_data(self, data, event_number):
+    def fill_data(self, data, event_tag):
         self.ToA_data.append(data["ToA"])
         self.ToT_data.append(data["ToT"])
         self.amplitude_data.append(data["amplitude"])
@@ -171,8 +236,14 @@ class WaveformStatistics():
         self.gravity_center_ToT_data.append(data["gravity_center_ToT"])
 
     def time_resolution_fit(self, data, model):
-        x2_min = min(data)
-        x2_max = sorted(data)[int(len(data))-1]
+        data = remove_none(data)
+        try:
+            x2_min = min(data)
+            x2_max = sorted(data)[int(len(data))-1]
+        except ValueError:
+            print("No valid data for "+model)
+            x2_min = 0
+            x2_max = 0
         n2_bin = 100
         histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
         for i in range(0,len(data)):
@@ -188,7 +259,7 @@ class WaveformStatistics():
         c1.SetTopMargin(0.12)
         c1.SetBottomMargin(0.2)
 
-        histo.GetXaxis().SetTitle(model+" [ns]")
+        histo.GetXaxis().SetTitle(model+" [s]")
         histo.GetYaxis().SetTitle("Events")
         histo.GetXaxis().SetTitleOffset(1.2)
         histo.GetXaxis().SetTitleSize(0.07)
@@ -222,8 +293,14 @@ class WaveformStatistics():
         c1.SaveAs(self.output_path+'/'+model+".C")
 
     def amplitude_fit(self, data, model):
-        x2_min = min(data)
-        x2_max = sorted(data)[int(len(data))-1]
+        data = remove_none(data)
+        try:
+            x2_min = min(data)
+            x2_max = sorted(data)[int(len(data))-1]
+        except ValueError:
+            print("No valid data for "+model)
+            x2_min = 0
+            x2_max = 0
         n2_bin = 100
         histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
         for i in range(0,len(data)):
@@ -271,8 +348,14 @@ class WaveformStatistics():
         c1.SaveAs(self.output_path+'/'+model+".C")
 
     def gravity_center_fit(self, data, model):
-        x2_min = min(data)
-        x2_max = sorted(data)[int(len(data))-1]
+        data = remove_none(data)
+        try:
+            x2_min = min(data)
+            x2_max = sorted(data)[int(len(data))-1]
+        except ValueError:
+            print("No valid data for "+model)
+            x2_min = 0
+            x2_max = 0
         n2_bin = 100
         histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
         for i in range(0,len(data)):
@@ -328,12 +411,21 @@ def main(kwargs):
     with open(device_json) as f:
         device_dict = json.load(f)
         read_ele_num = device_dict['read_ele_num']
+        daq_name = device_dict['daq']
+
+    if kwargs['daq'] != None:
+        daq_name = kwargs['daq']
+
+    daq_json = os.getenv("RASER_SETTING_PATH")+"/daq/" + daq_name + ".json"
+    with open(daq_json) as f:
+        daq_dict = json.load(f)
+        threshold = daq_dict['threshold']
 
     tct = kwargs['tct']
     if tct != None:
         input_path = "output/tct/" + det_name + "/" + tct
     else:
-        input_path = "output/gen_signal/" + det_name + "/batch"
+        input_path = "output/signal/" + det_name + "/batch"
 
     output_path = output(__file__, det_name)
-    WaveformStatistics(input_path, read_ele_num, output_path)
+    WaveformStatistics(input_path, read_ele_num, threshold, output_path)

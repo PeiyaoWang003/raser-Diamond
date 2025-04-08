@@ -77,7 +77,7 @@ def get_charge(time_list, volt_list, baseline):
     return charge
 
 def main():
-    path = './output/gen_signal/HPK-Si-LGAD-CCE/batch'
+    path = './output/signal/HPK-Si-LGAD-CCE/batch'
     csv_files = filter_csv_files(path)
 
     c = ROOT.TCanvas('c', 'c', 1500, 600)

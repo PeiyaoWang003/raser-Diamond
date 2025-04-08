@@ -3,9 +3,9 @@
     "det_model" : "planar",
     "material" : "SiC",
 
-    "lx" : 5000,
-    "ly" : 5000,
-    "lz" : 100,
+    "l_x" : 5000,
+    "l_y" : 5000,
+    "l_z" : 100,
 
     "doping":{
         "Acceptors" : "1.0e19*step(1e-4-x)",
@@ -87,5 +87,6 @@
         }
     },
     "g4experiment" : "time_resolution",
-    "amplifier" : "Charge_Sensitive_UCSC"
+    "amplifier" : "Charge_Sensitive_UCSC",
+    "daq" : "Alibava"
 }

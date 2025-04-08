@@ -3,9 +3,9 @@
     "det_model" : "lgad",
     "material" : "SiC",
 
-    "lx" : 1000,
-    "ly" : 1000,
-    "lz" : 50,
+    "l_x" : 1000,
+    "l_y" : 1000,
+    "l_z" : 50,
 
     "doping":{
         "Acceptors" : "2.0e19*step(3e-5-x)",
@@ -51,5 +51,8 @@
                 {"name" : "bot", "tag" : "bot", "material" : "metal"}
             ]
         }
-    }
+    },
+    "g4experiment" : "beta_source",
+    "amplifier" : "Broad_Band_UCSC",
+    "daq" : "Alibava"
 }

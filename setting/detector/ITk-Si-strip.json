@@ -3,9 +3,9 @@
     "det_model" : "strip",
     "material" : "Si",
 
-    "lx" : 170,
-    "ly" : 5000,
-    "lz" : 305,
+    "l_x" : 170,
+    "l_y" : 5000,
+    "l_z" : 305,
 
     "striplenth" : 75,
     "elelenth" : 25,
@@ -73,5 +73,6 @@
     },
 
     "g4experiment" : "beta_source",
-    "amplifier" : "Broad_Band_UCSC"
+    "amplifier" : "Broad_Band_UCSC",
+    "daq" : "Alibava"
 }

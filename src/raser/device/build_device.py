@@ -28,9 +28,9 @@ class Detector:
             self.device_dict = json.load(f)
         self.dimension = self.device_dict['default_dimension']
 
-        self.l_x = self.device_dict['lx'] 
-        self.l_y = self.device_dict['ly']  
-        self.l_z = self.device_dict['lz'] 
+        self.l_x = self.device_dict['l_x'] 
+        self.l_y = self.device_dict["l_y"]  
+        self.l_z = self.device_dict["l_z"] 
         
         self.voltage = float(self.device_dict['bias']['voltage'])
         self.temperature = self.device_dict['temperature']
@@ -65,9 +65,8 @@ class Detector:
             self.read_ele_num = 1
             
         if "pixel" in self.det_model:
-            self.p_x = self.device_dict['px']
-            self.p_y = self.device_dict['py']
-            self.p_z = self.device_dict['pz']
+            self.p_x = self.device_dict["p_x"]
+            self.p_y = self.device_dict["p_y"]
 
 if __name__ == "__main__":
     import sys

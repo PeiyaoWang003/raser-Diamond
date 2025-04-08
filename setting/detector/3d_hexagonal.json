@@ -1,11 +1,11 @@
 {
-    "det_name" : "3Dpixel",
-    "det_model" : "3Dpixel",
+    "det_name" : "3D_hexagonal",
+    "det_model" : "3D_hexagonal",
     "material" : "SiC",
 
-    "lx" : 10000,
-    "ly" : 10000,
-    "lz" : 350,
+    "l_x" : 10000,
+    "l_y" : 10000,
+    "l_z" : 350,
     
     "e_r" : 50.0,
     "e_gap" : 150.0,
@@ -72,11 +72,11 @@
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "setting/detector/3Dpixel_7e.msh",
+            "file" : "setting/detector/3D_hexagonal.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
-                    "region" : "3Dpixel", 
+                    "region" : "3D_hexagonal", 
                     "tag1" : "top", 
                     "tag2" : "bot"
                 }
@@ -89,5 +89,6 @@
     },
 
     "g4experiment" : "time_resolution",
-    "amplifier" : "Broad_Band_UCSC"
+    "amplifier" : "Broad_Band_UCSC",
+    "daq" : "Alibava"
 }

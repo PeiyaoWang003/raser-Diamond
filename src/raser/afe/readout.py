@@ -377,7 +377,7 @@ class Amplifier:
 
     def save_signal_TTree(self, path, tag=""):
         if tag != "":
-            tag = "_" + tag
+            tag = "_" + str(tag)
         for j in range(self.read_ele_num):
             time = array('d', [0.])
             volt = array('d', [0.])
@@ -390,7 +390,7 @@ class Amplifier:
             
             tree_file = ROOT.TFile(tree_file_name, "RECREATE")
             t_out = ROOT.TTree("tree", "signal")
-            t_out.Branch("time_ns", time, "time_ns/D")
+            t_out.Branch("time_s", time, "time_s/D")
             t_out.Branch("volt_mV", volt, "volt_mV/D")
 
             for i in range(self.amplified_currents[j].GetNbinsX()):

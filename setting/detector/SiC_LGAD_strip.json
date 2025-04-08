@@ -3,9 +3,9 @@
     "det_model" : "lgad",
     "material" : "SiC",
 
-    "lx" : 420,
-    "ly" : 420,
-    "lz" : 67.3,
+    "l_x" : 420,
+    "l_y" : 420,
+    "l_z" : 67.3,
 
     "striplenth" : 60,
     "elelenth" : 60,
@@ -80,5 +80,6 @@
     },
 
     "g4experiment" : "beta_source",
-    "amplifier" : "Broad_Band_SiC_Strip"
+    "amplifier" : "Broad_Band_SiC_Strip",
+    "daq" : "SiC_LGAD_strip"
 }
