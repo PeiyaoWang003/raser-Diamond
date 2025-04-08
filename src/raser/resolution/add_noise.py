@@ -860,7 +860,7 @@ def main(kwargs):
     # Outfilename and init_parameter
     rset = NoiseSetting(ele_name)
     output_path = output(__file__, det_name)
-    # input_file = "output/gen_signal/" + det_name + "/batch"
+    # input_file = "output/signal/" + det_name + "/batch"
     input_file = "output/tct/" + det_name + "/top_TCT"
     # Root defined
     out_root_f=ROOT.TFile(output_path+"/out.root","RECREATE")

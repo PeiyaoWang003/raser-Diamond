@@ -49,7 +49,7 @@ class Telescope:
         #paras
         self.pixelsize_x = my_d.p_x
         self.pixelsize_y = my_d.p_y
-        self.pixelsize_z = my_d.p_z
+        self.pixelsize_z = my_d.l_z
         self.layer_z = my_g4p.ltz
         self.seedcharge = my_g4p.seedcharge
         
@@ -394,7 +394,7 @@ class PixelHitTest:
         self.layer_z = my_g4p.ltz
         self.pixelsizex = my_d.p_x
         self.pixelsizey = my_d.p_y
-        self.thickness = my_d.p_z
+        self.thickness = my_d.l_z
         
         self.laserz = 0
         self.laserx = self.pixelsizex/2
@@ -453,7 +453,7 @@ class PixelHitTest:
         return t_list
     
 def draw_charge(my_charge):
-    path = os.path.join("output", "pixel",)
+    path = os.path.join("output", "telescope",)
     create_path(path) 
     c=ROOT.TCanvas("c","canvas1",1000,1000)
     c.cd()
@@ -497,7 +497,7 @@ def taichu_v2(label=""):
         t_my_d = MyObject()
         t_my_d.p_x = MaxSize*(i+1)/N
         t_my_d.p_y = MaxSize*(i+1)/N
-        t_my_d.p_z = 200.
+        t_my_d.l_z = 200.
         t_my_g = MyObject()
         t_my_g.seedcharge = 100
         t_my_g.ltz = [20000.,60000.,100000.,140000.,180000.,220000.]

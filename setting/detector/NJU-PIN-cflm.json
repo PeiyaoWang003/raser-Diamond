@@ -3,9 +3,9 @@
     "det_model" : "planar",
     "material" : "SiC",
 
-    "lx" : 50000,
-    "ly" : 200000,
-    "lz" : 100,
+    "l_x" : 50000,
+    "l_y" : 200000,
+    "l_z" : 100,
 
     "doping":{
         "Acceptors" : "1.0e19*step(1e-4-x)",
@@ -87,5 +87,6 @@
         }
     },
     "g4experiment" : "cflm",
-    "amplifier" : "ngspice"
+    "amplifier" : "ngspice",
+    "daq" : "Alibava"
 }

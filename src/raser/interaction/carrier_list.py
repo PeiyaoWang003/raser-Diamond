@@ -98,7 +98,7 @@ class PixelCarrierListFromG4P:
         material = my_d.material
         self.pixelsize_x = my_d.p_x
         self.pixelsize_y = my_d.p_y
-        self.pixelsize_z = my_d.p_z
+        self.pixelsize_z = my_d.l_z
         
         if (material == "SiC"):
             self.energy_loss = 8.4 #ev

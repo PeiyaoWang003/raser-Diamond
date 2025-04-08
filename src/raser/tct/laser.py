@@ -47,16 +47,16 @@ class LaserInjection():
         else:
             self.l_Rayleigh = laser_dic["l_Rayleigh"]#um
         #the size of the detector
-        self.lx = my_d.l_x#um
-        self.ly = my_d.l_y
-        self.lz = my_d.l_z
+        self.l_x = my_d.l_x#um
+        self.l_y = my_d.l_y
+        self.l_z = my_d.l_z
         #relative and absolute position of the focus
         self.fx_rel = laser_dic["fx_rel"]
         self.fy_rel = laser_dic["fy_rel"]
         self.fz_rel = laser_dic["fz_rel"]
-        self.fx_abs = self.fx_rel * self.lx
-        self.fy_abs = self.fy_rel * self.ly
-        self.fz_abs = self.fz_rel * self.lz
+        self.fx_abs = self.fx_rel * self.l_x
+        self.fy_abs = self.fy_rel * self.l_y
+        self.fz_abs = self.fz_rel * self.l_z
         #accuracy parameters
         self.r_step = laser_dic["r_step"]#um
         self.h_step = laser_dic["h_step"]#um
@@ -135,14 +135,14 @@ class LaserInjection():
             self.x_step = self.y_step = self.r_step
             self.x_char = self.y_char = self.r_char
             if self.direction == "top":
-                absorb_depth = self.lz * self.fz_rel
+                absorb_depth = self.l_z * self.fz_rel
                 def _getCarrierDensity(x, y, z):
                     return self.getCarrierDensity(z - self.fz_abs, absorb_depth, (x - self.fx_abs) ** 2 + (y - self.fy_abs) ** 2)
                 self._getCarrierDensity = _getCarrierDensity
             if self.direction == "bottom":
-                absorb_depth = self.lz * (1 - self.fz_rel)
+                absorb_depth = self.l_z * (1 - self.fz_rel)
                 def _getCarrierDensity(x, y, z):
-                    return self.getCarrierDensity(self.lz - z + self.fz_abs, absorb_depth, (x - self.fx_abs) ** 2 + (y - self.fy_abs) ** 2)
+                    return self.getCarrierDensity(self.l_z - z + self.fz_abs, absorb_depth, (x - self.fx_abs) ** 2 + (y - self.fy_abs) ** 2)
                 self._getCarrierDensity = _getCarrierDensity
 
         elif self.direction == "edge":
@@ -151,7 +151,7 @@ class LaserInjection():
             self.y_step = self.z_step = self.r_step
             self.y_char = self.z_char = self.r_char
 
-            absorb_depth = self.lx * self.fx_rel
+            absorb_depth = self.l_x * self.fx_rel
             def _getCarrierDensity(x, y, z):
                 return self.getCarrierDensity(x - self.fx_abs, absorb_depth, (y - self.fy_abs) ** 2 + (z -self.fz_abs) ** 2)
             self._getCarrierDensity = _getCarrierDensity

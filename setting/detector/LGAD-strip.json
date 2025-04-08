@@ -3,9 +3,9 @@
     "det_model" : "lgad",
     "material" : "Si",
 
-    "lx" : 170,
-    "ly" : 5000,
-    "lz" : 55,
+    "l_x" : 170,
+    "l_y" : 5000,
+    "l_z" : 55,
 
     "striplenth" : 75,
     "elelenth" : 20,
@@ -75,5 +75,6 @@
     },
 
     "g4experiment" : "beta_source",
-    "amplifier" : "Broad_Band_UCSC"
+    "amplifier" : "Broad_Band_UCSC",
+    "daq" : "Alibava"
 }

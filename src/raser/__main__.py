@@ -66,6 +66,7 @@ parser_mcu.add_argument('label', help='LABEL to identify Micro Control Unit desi
 parser_resolution = subparsers.add_parser('resolution', help='resolution calculation for time, space and energy')
 parser_resolution.add_argument('det_name', help='name of the detector')
 parser_resolution.add_argument('-tct', type=str, help='specify TCT signal class')
+parser_resolution.add_argument('-daq', type=str, help='specify DAQ system')
 
 parser_signal = subparsers.add_parser('signal', help='generate signal')
 parser_signal.add_argument('det_name', help='name of the detector')

@@ -1,38 +1,70 @@
 {
-    "det_name" : "pixel",
-    "det_model" : "pixel",
+    "det_name" : "3D_pixel",
+    "det_model" : "3D_pixel",
     "material" : "SiC",
 
-    "lx" : 1500,
-    "ly" : 1500,
-    "lz" : 20,
+    "l_x" : 10000,
+    "l_y" : 10000,
+    "l_z" : 350,
+    
+    "e_r" : 50.0,
+    "e_gap" : 150.0,
+    "e_t" : [
+        {
+            "x_coord" : 5000,
+            "y_coord" : 5000,
+            "radius" : 50.0,
+            "doping" : "p"
+        },
+        {
+            "x_coord" : 4787.868,
+            "y_coord" : 4787.868,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 5212.132,
+            "y_coord" : 4787.868,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 4787.868,
+            "y_coord" : 5212.132,
+            "radius" : 50.0,
+            "doping" : "n"
+        },
+        {
+            "x_coord" : 5212.132,
+            "y_coord" : 5212.132,
+            "radius" : 50.0,
+            "doping" : "n"
+        }
+    ],
 
     "doping":{
-        "Acceptors" : "1e15*step(z-1e-8)",
-        "Donors" : "1.0e17*step(1e-8-z)"
+        "Acceptors" : "0",
+        "Donors" : "1e13"
     },
-
-    "avalanche_bond" : 3.0,
-    "avalanche_model" : "Hatakeyama",
 
     "bias" : {
         "electrode" : "top",
         "voltage" : -500
     },
-
-    "temperature" : 300.0,
     
+    "temperature" : 300.0,
+
     "area_factor" : 1,
     "default_dimension" : 3,
-    "read_out_contact" : ["top"],
+    "read_out_contact" : ["center"],
 
     "mesh" : {
         "gmsh_mesh":{
-            "file" : "setting/detector/3d_pixel.msh",
+            "file" : "setting/detector/3D_pixel.msh",
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
-                    "region" : "pixel", 
+                    "region" : "3D_pixel", 
                     "tag1" : "top", 
                     "tag2" : "bot"
                 }
@@ -44,10 +76,7 @@
         }
     },
 
-    "g4experiment" : "telescope",
-    "px" : 25.0,
-    "py" : 25.0,
-    "pz" : 20.0,
-
-    "amplifier" : "Broad_Band_UCSC"
+    "g4experiment" : "time_resolution",
+    "amplifier" : "Broad_Band_UCSC",
+    "daq" : "Alibava"
 }
