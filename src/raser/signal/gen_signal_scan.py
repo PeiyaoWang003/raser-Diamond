@@ -74,7 +74,7 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
         if len(my_g4p.p_steps[event-start_n]) > 5:
             effective_number += 1
             my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
-            ele_current = rdo.Amplifier(my_current.sum_cu, amplifier, is_cut=True)
+            ele_current = rdo.Amplifier(my_current.sum_cu, amplifier, seed=event, is_cut=True)
 
             e_dep = "%.5f"%(my_g4p.edep_devices[event-start_n]) #mv
             tag = "event" + str(event) + "_" + "Edep" + str(e_dep)

@@ -37,24 +37,22 @@ class InputWaveform():
                     continue
                 self.waveforms[i].append(line.strip().split(","))
 
-        self.ToA[i] = get_ToA(self.waveforms[i], self.threshold)
-        self.ToT[i] = get_ToT(self.waveforms[i], self.threshold)
         self.amplitude[i] = get_amplitude(self.waveforms[i])
-        self.charge[i] = get_charge(self.waveforms[i])
-        self.ToR[i] = get_ToR(self.waveforms[i], self.amplitude[i], CFD)
+        if self.amplitude[i] < self.threshold:
+            self.amplitude[i] = None
+            self.ToA[i] = None
+            self.ToT[i] = None
+            self.charge[i] = None
+            self.ToR[i] = None
+        else:
+            self.ToA[i] = get_ToA(self.waveforms[i], self.threshold)
+            self.ToT[i] = get_ToT(self.waveforms[i], self.threshold)
+            self.charge[i] = get_charge(self.waveforms[i])
+            self.ToR[i] = get_ToR(self.waveforms[i], self.amplitude[i], CFD)
 
     def get_total_data(self):
         self.data = {}
-        if max([abs(a) for a in self.amplitude]) < self.threshold:
-            self.data["gravity_center_ToT"] = None
-            self.data["gravity_center_amplitude"] = None
-            self.data["gravity_center_charge"] = None
-            self.data["ToA"] = None
-            self.data["ToT"] = None
-            self.data["amplitude"] = None
-            self.data["charge"] = None
-            self.data["ToR"] = None
-        elif self.read_ele_num == 1:
+        if self.read_ele_num == 1:
             self.data["gravity_center_ToT"] = 0 # No spacial resolution
             self.data["gravity_center_amplitude"] = 0
             self.data["gravity_center_charge"] = 0
@@ -84,14 +82,14 @@ def get_ToT(waveform, threshold):
         if abs(float(i[1])) > threshold:
             start = float(i[0])
             break
-        else:
-            return None
+    else:
+        return None
     for i in waveform[::-1]:
         if abs(float(i[1])) > threshold:
             end = float(i[0])
             break
-        else:
-            return None
+    else:
+        return None
     return end - start
 
 def get_amplitude(waveform):
@@ -170,10 +168,10 @@ class WaveformStatistics():
                 self.waveforms[0].append(iw.waveforms[0])
                 self.fill_data(iw.data, event_number)
 
-            x = [float(i[0]) for i in self.waveforms[0][0]]
             canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
             multigraph = ROOT.TMultiGraph("mg","")
             for waveform in (self.waveforms[0]):
+                x = [float(i[0]) for i in waveform]
                 y = [float(i[1]) for i in waveform]
                 graph = ROOT.TGraph(len(x), array('f', x), array('f', y))
                 multigraph.Add(graph)
@@ -207,8 +205,8 @@ class WaveformStatistics():
             for j in range(read_ele_num):
                 canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                 multigraph = ROOT.TMultiGraph("mg","")
-                x = [float(i[0]) for i in self.waveforms[j][0]]
                 for waveform in (self.waveforms[j]):
+                    x = [float(i[0]) for i in waveform]
                     y = [float(i[1]) for i in waveform]
                     graph = ROOT.TGraph(len(x), array('f', x), array('f', y))
                     multigraph.Add(graph)
