@@ -71,6 +71,8 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
 
     length = 1000 # time length of the signal
     time = array('d', [0. for _ in range(length)])
+    amp_length = 20000 # time length of amplified signal
+    time_amp = array('d', [0. for _ in range(amp_length)])
 
     tree_cu = ROOT.TTree("tree", "Waveform Data")
     tree_cu.Branch("time", time, "time[{length}]/D".format(length=length))
@@ -107,11 +109,11 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
             tree_ct.Branch(i, other_data_ct[i], f"{i}/D")
     
     tree_amp = ROOT.TTree("tree", "Waveform Data")
-    tree_amp.Branch("time", time, "time[{length}]/D".format(length=length))
+    tree_amp.Branch("time", time_amp, "time[{length}]/D".format(length=amp_length))
     data_amp = []
     for i in range(my_d.read_ele_num):
-        data_amp.append(array('d', [0. for _ in range(length)]))
-        tree_amp.Branch("data_amp_{i}".format(i=i), data_amp[i], "data_amp_{i}[{length}]/D".format(i=i,length=length))
+        data_amp.append(array('d', [0. for _ in range(amp_length)]))
+        tree_amp.Branch("data_amp_{i}".format(i=i), data_amp[i], "data_amp_{i}[{length}]/D".format(i=i,length=amp_length))
     
     event_amp = array('i', [0])
     tree_amp.Branch("event", event_amp, "event/I")
@@ -165,7 +167,7 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
                 tree_ct.Fill()
 
             for j in range(ele_current.amplified_currents[0].GetNbinsX()):
-                time[j] = j*ele_current.amplified_currents[0].GetBinWidth(j)
+                time_amp[j] = j*ele_current.amplified_currents[0].GetBinWidth(j)
             for i in range(len(ele_current.amplified_currents)):
                 for j in range(ele_current.amplified_currents[i].GetNbinsX()):
                     data_amp[i][j] = ele_current.amplified_currents[i].GetBinContent(j)
