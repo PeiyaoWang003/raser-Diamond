@@ -266,14 +266,15 @@ def draw2D(x,y,value,title,v,path):
     graph = ROOT.TGraph2D()
     graph_1d = ROOT.TGraph()
     j = 0
-    y_middle = 0.5*max(y)
-    x_middle = 0.5*max(x)
+    y_middle = 0.5*(max(y)-min(y))
+    x_middle = 0.5*(max(x)-min(x))
     for i in range(len(x)):
         graph.SetPoint(i, y[i]*1e4, x[i]*1e4, value[i]) 
         if abs(y[i]*1e4 - y_middle) < 0.1 :
             graph_1d.SetPoint(j, x[i]*1e4,value[i])
             j=j+1
     canvas = ROOT.TCanvas("canvas", title, 1000, int(1000*x_middle/y_middle))
+    canvas.SetRightMargin(0.15)
     graph.Draw("CONT4Z")
     canvas.Draw()
     graph.GetXaxis().SetTitle("x [um]")

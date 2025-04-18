@@ -10,8 +10,6 @@
     "p_r" : 150,
     
     "read_ele_num" : 7,
-    "weighting_field_ele_num" : 1,
-    "field_shift_r" : 0,
 
     "e_r" : 50.0,
     "e_gap" : 150.0,
@@ -74,7 +72,8 @@
 
     "area_factor" : 1,
     "default_dimension" : 3,
-    "read_out_contact" : ["center"],
+    "read_out_contact" : [{"r_span":2, "name":"top"}],
+    "field_shift_r" : 0,
 
     "mesh" : {
         "gmsh_mesh":{

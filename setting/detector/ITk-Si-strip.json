@@ -3,14 +3,12 @@
     "det_model" : "strip",
     "material" : "Si",
 
-    "l_x" : 750,
+    "l_x" : 175,
     "l_y" : 5000,
     "l_z" : 305,
 
     "p_x" : 75,
-    "read_ele_num" : 10,
-    "weighting_field_ele_num" : 3,
-    "field_shift_x" : 47.5,
+    "read_ele_num" : 3,
 
     "doping": {
         "Acceptors" : "4e12*step(x-1e-4)+1e15*step(x-300e-4)",
@@ -30,7 +28,10 @@
 
     "area_factor" : 0.01,
     "default_dimension" : 2,
-    "read_out_contact" : ["top1", "top2", "top3"],
+    "read_out_contact" : [{"x_span":0, "y_span":0, "name":"top1"}, {"x_span":0, "y_span":0, "name":"top2"}, {"x_span":0, "y_span":0, "name":"top3"}],
+    "field_shift_x" : 0,
+    "read_out_contact" : [{"x_span":1, "y_span":0, "name":"top2"}],
+    "field_shift_x" : 87.5,
 
     "mesh" : {
         "2D_mesh" : {

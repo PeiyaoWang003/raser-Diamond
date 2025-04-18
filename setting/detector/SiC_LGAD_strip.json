@@ -1,6 +1,6 @@
 {
     "det_name" : "SiC_LGAD_strip",
-    "det_model" : "lgad",
+    "det_model" : "lgadstrip",
     "material" : "SiC",
 
     "l_x" : 420,
@@ -9,8 +9,6 @@
 
     "p_x" : 120,
     "read_ele_num" : 3,
-    "weighting_field_ele_num" : 3,
-    "field_shift_x" : 90,
 
     "doping":{
         "Acceptors" : "2.0e19*step(0.3e-4-x)",
@@ -31,7 +29,10 @@
 
     "area_factor" : 127.32,
     "default_dimension" : 2,
-    "read_out_contact" : ["top1", "top2", "top3"],
+    "read_out_contact" : [{"x_span":0, "y_span":0, "name":"top1"}, {"x_span":0, "y_span":0, "name":"top2"}, {"x_span":0, "y_span":0, "name":"top3"}],
+    "field_shift_x" : 0,
+    "read_out_contact" : [{"x_span":1, "y_span":0, "name":"top2"}],
+    "field_shift_x" : 210,
 
     "mesh" : {
         "2D_mesh" : {

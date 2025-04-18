@@ -21,6 +21,8 @@ parser_afe = subparsers.add_parser('afe', help='Analog Front End readout')
 parser_afe.add_argument('label', help='LABEL to identify electronics operations')
 parser_afe.add_argument('name', help='LABEL to identify electronics files')
 parser_afe.add_argument('-source', help='source current file for recreate_batch_signals')
+parser_afe.add_argument('-job_file', help='job file for recreate_batch_signals')
+parser_afe.add_argument('-tct', help='reprocess TCT signal for recreate_batch_signals')
 
 parser_bmos = subparsers.add_parser('bmos', help='Beam Monitor Online System')
 parser_bmos.add_argument('label', help='LABEL to identify BMOS simulations')

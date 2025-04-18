@@ -1,17 +1,21 @@
 .title KiCad schematic
 .include "setting/electronics/Simulation_SPICE.sp"
-R5 OUT4 0 10kOhm
+R8 Net-_C4-Pad1_ Net-_R8-Pad2_ 10kOhm
+V6 0 Net-_U3-V-_ DC 15 
+XU3 Net-_U3-+_ Net-_U3--_ Net-_U3-V+_ Net-_U3-V-_ Net-_R8-Pad2_ kicad_builtin_opamp POLE=300k GAIN=350 VOFF=0
 R7 Net-_U3--_ Net-_C3-Pad1_ 100kOhm
 R6 Net-_U3-+_ Net-_C3-Pad1_ 100kOhm
-C4 OUT4 0 100f
+C4 Net-_C4-Pad1_ 0 100f
 V5 Net-_U3-V+_ 0 DC 15 
-V6 0 Net-_U3-V-_ DC 15 
-R8 OUT4 Net-_R8-Pad2_ 10kOhm
-XU3 Net-_U3-+_ Net-_U3--_ Net-_U3-V+_ Net-_U3-V-_ Net-_R8-Pad2_ kicad_builtin_opamp POLE=300k GAIN=350 VOFF=0
-R2 Net-_U1--_ IN1 1kOhm
-I2 0 IN1 TRNOISE( 100n 10p 0 0 0 0 0 ) AC 1 0 
-I1 0 IN1 PULSE( 0 0.3uA 0n 1p 1p 3.333n 1 0 ) AC 1  
-C1 IN1 0 6p
+R5 Net-_C4-Pad1_ 0 10kOhm
+V8 Net-_C4-Pad1_ OUT4 TRNOISE( 4m 10p 0 0 0 0 0 ) AC 0 0 
+C2 IN2 Net-_U1--_ 60f
+R1 IN2 Net-_U1--_ 105kOhm
+V2 0 Net-_U1-V-_ DC 15 
+C6 IN2 Net-_U1--_ 68f
+R3 Net-_U2--_ IN2 15kOhm
+V1 Net-_U1-V+_ 0 DC 15 AC 1  
+XU1 0 Net-_U1--_ Net-_U1-V+_ Net-_U1-V-_ IN2 kicad_builtin_opamp POLE=20Meg GAIN=1778 VOFF=0
 C5 Net-_U3--_ IN3 100f
 C3 Net-_C3-Pad1_ 0 100f
 V4 0 Net-_U2-V-_ DC 15 
@@ -19,13 +23,9 @@ R4 IN3 Net-_U2--_ 150kOhm
 V7 Net-_C3-Pad1_ 0 DC 1.5 AC 1  
 V3 Net-_U2-V+_ 0 DC 15 
 XU2 0 Net-_U2--_ Net-_U2-V+_ Net-_U2-V-_ IN3 kicad_builtin_opamp POLE=6.25Meg GAIN=251 VOFF=0
-R1 IN2 Net-_U1--_ 105kOhm
-C2 IN2 Net-_U1--_ 60f
-V2 0 Net-_U1-V-_ DC 15 
-C6 IN2 Net-_U1--_ 68f
-R3 Net-_U2--_ IN2 15kOhm
-V1 Net-_U1-V+_ 0 DC 15 AC 1  
-XU1 0 Net-_U1--_ Net-_U1-V+_ Net-_U1-V-_ IN2 kicad_builtin_opamp POLE=20Meg GAIN=1778 VOFF=0
+I1 0 IN1 PULSE( 0 0.3uA 0n 1p 1p 3.333n 1 0 ) AC 1  
+C1 IN1 0 6p
+R2 Net-_U1--_ IN1 1kOhm
 
 .control
 noise v(OUT4) V1 dec 100 100Hz 100GHz

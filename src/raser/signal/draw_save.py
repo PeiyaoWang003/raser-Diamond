@@ -170,6 +170,43 @@ def draw_drift_path(my_d,my_g4p,my_f,my_current,path):
             del x_array[:]
             del y_array[:]
             del z_array[:]
+    if 'lgad' in my_d.det_model:
+        for hole in my_current.gain_current.holes:
+            n=len(hole.path)
+            if(n>0):
+                x_array.extend([step[0] for step in hole.path])
+                y_array.extend([step[1] for step in hole.path]) 
+                z_array.extend([step[2] for step in hole.path])              
+                gr_p = ROOT.TPolyLine3D(n,x_array,y_array,z_array)
+                gr_p.SetLineColor(617)#kMagneta+1
+                gr_p.SetLineStyle(1)
+                gr_p.Draw("SAME")
+                gr_2D_p=ROOT.TGraph(n,x_array,z_array)
+                gr_2D_p.SetMarkerColor(617)#kMagneta+1
+                gr_2D_p.SetLineColor(617)#kMagneta+1
+                gr_2D_p.SetLineStyle(1)
+                mg.Add(gr_2D_p)
+                del x_array[:]
+                del y_array[:]
+                del z_array[:]
+        for electron in my_current.gain_current.electrons:
+            m=len(electron.path)
+            if(m>0):
+                x_array.extend([step[0] for step in electron.path])
+                y_array.extend([step[1] for step in electron.path])
+                z_array.extend([step[2] for step in electron.path])                
+                gr_n = ROOT.TPolyLine3D(m,x_array,y_array,z_array)
+                gr_n.SetLineColor(867)#kAzure+7
+                gr_n.SetLineStyle(1)
+                gr_n.Draw("SAME")
+                gr_2D_n=ROOT.TGraph(m,x_array,z_array)
+                gr_2D_n.SetMarkerColor(867)#kAzure+7
+                gr_2D_n.SetLineColor(867)#kAzure+7
+                gr_2D_n.SetLineStyle(1)
+                mg.Add(gr_2D_n)
+                del x_array[:]
+                del y_array[:]
+                del z_array[:]
     particle_track = my_g4p.p_steps_current[my_g4p.selected_batch_number]
     n = len(particle_track)
     if(n>0):

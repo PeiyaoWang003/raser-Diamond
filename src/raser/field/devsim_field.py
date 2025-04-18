@@ -20,11 +20,11 @@ from util.math import *
 verbose = 0
 
 class DevsimField:
-    def __init__(self, device_name, dimension, voltage, read_out_contacts, irradiation_flux = 0):
+    def __init__(self, device_name, dimension, voltage, read_out_contact, irradiation_flux = 0):
         self.name = device_name
         self.voltage = voltage
         self.dimension = dimension
-        self.weighting_field_ele_num = int(len(read_out_contacts))
+        self.read_out_contact = read_out_contact
         # need to be consistent to the detector json
 
         path = "./output/field/{}/".format(self.name)
@@ -32,13 +32,13 @@ class DevsimField:
         # Weighting Potential is universal for all irradiation flux
         # TODO: Net Doping should be here too
         WeightingPotentialFiles = []
-        for contact in read_out_contacts:
-            WeightingPotentialFiles.append(path + "weightingfield/{}/Potential_{}V.pkl".format(contact, 1))
+        for contact in read_out_contact:
+            WeightingPotentialFiles.append(path + "weightingfield/{}/Potential_{}V.pkl".format(contact['name'], 1))
 
         if irradiation_flux != 0:
             path = "./output/field/{}/{}/".format(self.name, irradiation_flux)
 
-        doping_file_pattern = re.compile(r'^NetDoping_(\d+\.?\d*)V\.pkl$')
+        doping_file_pattern = re.compile(r'^NetDoping_(-?\d+\.?\d*)V\.pkl$')
         for filename in os.listdir(path):
             if doping_file_pattern.match(filename):
                 DopingFile = path + filename
@@ -102,7 +102,7 @@ class DevsimField:
 
     def set_w_p(self,WeightingPotentialFiles):
         self.WeightingPotential = []
-        for i in range(self.weighting_field_ele_num):
+        for i in range(len(self.read_out_contact)):
             WeightingPotentialFile = WeightingPotentialFiles[i]
             try:
                 with open(WeightingPotentialFile,'rb') as file:

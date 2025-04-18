@@ -24,7 +24,7 @@
 
     "area_factor" : 1,
     "default_dimension" : 2,
-    "read_out_contact" : ["top"],
+    "read_out_contact" : [{"x_span":0, "y_span":0, "name":"top"}],
 
     "mesh" : {
         "1D_mesh" : {
