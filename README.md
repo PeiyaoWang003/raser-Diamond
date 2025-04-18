@@ -128,11 +128,11 @@ For signal simulation of HPK devices:
 
 For signal simulation of CMOS strip detector:
 
-    mesh CMOS_strip_C
-    raser field -umf [-cv] CMOS_strip_C
-    raser field -wf CMOS_strip_C
-    raser signal CMOS_strip_C
-    raser tct signal CMOS_strip_C <laser_name in `setting/laser`>
+    mesh CMOS_strip
+    raser field -umf [-cv] CMOS_strip
+    raser field -wf CMOS_strip
+    raser signal CMOS_strip
+    raser tct signal CMOS_strip <laser_name in `setting/laser`>
 
 For time resolution of NJU SiC PiN in https://doi.org/10.3389/fphy.2022.718071 :
 

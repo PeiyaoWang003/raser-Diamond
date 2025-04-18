@@ -24,26 +24,11 @@
     "area_factor" : 1,
     "default_dimension" : 2,
     "read_out_contact" : [{"x_span":2, "y_span":0, "name":"top"}],
-    "field_shift_x" : 0,
+    "field_shift_x" : -37.75,
 
-    "mesh" : {
-        "gmsh_mesh":{
-            "file" : "./setting/detector/CMOS_strip_4k.msh",
-            "region" : [
-                {
-                    "material" : "Silicon", 
-                    "region" : "CMOS_strip_4k",
-                    "gmsh_name": "CMOS_strip_4k"
-                }
-            ],
-            "contact" : [
-                {"name" : "top", "region" : "CMOS_strip_4k", "material" : "metal", "gmsh_name" : "top"},
-                {"name" : "bot", "region" : "CMOS_strip_4k", "material" : "metal", "gmsh_name" : "bot"}
-            ]
-        }
-    },
+    "mesh" : "tcad_mesh",
 
-    "g4experiment" : "beta_source",
+    "g4experiment" : "proton_source_21",
     "amplifier" : "ABCStar_fe",
-    "daq" : "Alibava"
+    "daq" : "CMOS_strip"
 }

@@ -49,11 +49,7 @@ class Detector:
         self.g4experiment = self.device_dict['g4experiment']
         self.amplifier = self.device_dict['amplifier']
 
-        if "planar" in self.det_model or "lgad" in self.det_model:
-            self.x_ele_num = self.device_dict['x_ele_num']
-            self.y_ele_num = self.device_dict['y_ele_num']
-            self.read_ele_num = 1
-        elif "strip" in self.det_model:
+        if "strip" in self.det_model:
             self.x_ele_num = self.device_dict['read_ele_num']
             self.y_ele_num = 1
             self.read_ele_num = self.device_dict['read_ele_num']
@@ -66,6 +62,10 @@ class Detector:
             self.field_shift_y = self.device_dict['field_shift_y']
         elif "hexagonal" in self.det_model:
             pass
+        else:
+            self.x_ele_num = 1
+            self.y_ele_num = 1
+            self.read_ele_num = 1
 
         if "lgad" in self.det_model:
             self.avalanche_bond = self.device_dict['avalanche_bond']

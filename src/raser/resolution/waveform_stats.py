@@ -36,10 +36,10 @@ class InputWaveform():
             self.waveforms[i] = list(zip(time, amp))
             self.amplitude[i] = get_amplitude(self.waveforms[i])
             if self.amplitude[i] < self.threshold:
-                self.amplitude[i] = None
+                self.amplitude[i] = 0
                 self.ToA[i] = None
-                self.ToT[i] = None
-                self.charge[i] = None
+                self.ToT[i] = 0
+                self.charge[i] = 0
                 self.ToR[i] = None
             else:
                 self.ToA[i] = get_ToA(self.waveforms[i], self.threshold)
@@ -82,13 +82,13 @@ def get_ToT(waveform, threshold):
             start = float(i[0])
             break
     else:
-        return None
+        return 0
     for i in waveform[::-1]:
         if abs(float(i[1])) > threshold:
             end = float(i[0])
             break
     else:
-        return None
+        return 0
     return end - start
 
 def get_amplitude(waveform):
@@ -118,16 +118,14 @@ def get_total_amp(amp_list):
     return sum(new_list)
 
 def get_gravity_center(amp_list):
-    zip_list = zip(amp_list,range(len(amp_list)))
-    new_zip = []
-    for (amp,i) in zip_list:
-        if amp == None:
-            continue
-        else:
-            new_zip.append((amp,i))
-    if len(new_zip) == 0:
+    max_amp = max(amp_list)
+    i_max = amp_list.index(max_amp)
+    if max_amp == 0:
         return None
-    return sum([amp * i for (amp,i) in new_zip]) / sum([amp for (amp,i) in new_zip])
+    if i_max < len(amp_list) - 1 and (i_max == 0 or amp_list[i_max+1] >= amp_list[i_max-1]):
+        return (i_max * amp_list[i_max] + (i_max+1) * amp_list[i_max+1])/(amp_list[i_max] + amp_list[i_max+1])
+    elif i_max == len(amp_list) - 1 or amp_list[i_max+1] <= amp_list[i_max-1]: # ensured i_max != 0
+        return (i_max * amp_list[i_max] + (i_max-1) * amp_list[i_max-1])/(amp_list[i_max] + amp_list[i_max-1])
 
 def remove_none(list):
     new_list = []
@@ -160,13 +158,17 @@ class WaveformStatistics():
             path = os.path.join(input_path, file)
             file_pointer = ROOT.TFile(path, "READ")
             tree = file_pointer.Get("tree")
-            for i in range(tree.GetEntries()):
+            n = tree.GetEntries()
+            for i in range(n):
                 tree.GetEntry(i) 
                 iw = InputWaveform(tree, threshold, read_ele_num)
                 self.fill_data(iw.data)
                 if vis == True:
                     for j in range(read_ele_num):
                         self.waveforms[j].append(iw.waveforms[j])
+
+            print("read {n} events from {file}".format(n=n, file=file))
+            file_pointer.Close()
 
         if vis == True:
             for j in range(read_ele_num):

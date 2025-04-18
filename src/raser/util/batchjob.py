@@ -31,15 +31,12 @@ def main(destination_subfolder, command, batch_level, is_test):
     command_name = command.replace(" ","_").replace("/","_")
     jobfile_name = "./output/{}/jobs/".format(destination_subfolder)+command_name+".job"
     IMGFILE = os.environ.get('IMGFILE')
-    BINDPATH = os.environ.get('BINDPATH')
-    raser_shell = "/usr/bin/apptainer exec --env-file cfg/env -B" + " " \
-                + BINDPATH + " " \
+    raser_shell = "/usr/bin/apptainer exec --env-file cfg/env" + " " \
                 + IMGFILE + " " \
                 + "python3 src/raser"
     if "-umf" in command:
         command = command.replace("-umf", "")
         raser_shell = "/usr/bin/apptainer exec --env-file cfg/env -B" + " " \
-                + BINDPATH + " " \
                 + IMGFILE + " " \
                 + "python3 -mdevsim.umfpack.umfshim src/raser/__main__.py"
     gen_job(jobfile_name, run_code=raser_shell+' '+command)

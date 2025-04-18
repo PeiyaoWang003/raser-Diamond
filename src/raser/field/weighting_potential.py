@@ -14,27 +14,25 @@ import numpy as np
 from . import devsim_draw
 from util.output import create_path
 
-def main(v1, v2, det_name):
-    v1 = float(v1)
-    v2 = float(v2)
-    diff = v2-v1
+def main(v, electrode_name, det_name):
+    v = float(v)
 
-    v1_potential_file = 'output/field/'+det_name+'/Potential_'+str(v1)+'V.pkl'
-    v2_potential_file = 'output/field/'+det_name+'/Potential_'+str(v2)+'V.pkl'
-    with open(v1_potential_file,'rb') as file:
-        v1_potential = pickle.load(file)
-    with open(v2_potential_file,'rb') as file:
-        v2_potential = pickle.load(file)
-    v1_values = np.array(v1_potential['values'])
-    v2_values = np.array(v2_potential['values'])
-    points = v1_potential['points']
-    dimension = v1_potential['metadata']['dimension']
+    potential_file = 'output/field/'+det_name+'/Potential_'+str(v)+'V.pkl'
+    added_potential_file = 'output/field/'+det_name+'/weightingfield/'+electrode_name+'/Potential_'+str(v)+'V.pkl'
+    with open(potential_file,'rb') as file:
+        potential = pickle.load(file)
+    with open(added_potential_file,'rb') as file:
+        added_potential = pickle.load(file)
+    values = np.array(potential['values'])
+    added_values = np.array(added_potential['values'])
+    points = potential['points']
+    dimension = potential['metadata']['dimension']
 
-    values = (v2_values-v1_values)/diff +1
-    # +1 forassume v1_ and v2_values obtained from bottom biasing
+    values = (added_values-values)/1 
+    # assume 1 volt added for weighting field calculation
 
     w_p_data = {'points': points, 'values': values, 'metadata':{'voltage': 1, 'dimension': dimension}}
-    path = 'output/field/'+det_name+'/weightingfield/top/'
+    path = 'output/field/'+det_name+'/weightingfield/'+electrode_name+'/'
     create_path(path)
     w_p_file = path + 'Potential_1V.pkl'
     with open(w_p_file, 'wb') as file:
