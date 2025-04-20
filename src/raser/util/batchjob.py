@@ -21,11 +21,8 @@ def main(destination_subfolder, command, batch_level, is_test):
     gid = stat_info.st_gid
     user = pwd.getpwuid(uid)[0]
     group = grp.getgrgid(gid)[0]
-    
-    if batch_level < 0:
-        mem = 10 * (-batch_level)
-    elif batch_level > 0:
-        mem = 5000 * batch_level
+
+    mem = 8000 * batch_level
  
     create_path("./output/{}/jobs".format(destination_subfolder))
     command_name = command.replace(" ","_").replace("/","_")

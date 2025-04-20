@@ -1,6 +1,6 @@
 {
     "geant4_model" : "proton_source",
-    "total_events" : 50,
+    "total_events" : 20,
     
     "object":{},
 

@@ -4,6 +4,7 @@ def main(kwargs):
     label = kwargs['label']
     scan_number = kwargs['scan']
     job_number = kwargs['job']
+    mem = kwargs['mem']
 
     if label == 'signal':
         if scan_number != None:
@@ -22,7 +23,7 @@ def main(kwargs):
                 command = ' '.join(args) 
                 print(command)
                 destination = 'signal'
-                batchjob.main(destination, command, 1, is_test=False)
+                batchjob.main(destination, command, mem, is_test=False)
         elif job_number != None:
             from . import gen_signal_scan
             gen_signal_scan.main(kwargs)
