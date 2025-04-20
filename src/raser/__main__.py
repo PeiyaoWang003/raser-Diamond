@@ -80,6 +80,7 @@ parser_signal.add_argument('-g4_vis', help='visualization of Geant4 experiment',
 parser_signal.add_argument('-amp', '--amplifier', type=str, help='amplifier')
 parser_signal.add_argument('-s', '--scan', type=int, help='instance number for scan mode')
 parser_signal.add_argument('--job', type=int, help='flag of run in job')
+parser_signal.add_argument('-mem', type=int, help='memory limit of the job in 8GB', default=1)
 
 parser_tct = subparsers.add_parser('tct', help='TCT simulation')
 parser_tct.add_argument('label', help='LABEL to identify TCT options')

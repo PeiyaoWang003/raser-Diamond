@@ -63,6 +63,8 @@ class CarrierCluster:
 
         self.field_shift_x = field_shift_x
         self.field_shift_y = field_shift_y
+        # for odd strip, field shift should let x_reduced = 0 at the center of the strip
+        # for even strip, field shift should let x_reduced = 0 at the edge of the strip
         self.p_x = p_x
         self.p_y = p_y
         self.x_num = int((x_init-l_x/2) // p_x + n_x/2.0)
@@ -70,6 +72,7 @@ class CarrierCluster:
         if len(weighting_field) == 1 and (weighting_field[0]['x_span'] != 0 or weighting_field[0]['y_span'] != 0):
             self.x_reduced = (x_init-l_x/2) % p_x + field_shift_x
             self.y_reduced = (y_init-l_y/2) % p_y + field_shift_y
+            print(self.x_reduced,x_init)
 
         else:
             self.x_reduced = x_init

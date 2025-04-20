@@ -50,25 +50,6 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
 
     effective_number = 0
 
-    ele_json = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier + ".json"
-    ele_cir = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier + ".cir"
-    if os.path.exists(ele_json):
-        ROOT.gRandom.SetSeed(instance_number) # to ensure time resolution result reproducible
-    elif os.path.exists(ele_cir):
-        subprocess.run(['ngspice -b '+ele_cir], shell=True)
-        noise_raw = "./output/elec/" + amplifier + "/noise.raw" # need to be fixed in the .cir
-        try:
-            with open(noise_raw, 'r') as f_in:
-                lines = f_in.readlines()
-                freq, noise = [],[]
-                for line in lines:
-                    freq.append(float(line.split()[0]))
-                noise.append(float(line.split()[1]))
-        except FileNotFoundError:
-            print("Warning: ngspice .noise experiment is not set.")
-            print("Please check the .cir file or make sure you have set an TRNOISE source.")
-        # TODO: fix noise seed, add noise from ngspice .noise spectrum
-
     length = 1000 # time length of the signal
     time = array('d', [0. for _ in range(length)])
     amp_length = 20000 # time length of amplified signal
@@ -229,6 +210,27 @@ def main(kwargs):
 
     g4_seed = instance_number * total_events
     my_g4p = g4g.Particles(my_d, g4experiment, g4_seed)
+
+    ele_json = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier + ".json"
+    ele_cir = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier + ".cir"
+    if os.path.exists(ele_json):
+        ROOT.gRandom.SetSeed(instance_number) # to ensure time resolution result reproducible
+    elif os.path.exists(ele_cir):
+        # subprocess.run(['ngspice -b '+ele_cir], shell=True)
+        # noise_raw = "./output/elec/" + amplifier + "/noise.raw" # need to be fixed in the .cir
+        # try:
+        #     with open(noise_raw, 'r') as f_in:
+        #         lines = f_in.readlines()
+        #         freq, noise = [],[]
+        #         for line in lines:
+        #             freq.append(float(line.split()[0]))
+        #         noise.append(float(line.split()[1]))
+        # except FileNotFoundError:
+        #     print("Warning: ngspice .noise experiment is not set.")
+        #     print("Please check the .cir file or make sure you have set an TRNOISE source.")
+        # TODO: fix noise seed, add noise from ngspice .noise spectrum
+        pass
+    
     batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number)
     del my_g4p
 
