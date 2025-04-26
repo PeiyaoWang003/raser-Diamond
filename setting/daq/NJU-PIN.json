@@ -1,3 +1,4 @@
 {
-    "threshold" : 15
+    "threshold" : 15,
+    "amplitude_threshold" : 20
 }

@@ -62,7 +62,6 @@ def main(amp_name, det_name, file, tct=None):
 
     if "strip" in my_d.det_model:
         for i in range(n):
-            print(waveforms[i])
             cross_talk_cu = cross_talk(waveforms[i])
             for j in range(cross_talk_cu[0].GetNbinsX()):
                 time[j] = j*cross_talk_cu[0].GetBinWidth(j)
