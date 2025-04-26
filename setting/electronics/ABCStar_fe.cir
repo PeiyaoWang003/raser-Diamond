@@ -8,7 +8,7 @@ R6 Net-_U3-+_ Net-_C3-Pad1_ 100kOhm
 C4 Net-_C4-Pad1_ 0 100f
 V5 Net-_U3-V+_ 0 DC 15 
 R5 Net-_C4-Pad1_ 0 10kOhm
-V8 Net-_C4-Pad1_ OUT4 TRNOISE( 4m 10p 0 0 0 0 0 ) AC 0 0 
+V8 Net-_C4-Pad1_ OUT4 TRNOISE( 10m 10p 0 0 0 0 0 ) AC 0 0 
 C2 IN2 Net-_U1--_ 60f
 R1 IN2 Net-_U1--_ 105kOhm
 V2 0 Net-_U1-V-_ DC 15 

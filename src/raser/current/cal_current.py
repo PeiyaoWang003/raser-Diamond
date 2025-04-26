@@ -72,7 +72,6 @@ class CarrierCluster:
         if len(weighting_field) == 1 and (weighting_field[0]['x_span'] != 0 or weighting_field[0]['y_span'] != 0):
             self.x_reduced = (x_init-l_x/2) % p_x + field_shift_x
             self.y_reduced = (y_init-l_y/2) % p_y + field_shift_y
-            print(self.x_reduced,x_init)
 
         else:
             self.x_reduced = x_init

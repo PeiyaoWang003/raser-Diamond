@@ -19,22 +19,24 @@ class InputWaveform():
     charge : total charge for current sensitive preamp
     ToR : time of ratio (CFD)
     """
-    def __init__(self, input_entry, threshold, read_ele_num=1, CFD=CFD):
+    def __init__(self, input_entry, threshold, amplitude_threshold, read_ele_num=1, CFD=CFD):
         self.waveforms = [None for _ in range(read_ele_num)]
         self.read_ele_num = read_ele_num
         self.CFD = CFD
+        self.peak_time = [0 for i in range(read_ele_num)]
         self.ToA = [0 for i in range(read_ele_num)]
         self.ToT = [0 for i in range(read_ele_num)]
         self.amplitude = [0 for i in range(read_ele_num)] # for charge sensitive pre amp
         self.charge = [0 for i in range(read_ele_num)] # for current sensitive pre amp
         self.ToR = [0 for i in range(read_ele_num)]
         self.threshold = threshold
+        self.amplitude_threshold = amplitude_threshold
 
         time = input_entry.time
         for i in range(read_ele_num):
             amp = eval(f"input_entry.data_amp_{i}")
             self.waveforms[i] = list(zip(time, amp))
-            self.amplitude[i] = get_amplitude(self.waveforms[i])
+            self.amplitude[i], self.peak_time[i] = get_amplitude(self.waveforms[i])
             if self.amplitude[i] < self.threshold:
                 self.amplitude[i] = 0
                 self.ToA[i] = None
@@ -42,16 +44,25 @@ class InputWaveform():
                 self.charge[i] = 0
                 self.ToR[i] = None
             else:
-                self.ToA[i] = get_ToA(self.waveforms[i], self.threshold)
-                self.ToT[i] = get_ToT(self.waveforms[i], self.threshold)
+                self.ToA[i] = get_ToA(self.waveforms[i], self.threshold, self.peak_time[i])
+                self.ToT[i] = get_ToT(self.waveforms[i], self.threshold, self.peak_time[i])
                 self.charge[i] = get_charge(self.waveforms[i])
-                self.ToR[i] = get_ToR(self.waveforms[i], self.amplitude[i], CFD)
+                self.ToR[i] = get_ToR(self.waveforms[i], CFD, self.peak_time[i])
 
         self.get_total_data()
 
     def get_total_data(self):
         self.data = {}
-        if self.read_ele_num == 1:
+        if max(self.amplitude) < self.amplitude_threshold:
+            self.data["gravity_center_ToT"] = None
+            self.data["gravity_center_amplitude"] = None
+            self.data["gravity_center_charge"] = None
+            self.data["ToA"] = None
+            self.data["ToT"] = None
+            self.data["amplitude"] = None
+            self.data["charge"] = None
+            self.data["ToR"] = None
+        elif self.read_ele_num == 1:
             self.data["gravity_center_ToT"] = 0 # No spacial resolution
             self.data["gravity_center_amplitude"] = 0
             self.data["gravity_center_charge"] = 0
@@ -62,29 +73,29 @@ class InputWaveform():
             self.data["ToR"] = self.ToR[0]
         else:
             # assume strip, one dimensional spacial resolution
-            self.data["gravity_center_ToT"] = get_gravity_center(self.ToT)
-            self.data["gravity_center_amplitude"] = get_gravity_center(self.amplitude)
-            self.data["gravity_center_charge"] = get_gravity_center(self.charge)
+            self.data["gravity_center_ToT"] = get_gravity_center(self.ToT, 10e-9) # TODO: assign a proper value for all DAQ systems
+            self.data["gravity_center_amplitude"] = get_gravity_center(self.amplitude, self.amplitude_threshold)
+            self.data["gravity_center_charge"] = get_gravity_center(self.charge, 1e5) # TODO: assign a proper value for all DAQ systems
             self.data["ToA"] = get_conjoined_time(self.ToA) # TODO: conjoint measurement
-            self.data["ToT"] = get_total_amp(self.ToT)
-            self.data["amplitude"] = get_total_amp(self.amplitude)
-            self.data["charge"] = get_total_amp(self.charge)
+            self.data["ToT"] = get_total_amp(self.ToT, 10e-9)
+            self.data["amplitude"] = get_total_amp(self.amplitude, self.amplitude_threshold)
+            self.data["charge"] = get_total_amp(self.charge, 1e5)
             self.data["ToR"] = get_conjoined_time(self.ToR) # TODO: conjoint measurement
 
-def get_ToA(waveform, threshold):
-    for i in waveform:
-        if abs(float(i[1])) > threshold:
+def get_ToA(waveform, threshold, peak_time):
+    for i in waveform[peak_time::-1]:
+        if abs(float(i[1])) < threshold:
             return float(i[0])
 
-def get_ToT(waveform, threshold):
-    for i in waveform:
-        if abs(float(i[1])) > threshold:
+def get_ToT(waveform, threshold, peak_time):
+    for i in waveform[peak_time::-1]:
+        if abs(float(i[1])) < threshold:
             start = float(i[0])
             break
     else:
         return 0
-    for i in waveform[::-1]:
-        if abs(float(i[1])) > threshold:
+    for i in waveform[peak_time:]:
+        if abs(float(i[1])) < threshold:
             end = float(i[0])
             break
     else:
@@ -92,14 +103,15 @@ def get_ToT(waveform, threshold):
     return end - start
 
 def get_amplitude(waveform):
-    return max(abs(float(i[1])) for i in waveform)
+    return max(abs(float(i[1])) for i in waveform), waveform.index(max(waveform, key=lambda x: abs(float(x[1]))))
 
 def get_charge(waveform):
     return abs(sum(float(i[1]) for i in waveform))
 
-def get_ToR(waveform, amplitude, CFD):
+def get_ToR(waveform, CFD, peak_time):
     # CFD = Constant Fraction Discriminator
-    for i in waveform:
+    amplitude = waveform[peak_time][1]
+    for i in waveform[peak_time::-1]:
         if abs(float(i[1])) > amplitude * CFD:
             return float(i[0])
         
@@ -110,22 +122,45 @@ def get_conjoined_time(time_list):
         return None
     return min(new_list)
 
-def get_total_amp(amp_list):
-    # TODO: conjoint measurement
-    new_list = remove_none(amp_list)
-    if len(new_list) == 0:
-        return None
-    return sum(new_list)
-
-def get_gravity_center(amp_list):
+def get_total_amp(amp_list, amp_thres):
     max_amp = max(amp_list)
     i_max = amp_list.index(max_amp)
     if max_amp == 0:
         return None
-    if i_max < len(amp_list) - 1 and (i_max == 0 or amp_list[i_max+1] >= amp_list[i_max-1]):
-        return (i_max * amp_list[i_max] + (i_max+1) * amp_list[i_max+1])/(amp_list[i_max] + amp_list[i_max+1])
-    elif i_max == len(amp_list) - 1 or amp_list[i_max+1] <= amp_list[i_max-1]: # ensured i_max != 0
-        return (i_max * amp_list[i_max] + (i_max-1) * amp_list[i_max-1])/(amp_list[i_max] + amp_list[i_max-1])
+    seeds = set()
+    for i in range(len(amp_list)):
+        if amp_list[i] > amp_thres:
+            seeds.add(i)
+    if len(seeds) == 0:
+        return None
+    new_seeds = set()
+    for i in seeds:
+        new_seeds.add(i)
+        if i > 0:
+            new_seeds.add(i-1)
+        if i < len(amp_list) - 1:
+            new_seeds.add(i+1)
+    return sum([amp_list[i] for i in new_seeds])
+
+def get_gravity_center(amp_list, amp_thres):
+    max_amp = max(amp_list)
+    i_max = amp_list.index(max_amp)
+    if max_amp == 0:
+        return None
+    seeds = set()
+    for i in range(len(amp_list)):
+        if amp_list[i] > amp_thres:
+            seeds.add(i)
+    if len(seeds) == 0:
+        return None
+    new_seeds = set()
+    for i in seeds:
+        new_seeds.add(i)
+        if i > 0:
+            new_seeds.add(i-1)
+        if i < len(amp_list) - 1:
+            new_seeds.add(i+1)
+    return sum([i * amp_list[i] for i in new_seeds]) / sum(amp_list[i] for i in new_seeds)
 
 def remove_none(list):
     new_list = []
@@ -136,7 +171,7 @@ def remove_none(list):
     return new_list
 
 class WaveformStatistics():
-    def __init__(self, input_path, read_ele_num, threshold, output_path, vis=False):
+    def __init__(self, input_path, read_ele_num, threshold, amplitude_threshold, output_path, vis=False):
         self.ToA_data = []
         self.ToT_data = []
         self.amplitude_data = []
@@ -161,7 +196,7 @@ class WaveformStatistics():
             n = tree.GetEntries()
             for i in range(n):
                 tree.GetEntry(i) 
-                iw = InputWaveform(tree, threshold, read_ele_num)
+                iw = InputWaveform(tree, threshold, amplitude_threshold, read_ele_num)
                 self.fill_data(iw.data)
                 if vis == True:
                     for j in range(read_ele_num):
@@ -320,13 +355,13 @@ class WaveformStatistics():
 
     def gravity_center_fit(self, data, model):
         data = remove_none(data)
+        
         try:
-            x2_min = min(data)
-            x2_max = sorted(data)[int(len(data))-1]
+            mid = sorted(data)[int(len(data)/2)]
         except ValueError:
             print("No valid data for "+model)
-            x2_min = 0
-            x2_max = 0
+        x2_min = mid-2
+        x2_max = mid+2
         n2_bin = 100
         histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
         for i in range(0,len(data)):
@@ -394,6 +429,7 @@ def main(kwargs):
     with open(daq_json) as f:
         daq_dict = json.load(f)
         threshold = daq_dict['threshold']
+        amplitude_threshold = daq_dict['amplitude_threshold']
 
     tct = kwargs['tct']
     if tct != None:
@@ -402,4 +438,4 @@ def main(kwargs):
         input_path = "output/signal/" + det_name + "/batch"
 
     output_path = output(__file__, det_name)
-    WaveformStatistics(input_path, read_ele_num, threshold, output_path)
+    WaveformStatistics(input_path, read_ele_num, threshold, amplitude_threshold, output_path)
