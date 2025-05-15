@@ -89,6 +89,7 @@ class Amplifier:
             for i in range(self.read_ele_num):
                 subprocess.run(['ngspice -b '+tmp_cirs[i]], shell=True)
             self.read_raw_file(raws)
+            # TODO: delete the files properly
             for tmp_cir in tmp_cirs:
                 delete_file(tmp_cir)
             for raw in raws:
