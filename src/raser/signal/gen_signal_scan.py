@@ -18,7 +18,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 from device import build_device as bdv
-from interaction import g4_general as g4g
+from interaction.interaction import GeneralG4Interaction
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from current.cross_talk import cross_talk
@@ -26,7 +26,7 @@ from afe import readout as rdo
 from util.output import output
 from util.math import inversed_fast_fourier_transform as ifft
 
-def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number):
+def batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_number):
     """
     Description:
         Batch run some events to get time resolution
@@ -80,9 +80,9 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
 
     for event in range(start_n,end_n):
         print("run events number:%s"%(event))
-        if len(my_g4p.p_steps[event-start_n]) > 5:
+        if len(my_g4.p_steps[event-start_n]) > 5:
             effective_number += 1
-            my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4p, event-start_n)
+            my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, event-start_n)
 
             if "strip" in my_d.det_model:
                 my_current.cross_talk_cu = cross_talk(my_current.sum_cu)
@@ -92,7 +92,7 @@ def batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_nu
             ele_current = rdo.Amplifier(my_current.cross_talk_cu, amplifier, seed=event, is_cut=True)
 
             event_array[0] = event
-            e_dep_array[0] = my_g4p.edep_devices[event-start_n]
+            e_dep_array[0] = my_g4.edep_devices[event-start_n]
             # assume the list of electrons is sorted by particle injection trace
             # and all inside the active region of the detector
             par_in_array[0], par_in_array[1], par_in_array[2] = my_current.electrons[0].path[0][0], my_current.electrons[0].path[0][1], my_current.electrons[0].path[0][2]
@@ -149,7 +149,7 @@ def main(kwargs):
     instance_number = job_number
 
     g4_seed = instance_number * total_events
-    my_g4p = g4g.Particles(my_d, g4experiment, g4_seed)
+    my_g4 = GeneralG4Interaction(my_d, g4experiment, g4_seed)
 
     ele_json = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier + ".json"
     ele_cir = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier + ".cir"
@@ -171,6 +171,6 @@ def main(kwargs):
         # TODO: fix noise seed, add noise from ngspice .noise spectrum
         pass
     
-    batch_loop(my_d, my_f, my_g4p, amplifier, g4_seed, total_events, instance_number)
-    del my_g4p
+    batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_number)
+    del my_g4
 
