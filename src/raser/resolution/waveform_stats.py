@@ -67,6 +67,9 @@ class InputWaveform():
             self.data["gravity_center_ToT"] = None
             self.data["gravity_center_amplitude"] = None
             self.data["gravity_center_charge"] = None
+            self.data["cluster_size_ToT"] = 0
+            self.data["cluster_size_amplitude"] = 0
+            self.data["cluster_charge"] = 0
             self.data["gravity_center_ToT_error"] = None
             self.data["gravity_center_amplitude_error"] = None
             self.data["gravity_center_charge_error"] = None
@@ -79,6 +82,9 @@ class InputWaveform():
             self.data["gravity_center_ToT"] = 0 # No spacial resolution
             self.data["gravity_center_amplitude"] = 0
             self.data["gravity_center_charge"] = 0
+            self.data["cluster_size_ToT"] = 1
+            self.data["cluster_size_amplitude"] = 1
+            self.data["cluster_charge"] = 1
             self.data["gravity_center_ToT_error"] = 0
             self.data["gravity_center_amplitude_error"] = 0
             self.data["gravity_center_charge_error"] = 0
@@ -89,9 +95,9 @@ class InputWaveform():
             self.data["amplitude"] = get_total_amp(self.amplitude, self.amplitude_threshold)
             self.data["charge"] = get_total_amp(self.charge, 1e5)
             self.data["ToR"] = get_conjoined_time(self.ToR) # TODO: conjoint measurement
-            self.data["gravity_center_ToT"] = get_gravity_center(self.ToT, 10e-9) # TODO: assign a proper value for all DAQ systems
-            self.data["gravity_center_amplitude"] = get_gravity_center(self.amplitude, self.amplitude_threshold)
-            self.data["gravity_center_charge"] = get_gravity_center(self.charge, 1e5) # TODO: assign a proper value for all DAQ systems
+            self.data["gravity_center_ToT"], self.data["cluster_size_ToT"] = get_gravity_center_and_cluster_size(self.ToT, 10e-9) # TODO: assign a proper value for all DAQ systems
+            self.data["gravity_center_amplitude"], self.data["cluster_size_amplitude"] = get_gravity_center_and_cluster_size(self.amplitude, self.amplitude_threshold)
+            self.data["gravity_center_charge"], self.data["cluster_charge"] = get_gravity_center_and_cluster_size(self.charge, 1e5) # TODO: assign a proper value for all DAQ systems
 
             if self.data["gravity_center_ToT"] != None:
                 self.data["gravity_center_ToT_error"] = self.data["gravity_center_ToT"] - self.original_x/self.pitch_x
@@ -106,7 +112,7 @@ class InputWaveform():
             else:
                 self.data["gravity_center_charge_error"] = None
 
-            self.data["original_x"] = self.original_x
+        self.data["original_x"] = self.original_x
 
 def get_ToA(hist, threshold, peak_time_bin):
     for i in range(peak_time_bin, 0, -1):
@@ -180,31 +186,31 @@ def get_total_amp(amp_list, amp_thres):
     new_seeds = set()
     for i in seeds:
         new_seeds.add(i)
-        if i > 0:
+        if i > 0 and amp_list[i-1] > 0:
             new_seeds.add(i-1)
-        if i < len(amp_list) - 1:
+        if i < len(amp_list) - 1 and amp_list[i+1] > 0:
             new_seeds.add(i+1)
     return sum([amp_list[i] for i in new_seeds])
 
-def get_gravity_center(amp_list, amp_thres):
+def get_gravity_center_and_cluster_size(amp_list, amp_thres):
     max_amp = max(amp_list)
     i_max = amp_list.index(max_amp)
     if max_amp == 0:
-        return None
+        return None, 0
     seeds = set()
     for i in range(len(amp_list)):
         if amp_list[i] > amp_thres:
             seeds.add(i)
     if len(seeds) == 0:
-        return None
+        return None, 0
     new_seeds = set()
     for i in seeds:
         new_seeds.add(i)
-        if i > 0:
+        if i > 0 and amp_list[i-1] > 0:
             new_seeds.add(i-1)
-        if i < len(amp_list) - 1:
+        if i < len(amp_list) - 1 and amp_list[i+1] > 0:
             new_seeds.add(i+1)
-    return sum([i * amp_list[i] for i in new_seeds]) / sum(amp_list[i] for i in new_seeds)
+    return sum([i * amp_list[i] for i in new_seeds]) / sum(amp_list[i] for i in new_seeds), len(new_seeds)
 
 def remove_none(list):
     new_list = []
@@ -268,6 +274,9 @@ class WaveformStatistics():
         self.gravity_center_fill(self.data["gravity_center_ToT"], "gravity_center_ToT")
         self.gravity_center_fill(self.data["gravity_center_amplitude"], "gravity_center_amplitude")
         self.gravity_center_fill(self.data["gravity_center_charge"], "gravity_center_charge")
+        self.cluster_size_fill(self.data["cluster_size_ToT"], "cluster_size_ToT")
+        self.cluster_size_fill(self.data["cluster_size_amplitude"], "cluster_size_amplitude")
+        self.cluster_size_fill(self.data["cluster_charge"], "cluster_size_charge")
         self.gravity_center_error_fit(self.data["gravity_center_ToT_error"], "gravity_center_ToT_error")
         self.gravity_center_error_fit(self.data["gravity_center_amplitude_error"], "gravity_center_amplitude_error")
         self.gravity_center_error_fit(self.data["gravity_center_charge_error"], "gravity_center_charge_error")
@@ -283,8 +292,8 @@ class WaveformStatistics():
                 self.data[key] = []
                 self.data[key].append(data[key])
 
-    def time_resolution_fit(self, data, model):
-        data = remove_none(data)
+    def time_resolution_fit(self, input_data, model):
+        data = remove_none(input_data)
         try:
             x2_min = min(data)
             x2_max = sorted(data)[int(len(data))-1]
@@ -340,8 +349,8 @@ class WaveformStatistics():
         c1.SaveAs(self.output_path+'/'+model+".pdf")
         c1.SaveAs(self.output_path+'/'+model+".C")
 
-    def amplitude_fit(self, data, model):
-        data = remove_none(data)
+    def amplitude_fit(self, input_data, model):
+        data = remove_none(input_data)
         try:
             x2_min = min(data)
             x2_max = sorted(data)[int(len(data))-1]
@@ -395,8 +404,8 @@ class WaveformStatistics():
         c1.SaveAs(self.output_path+'/'+model+".pdf")
         c1.SaveAs(self.output_path+'/'+model+".C")
 
-    def gravity_center_fill(self, data, model):
-        data = remove_none(data)
+    def gravity_center_fill(self, input_data, model):
+        data = remove_none(input_data)
         try:
             x2_min = min(data)
             x2_max = max(data)
@@ -440,9 +449,45 @@ class WaveformStatistics():
         c1.SaveAs(self.output_path+'/'+model+".pdf")
         c1.SaveAs(self.output_path+'/'+model+".C")
 
+    def cluster_size_fill(self, input_data, model):
+        data = remove_none(input_data)
+        histo=ROOT.TH1I("","",11,0,11)
+        for i in range(0,len(data)):
+            histo.Fill(data[i])
 
-    def gravity_center_error_fit(self, data, model):
-        data = remove_none(data)
+        c1 = ROOT.TCanvas("c1","c1",200,10,800,600)
+        ROOT.gStyle.SetOptStat(0)
+        c1.SetGrid()
+        c1.SetLeftMargin(0.2)
+        c1.SetTopMargin(0.12)
+        c1.SetBottomMargin(0.2)
+
+        histo.GetXaxis().SetTitle(model)
+        histo.GetYaxis().SetTitle("Events")
+        histo.GetXaxis().SetTitleOffset(1.2)
+        histo.GetXaxis().SetTitleSize(0.07)
+        histo.GetXaxis().SetLabelSize(0.05)
+        histo.GetXaxis().SetNdivisions(510)
+        histo.GetYaxis().SetTitleOffset(1.1)
+        histo.GetYaxis().SetTitleSize(0.07)
+        histo.GetYaxis().SetLabelSize(0.05)
+        histo.GetYaxis().SetNdivisions(505)
+        histo.GetXaxis().CenterTitle()
+        histo.GetYaxis().CenterTitle()
+        histo.SetLineWidth(2)
+
+        # Legend setting
+        leg = ROOT.TLegend(0.75, 0.6, 0.85, 0.8)
+        leg.AddEntry(histo,"Sim","L")
+        
+        histo.Draw()
+        leg.Draw("same")
+        # Save
+        c1.SaveAs(self.output_path+'/'+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+model+".C")
+
+    def gravity_center_error_fit(self, input_data, model):
+        data = remove_none(input_data)
         try:
             mid = sorted(data)[int(len(data)/2)]
         except IndexError:
@@ -499,6 +544,7 @@ class WaveformStatistics():
         c1.SaveAs(self.output_path+'/'+model+".C")
 
     def ita_calibration(self, data, original_x, pitch_x, model):
+        print(len(data),len(original_x))
         new_data = []
         new_original_x = []
         for i in range(len(data)):
@@ -506,6 +552,8 @@ class WaveformStatistics():
                 continue
             new_data.append(data[i])
             new_original_x.append(original_x[i])
+
+        print(len(new_data),len(new_original_x))
 
         x_min = -0.5
         x_max = 0.5

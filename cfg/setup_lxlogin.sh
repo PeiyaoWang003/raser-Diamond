@@ -56,21 +56,20 @@ resolve_and_reorder() {
 
     local resolved_paths=()
     for path in "${paths[@]}"; do
-        # 检查路径是否为软链接，如果是则解析真实路径，否则保留原路径
+        # 检查路径是否为软链接，如果是则解析真实路径并添加，否则只添加原路径
         if [ -L "$path" ]; then
             resolved=$(readlink -f "$path")
+            resolved_paths+=("$resolved")
         else 
             # 跳过不存在的路径
-            if [ -e "$path" ]; then
-                resolved="$path"
-            else 
+            if [ ! -e "$path" ]; then
                 if [ -z "$PS1" ]; then
                     echo "Warning from raser setup: $path do not exist"
                 fi
                 continue
             fi
         fi
-        resolved_paths+=("$resolved")
+        resolved_paths+=("$path")
     done
 
     # 按原顺序重新拼接为逗号分隔的字符串
