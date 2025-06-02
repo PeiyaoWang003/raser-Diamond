@@ -19,9 +19,11 @@ class InputWaveform():
     charge : total charge for current sensitive preamp
     ToR : time of ratio (CFD)
     """
-    def __init__(self, input_entry, threshold, amplitude_threshold, read_ele_num=1, CFD=CFD):
+    def __init__(self, input_entry, threshold, amplitude_threshold, read_ele_num, pitch_x, pitch_y, CFD=CFD):
         self.waveforms = [None for _ in range(read_ele_num)]
         self.read_ele_num = read_ele_num
+        self.pitch_x = pitch_x
+        self.pitch_y = pitch_y
         self.CFD = CFD
         self.peak_time = [0 for i in range(read_ele_num)]
         self.ToA = [0 for i in range(read_ele_num)]
@@ -32,7 +34,12 @@ class InputWaveform():
         self.threshold = threshold
         self.amplitude_threshold = amplitude_threshold
 
+        par_in = input_entry.par_in
+        par_out = input_entry.par_out
+        self.original_x = (par_in[0]+par_out[0])/2
+
         for i in range(read_ele_num):
+            # only available for strip detector
             self.waveforms[i] = eval(f"input_entry.amplified_waveform_{i}")
             self.amplitude[i], self.peak_time[i] = get_amplitude(self.waveforms[i])
             if self.amplitude[i] < self.threshold:
@@ -52,33 +59,60 @@ class InputWaveform():
     def get_total_data(self):
         self.data = {}
         if max(self.amplitude) < self.amplitude_threshold:
-            self.data["gravity_center_ToT"] = None
-            self.data["gravity_center_amplitude"] = None
-            self.data["gravity_center_charge"] = None
             self.data["ToA"] = None
             self.data["ToT"] = None
             self.data["amplitude"] = None
             self.data["charge"] = None
             self.data["ToR"] = None
+            self.data["gravity_center_ToT"] = None
+            self.data["gravity_center_amplitude"] = None
+            self.data["gravity_center_charge"] = None
+            self.data["cluster_size_ToT"] = 0
+            self.data["cluster_size_amplitude"] = 0
+            self.data["cluster_charge"] = 0
+            self.data["gravity_center_ToT_error"] = None
+            self.data["gravity_center_amplitude_error"] = None
+            self.data["gravity_center_charge_error"] = None
         elif self.read_ele_num == 1:
-            self.data["gravity_center_ToT"] = 0 # No spacial resolution
-            self.data["gravity_center_amplitude"] = 0
-            self.data["gravity_center_charge"] = 0
             self.data["ToA"] = self.ToA[0]
             self.data["ToT"] = self.ToT[0]
             self.data["amplitude"] = self.amplitude[0]
             self.data["charge"] = self.charge[0]
             self.data["ToR"] = self.ToR[0]
+            self.data["gravity_center_ToT"] = 0 # No spacial resolution
+            self.data["gravity_center_amplitude"] = 0
+            self.data["gravity_center_charge"] = 0
+            self.data["cluster_size_ToT"] = 1
+            self.data["cluster_size_amplitude"] = 1
+            self.data["cluster_charge"] = 1
+            self.data["gravity_center_ToT_error"] = 0
+            self.data["gravity_center_amplitude_error"] = 0
+            self.data["gravity_center_charge_error"] = 0
         else:
             # assume strip, one dimensional spacial resolution
-            self.data["gravity_center_ToT"] = get_gravity_center(self.ToT, 10e-9) # TODO: assign a proper value for all DAQ systems
-            self.data["gravity_center_amplitude"] = get_gravity_center(self.amplitude, self.amplitude_threshold)
-            self.data["gravity_center_charge"] = get_gravity_center(self.charge, 1e5) # TODO: assign a proper value for all DAQ systems
             self.data["ToA"] = get_conjoined_time(self.ToA) # TODO: conjoint measurement
             self.data["ToT"] = get_total_amp(self.ToT, 10e-9)
             self.data["amplitude"] = get_total_amp(self.amplitude, self.amplitude_threshold)
             self.data["charge"] = get_total_amp(self.charge, 1e5)
             self.data["ToR"] = get_conjoined_time(self.ToR) # TODO: conjoint measurement
+            self.data["gravity_center_ToT"], self.data["cluster_size_ToT"] = get_gravity_center_and_cluster_size(self.ToT, 10e-9) # TODO: assign a proper value for all DAQ systems
+            self.data["gravity_center_amplitude"], self.data["cluster_size_amplitude"] = get_gravity_center_and_cluster_size(self.amplitude, self.amplitude_threshold)
+            self.data["gravity_center_charge"], self.data["cluster_charge"] = get_gravity_center_and_cluster_size(self.charge, 1e5) # TODO: assign a proper value for all DAQ systems
+
+            if self.data["gravity_center_ToT"] != None:
+                self.data["gravity_center_ToT_error"] = self.data["gravity_center_ToT"] - self.original_x/self.pitch_x
+            else:
+                self.data["gravity_center_ToT_error"] = None
+            if self.data["gravity_center_amplitude"] != None:
+                self.data["gravity_center_amplitude_error"] = self.data["gravity_center_amplitude"] - self.original_x/self.pitch_x
+            else:
+                self.data["gravity_center_amplitude_error"] = None
+            if self.data["gravity_center_charge"] != None:
+                self.data["gravity_center_charge_error"] = self.data["gravity_center_charge"] - self.original_x/self.pitch_x
+            else:
+                self.data["gravity_center_charge_error"] = None
+
+        self.data["original_x"] = self.original_x
 
 def get_ToA(hist, threshold, peak_time_bin):
     for i in range(peak_time_bin, 0, -1):
@@ -152,31 +186,31 @@ def get_total_amp(amp_list, amp_thres):
     new_seeds = set()
     for i in seeds:
         new_seeds.add(i)
-        if i > 0:
+        if i > 0 and amp_list[i-1] > 0:
             new_seeds.add(i-1)
-        if i < len(amp_list) - 1:
+        if i < len(amp_list) - 1 and amp_list[i+1] > 0:
             new_seeds.add(i+1)
     return sum([amp_list[i] for i in new_seeds])
 
-def get_gravity_center(amp_list, amp_thres):
+def get_gravity_center_and_cluster_size(amp_list, amp_thres):
     max_amp = max(amp_list)
     i_max = amp_list.index(max_amp)
     if max_amp == 0:
-        return None
+        return None, 0
     seeds = set()
     for i in range(len(amp_list)):
         if amp_list[i] > amp_thres:
             seeds.add(i)
     if len(seeds) == 0:
-        return None
+        return None, 0
     new_seeds = set()
     for i in seeds:
         new_seeds.add(i)
-        if i > 0:
+        if i > 0 and amp_list[i-1] > 0:
             new_seeds.add(i-1)
-        if i < len(amp_list) - 1:
+        if i < len(amp_list) - 1 and amp_list[i+1] > 0:
             new_seeds.add(i+1)
-    return sum([i * amp_list[i] for i in new_seeds]) / sum(amp_list[i] for i in new_seeds)
+    return sum([i * amp_list[i] for i in new_seeds]) / sum(amp_list[i] for i in new_seeds), len(new_seeds)
 
 def remove_none(list):
     new_list = []
@@ -187,15 +221,9 @@ def remove_none(list):
     return new_list
 
 class WaveformStatistics():
-    def __init__(self, input_path, read_ele_num, threshold, amplitude_threshold, output_path, vis=False):
-        self.ToA_data = []
-        self.ToT_data = []
-        self.amplitude_data = []
-        self.charge_data = []
-        self.ToR_data = []
-        self.gravity_center_ToT_data = []
-        self.gravity_center_amplitude_data = []
-        self.gravity_center_charge_data = []
+    def __init__(self, input_path, read_ele_num, pitch_x, pitch_y, threshold, amplitude_threshold, output_path, vis=False):
+        # TODO: establish a better method to get the coordinate of the electrode
+        self.data = {}
         self.waveforms = [[] for i in range(read_ele_num)]
 
         self.output_path = output_path
@@ -212,7 +240,7 @@ class WaveformStatistics():
             n = tree.GetEntries()
             for i in range(n):
                 tree.GetEntry(i) 
-                iw = InputWaveform(tree, threshold, amplitude_threshold, read_ele_num)
+                iw = InputWaveform(tree, threshold, amplitude_threshold, read_ele_num, pitch_x, pitch_y)
                 self.fill_data(iw.data)
                 if vis == True:
                     for j in range(read_ele_num):
@@ -238,27 +266,34 @@ class WaveformStatistics():
                 canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.pdf".format(j)))
                 canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.png".format(j)))
 
-        self.time_resolution_fit(self.ToA_data, "ToA")
-        self.time_resolution_fit(self.ToR_data, "ToR")
-        self.amplitude_fit(self.amplitude_data, "amplitude")
-        self.amplitude_fit(self.charge_data, "charge")
-        self.amplitude_fit(self.ToT_data, "ToT")
-        self.gravity_center_fit(self.gravity_center_ToT_data, "gravity_center_ToT")
-        self.gravity_center_fit(self.gravity_center_amplitude_data, "gravity_center_amplitude")
-        self.gravity_center_fit(self.gravity_center_charge_data, "gravity_center_charge")
+        self.time_resolution_fit(self.data["ToA"], "ToA")
+        self.time_resolution_fit(self.data["ToR"], "ToR")
+        self.amplitude_fit(self.data["charge"], "charge")
+        self.amplitude_fit(self.data["amplitude"], "amplitude")
+        self.amplitude_fit(self.data["ToT"], "ToT")
+        self.gravity_center_fill(self.data["gravity_center_ToT"], "gravity_center_ToT")
+        self.gravity_center_fill(self.data["gravity_center_amplitude"], "gravity_center_amplitude")
+        self.gravity_center_fill(self.data["gravity_center_charge"], "gravity_center_charge")
+        self.cluster_size_fill(self.data["cluster_size_ToT"], "cluster_size_ToT")
+        self.cluster_size_fill(self.data["cluster_size_amplitude"], "cluster_size_amplitude")
+        self.cluster_size_fill(self.data["cluster_charge"], "cluster_size_charge")
+        self.gravity_center_error_fit(self.data["gravity_center_ToT_error"], "gravity_center_ToT_error")
+        self.gravity_center_error_fit(self.data["gravity_center_amplitude_error"], "gravity_center_amplitude_error")
+        self.gravity_center_error_fit(self.data["gravity_center_charge_error"], "gravity_center_charge_error")
+        self.ita_calibration(self.data["gravity_center_ToT"], self.data["original_x"], pitch_x, "ita_calibration_ToT")
+        self.ita_calibration(self.data["gravity_center_amplitude"], self.data["original_x"], pitch_x, "ita_calibration_amplitude")
+        self.ita_calibration(self.data["gravity_center_charge"], self.data["original_x"], pitch_x, "ita_calibration_charge")
     
     def fill_data(self, data):
-        self.ToA_data.append(data["ToA"])
-        self.ToT_data.append(data["ToT"])
-        self.amplitude_data.append(data["amplitude"])
-        self.charge_data.append(data["charge"])
-        self.ToR_data.append(data["ToR"])
-        self.gravity_center_amplitude_data.append(data["gravity_center_amplitude"])
-        self.gravity_center_charge_data.append(data["gravity_center_charge"])
-        self.gravity_center_ToT_data.append(data["gravity_center_ToT"])
+        for key in data:
+            try:
+                self.data[key].append(data[key])
+            except KeyError:
+                self.data[key] = []
+                self.data[key].append(data[key])
 
-    def time_resolution_fit(self, data, model):
-        data = remove_none(data)
+    def time_resolution_fit(self, input_data, model):
+        data = remove_none(input_data)
         try:
             x2_min = min(data)
             x2_max = sorted(data)[int(len(data))-1]
@@ -314,8 +349,8 @@ class WaveformStatistics():
         c1.SaveAs(self.output_path+'/'+model+".pdf")
         c1.SaveAs(self.output_path+'/'+model+".C")
 
-    def amplitude_fit(self, data, model):
-        data = remove_none(data)
+    def amplitude_fit(self, input_data, model):
+        data = remove_none(input_data)
         try:
             x2_min = min(data)
             x2_max = sorted(data)[int(len(data))-1]
@@ -369,16 +404,97 @@ class WaveformStatistics():
         c1.SaveAs(self.output_path+'/'+model+".pdf")
         c1.SaveAs(self.output_path+'/'+model+".C")
 
-    def gravity_center_fit(self, data, model):
-        data = remove_none(data)
+    def gravity_center_fill(self, input_data, model):
+        data = remove_none(input_data)
+        try:
+            x2_min = min(data)
+            x2_max = max(data)
+        except IndexError:
+            print("No valid data for "+model)
+            return
         
+        n2_bin = 10*40 # TODO: temp hard code for strip
+        histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
+        for i in range(0,len(data)):
+            histo.Fill(data[i])
+
+        c1 = ROOT.TCanvas("c1","c1",200,10,800,600)
+        ROOT.gStyle.SetOptStat(0)
+        c1.SetGrid()
+        c1.SetLeftMargin(0.2)
+        c1.SetTopMargin(0.12)
+        c1.SetBottomMargin(0.2)
+
+        histo.GetXaxis().SetTitle(model)
+        histo.GetYaxis().SetTitle("Events")
+        histo.GetXaxis().SetTitleOffset(1.2)
+        histo.GetXaxis().SetTitleSize(0.07)
+        histo.GetXaxis().SetLabelSize(0.05)
+        histo.GetXaxis().SetNdivisions(510)
+        histo.GetYaxis().SetTitleOffset(1.1)
+        histo.GetYaxis().SetTitleSize(0.07)
+        histo.GetYaxis().SetLabelSize(0.05)
+        histo.GetYaxis().SetNdivisions(505)
+        histo.GetXaxis().CenterTitle()
+        histo.GetYaxis().CenterTitle()
+        histo.SetLineWidth(2)
+
+        # Legend setting
+        leg = ROOT.TLegend(0.75, 0.6, 0.85, 0.8)
+        leg.AddEntry(histo,"Sim","L")
+        
+        histo.Draw()
+        leg.Draw("same")
+        # Save
+        c1.SaveAs(self.output_path+'/'+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+model+".C")
+
+    def cluster_size_fill(self, input_data, model):
+        data = remove_none(input_data)
+        histo=ROOT.TH1I("","",11,0,11)
+        for i in range(0,len(data)):
+            histo.Fill(data[i])
+
+        c1 = ROOT.TCanvas("c1","c1",200,10,800,600)
+        ROOT.gStyle.SetOptStat(0)
+        c1.SetGrid()
+        c1.SetLeftMargin(0.2)
+        c1.SetTopMargin(0.12)
+        c1.SetBottomMargin(0.2)
+
+        histo.GetXaxis().SetTitle(model)
+        histo.GetYaxis().SetTitle("Events")
+        histo.GetXaxis().SetTitleOffset(1.2)
+        histo.GetXaxis().SetTitleSize(0.07)
+        histo.GetXaxis().SetLabelSize(0.05)
+        histo.GetXaxis().SetNdivisions(510)
+        histo.GetYaxis().SetTitleOffset(1.1)
+        histo.GetYaxis().SetTitleSize(0.07)
+        histo.GetYaxis().SetLabelSize(0.05)
+        histo.GetYaxis().SetNdivisions(505)
+        histo.GetXaxis().CenterTitle()
+        histo.GetYaxis().CenterTitle()
+        histo.SetLineWidth(2)
+
+        # Legend setting
+        leg = ROOT.TLegend(0.75, 0.6, 0.85, 0.8)
+        leg.AddEntry(histo,"Sim","L")
+        
+        histo.Draw()
+        leg.Draw("same")
+        # Save
+        c1.SaveAs(self.output_path+'/'+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+model+".C")
+
+    def gravity_center_error_fit(self, input_data, model):
+        data = remove_none(input_data)
         try:
             mid = sorted(data)[int(len(data)/2)]
         except IndexError:
             print("No valid data for "+model)
             return
-        x2_min = mid-2
-        x2_max = mid+2
+        x2_min = mid-1
+        x2_max = mid+1
         n2_bin = 100
         histo=ROOT.TH1F("","",n2_bin,x2_min,x2_max)
         for i in range(0,len(data)):
@@ -427,6 +543,53 @@ class WaveformStatistics():
         c1.SaveAs(self.output_path+'/'+model+".pdf")
         c1.SaveAs(self.output_path+'/'+model+".C")
 
+    def ita_calibration(self, data, original_x, pitch_x, model):
+        print(len(data),len(original_x))
+        new_data = []
+        new_original_x = []
+        for i in range(len(data)):
+            if data[i] == None:
+                continue
+            new_data.append(data[i])
+            new_original_x.append(original_x[i])
+
+        print(len(new_data),len(new_original_x))
+
+        x_min = -0.5
+        x_max = 0.5
+        y_min = 0.5
+        y_max = -0.5
+        n_x = 20
+        n_y = 20
+        histo=ROOT.TH2F("","",n_x,x_min,x_max,n_y,y_min,y_max)
+        for i in range(0,len(new_data)):
+            histo.Fill(new_original_x[i]/pitch_x - round(new_original_x[i]/pitch_x), new_data[i]- round(new_data[i]))
+
+        histo.GetXaxis().SetTitle("Original x")
+        histo.GetYaxis().SetTitle("Reconstructed x")
+        histo.GetXaxis().SetTitleOffset(1.2)
+        histo.GetXaxis().SetTitleSize(0.07)
+        histo.GetXaxis().SetLabelSize(0.05)
+        histo.GetXaxis().SetNdivisions(505)
+        histo.GetYaxis().SetTitleOffset(1.1)
+        histo.GetYaxis().SetTitleSize(0.07)
+        histo.GetYaxis().SetLabelSize(0.05)
+        histo.GetYaxis().SetNdivisions(505)
+        histo.GetXaxis().CenterTitle()
+        histo.GetYaxis().CenterTitle()
+
+        c1 = ROOT.TCanvas("c1","c1",200,10,800,1000)
+        ROOT.gStyle.SetOptStat(0)
+        c1.SetGrid()
+        c1.SetLeftMargin(0.2)
+        c1.SetTopMargin(0.12)
+        c1.SetBottomMargin(0.2)
+
+        histo.Draw("COLZ")
+        # Save
+        c1.SaveAs(self.output_path+'/'+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+model+".C")
+
 
 def main(kwargs):
     det_name = kwargs['det_name']
@@ -435,8 +598,16 @@ def main(kwargs):
         device_dict = json.load(f)
         if device_dict['det_model'] == 'planar' or device_dict['det_model'] == 'lgad':
             read_ele_num = 1
-        else:
+            pitch_x = device_dict['l_x']
+            pitch_y = device_dict['l_y']
+        elif device_dict['det_model'] == 'strip':
             read_ele_num = device_dict['read_ele_num']
+            pitch_x = device_dict['p_x']
+            pitch_y = device_dict['l_y']
+        elif device_dict['det_model'] == 'pixel':
+            read_ele_num = device_dict['x_ele_num'] * device_dict['y_ele_num']
+            pitch_x = device_dict['p_x']
+            pitch_y = device_dict['p_y']
         daq_name = device_dict['daq']
 
     if kwargs['daq'] != None:
@@ -455,4 +626,4 @@ def main(kwargs):
         input_path = "output/signal/" + det_name + "/batch"
 
     output_path = output(__file__, det_name)
-    WaveformStatistics(input_path, read_ele_num, threshold, amplitude_threshold, output_path)
+    WaveformStatistics(input_path, read_ele_num, pitch_x, pitch_y, threshold, amplitude_threshold, output_path)
