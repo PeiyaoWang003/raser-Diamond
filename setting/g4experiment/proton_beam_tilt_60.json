@@ -1,5 +1,5 @@
 {
-    "geant4_model" : "proton_beam",
+    "geant4_model" : "proton_beam_tilt_60",
     "total_events" : 50,
     
     "object":{},

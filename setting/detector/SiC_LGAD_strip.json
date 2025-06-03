@@ -31,8 +31,6 @@
     "default_dimension" : 2,
     "read_out_contact" : [{"x_span":0, "y_span":0, "name":"top1"}, {"x_span":0, "y_span":0, "name":"top2"}, {"x_span":0, "y_span":0, "name":"top3"}],
     "field_shift_x" : 0,
-    "read_out_contact" : [{"x_span":1, "y_span":0, "name":"top2"}],
-    "field_shift_x" : 210,
 
     "mesh" : {
         "2D_mesh" : {

@@ -125,6 +125,7 @@ def draw_drift_path(my_d,my_g4,my_f,my_current,path):
     structure.GetXaxis().SetTitleSize(0.08)
     structure.GetYaxis().SetTitleSize(0.08)
     structure.GetZaxis().SetTitleSize(0.08)
+    structure.GetXaxis().SetNdivisions(5)
     structure.GetYaxis().SetNdivisions(5)
     structure.GetZaxis().SetNdivisions(5)
     structure.Draw("ISO")
@@ -239,6 +240,7 @@ def draw_drift_path(my_d,my_g4,my_f,my_current,path):
     mg.GetYaxis().SetLabelSize(0.08)
     mg.GetXaxis().SetTitleSize(0.08)
     mg.GetYaxis().SetTitleSize(0.08)
+    mg.GetXaxis().SetNdivisions(5)
     mg.GetYaxis().SetNdivisions(5)
     c1.Update()
     mg.Draw("APL")
@@ -246,24 +248,5 @@ def draw_drift_path(my_d,my_g4,my_f,my_current,path):
     c1.SaveAs(path+'/'+my_d.det_model+"_drift_path.root")
     del c1
 
-def cce(my_current, path):
-    charge=array('d')
-    x=array('d')
-    for i in range(my_current.read_ele_num):
-        x.append(i+1)
-        sum_charge=0
-        for j in range(my_current.n_bin):
-            sum_charge=sum_charge+my_current.sum_cu[i].GetBinContent(j)*my_current.t_bin
-        charge.append(sum_charge/1.6e-19)
-    print("===========RASER info================\nCollected Charge is {} e\n==============Result==============".format(list(charge)))
-    n=int(len(charge))
-    c1=ROOT.TCanvas("c1","canvas1",1000,1000)
-    cce=ROOT.TGraph(n,x,charge)
-    cce.SetMarkerStyle(3)
-    cce.Draw()
-    cce.SetTitle("Charge Collection Efficiency")
-    cce.GetXaxis().SetTitle("elenumber")
-    cce.GetYaxis().SetTitle("charge[Coulomb]")
-    c1.SaveAs(path+"/cce.pdf")
-    c1.SaveAs(path+"/cce.root")
+
 

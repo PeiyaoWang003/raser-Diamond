@@ -5,6 +5,7 @@ from array import array
 
 import ROOT
 
+from device import build_device as bdv
 from util.output import output
 from util.math import is_number, fit_data_normal, fit_data_landau
 
@@ -221,17 +222,33 @@ def remove_none(list):
     return new_list
 
 class WaveformStatistics():
-    def __init__(self, input_path, read_ele_num, pitch_x, pitch_y, threshold, amplitude_threshold, output_path, vis=False):
+    def __init__(self, input_path, my_d, threshold, amplitude_threshold, output_path, vis=False):
+        if my_d.det_model == 'planar' or my_d.det_model == 'lgad':
+            my_d.read_ele_num = 1
+            pitch_x = my_d.l_x
+            pitch_y = my_d.l_y
+        elif my_d.det_model == 'strip':
+            my_d.read_ele_num = my_d.read_ele_num
+            pitch_x = my_d.p_x
+            pitch_y = my_d.l_y
+        elif my_d.det_model == 'pixel':
+            my_d.read_ele_num = my_d.x_ele_num * my_d.y_ele_num
+            pitch_x = my_d.p_x
+            pitch_y = my_d.p_y
+
         # TODO: establish a better method to get the coordinate of the electrode
         self.data = {}
-        self.waveforms = [[] for i in range(read_ele_num)]
+        self.waveforms = [[] for i in range(my_d.read_ele_num)]
 
         self.output_path = output_path
 
         files = os.listdir(input_path)
         files.sort()
+
+        tag = str(my_d.voltage)+str(my_d.irradiation_flux)+str(my_d.g4experiment)+str(my_d.amplifier)
+
         for file in files:
-            if '.root' not in file:
+            if tag not in file:
                 continue
             
             path = os.path.join(input_path, file)
@@ -240,17 +257,17 @@ class WaveformStatistics():
             n = tree.GetEntries()
             for i in range(n):
                 tree.GetEntry(i) 
-                iw = InputWaveform(tree, threshold, amplitude_threshold, read_ele_num, pitch_x, pitch_y)
+                iw = InputWaveform(tree, threshold, amplitude_threshold, my_d.read_ele_num, pitch_x, pitch_y)
                 self.fill_data(iw.data)
                 if vis == True:
-                    for j in range(read_ele_num):
+                    for j in range(my_d.read_ele_num):
                         self.waveforms[j].append(iw.waveforms[j])
 
             print("read {n} events from {file}".format(n=n, file=file))
             file_pointer.Close()
 
         if vis == True:
-            for j in range(read_ele_num):
+            for j in range(my_d.read_ele_num):
                 canvas = ROOT.TCanvas("canvas", "Canvas", 800, 600)
                 multigraph = ROOT.TMultiGraph("mg","")
                 count = 0
@@ -266,23 +283,23 @@ class WaveformStatistics():
                 canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.pdf".format(j)))
                 canvas.SaveAs(os.path.join(output_path, "waveform_electrode_{}.png".format(j)))
 
-        self.time_resolution_fit(self.data["ToA"], "ToA")
-        self.time_resolution_fit(self.data["ToR"], "ToR")
-        self.amplitude_fit(self.data["charge"], "charge")
-        self.amplitude_fit(self.data["amplitude"], "amplitude")
-        self.amplitude_fit(self.data["ToT"], "ToT")
-        self.gravity_center_fill(self.data["gravity_center_ToT"], "gravity_center_ToT")
-        self.gravity_center_fill(self.data["gravity_center_amplitude"], "gravity_center_amplitude")
-        self.gravity_center_fill(self.data["gravity_center_charge"], "gravity_center_charge")
-        self.cluster_size_fill(self.data["cluster_size_ToT"], "cluster_size_ToT")
-        self.cluster_size_fill(self.data["cluster_size_amplitude"], "cluster_size_amplitude")
-        self.cluster_size_fill(self.data["cluster_charge"], "cluster_size_charge")
-        self.gravity_center_error_fit(self.data["gravity_center_ToT_error"], "gravity_center_ToT_error")
-        self.gravity_center_error_fit(self.data["gravity_center_amplitude_error"], "gravity_center_amplitude_error")
-        self.gravity_center_error_fit(self.data["gravity_center_charge_error"], "gravity_center_charge_error")
-        self.ita_calibration(self.data["gravity_center_ToT"], self.data["original_x"], pitch_x, "ita_calibration_ToT")
-        self.ita_calibration(self.data["gravity_center_amplitude"], self.data["original_x"], pitch_x, "ita_calibration_amplitude")
-        self.ita_calibration(self.data["gravity_center_charge"], self.data["original_x"], pitch_x, "ita_calibration_charge")
+        self.time_resolution_fit(self.data["ToA"], "ToA", tag)
+        self.time_resolution_fit(self.data["ToR"], "ToR", tag)
+        self.amplitude_fit(self.data["charge"], "charge", tag)
+        self.amplitude_fit(self.data["amplitude"], "amplitude", tag)
+        self.amplitude_fit(self.data["ToT"], "ToT", tag)
+        self.gravity_center_fill(self.data["gravity_center_ToT"], "gravity_center_ToT", tag)
+        self.gravity_center_fill(self.data["gravity_center_amplitude"], "gravity_center_amplitude", tag)
+        self.gravity_center_fill(self.data["gravity_center_charge"], "gravity_center_charge", tag)
+        self.cluster_size_fill(self.data["cluster_size_ToT"], "cluster_size_ToT", tag)
+        self.cluster_size_fill(self.data["cluster_size_amplitude"], "cluster_size_amplitude", tag)
+        self.cluster_size_fill(self.data["cluster_charge"], "cluster_size_charge", tag)
+        self.gravity_center_error_fit(self.data["gravity_center_ToT_error"], "gravity_center_ToT_error", tag)
+        self.gravity_center_error_fit(self.data["gravity_center_amplitude_error"], "gravity_center_amplitude_error", tag)
+        self.gravity_center_error_fit(self.data["gravity_center_charge_error"], "gravity_center_charge_error", tag)
+        self.ita_calibration(self.data["gravity_center_ToT"], self.data["original_x"], pitch_x, "ita_calibration_ToT", tag)
+        self.ita_calibration(self.data["gravity_center_amplitude"], self.data["original_x"], pitch_x, "ita_calibration_amplitude", tag)
+        self.ita_calibration(self.data["gravity_center_charge"], self.data["original_x"], pitch_x, "ita_calibration_charge", tag)
     
     def fill_data(self, data):
         for key in data:
@@ -292,7 +309,7 @@ class WaveformStatistics():
                 self.data[key] = []
                 self.data[key].append(data[key])
 
-    def time_resolution_fit(self, input_data, model):
+    def time_resolution_fit(self, input_data, model, tag):
         data = remove_none(input_data)
         try:
             x2_min = min(data)
@@ -346,10 +363,10 @@ class WaveformStatistics():
         #tex.DrawLatexNDC(0.65, 0.7, "CFD=0.5")
         tex.DrawLatexNDC(0.65, 0.6, "#sigma = %.3f #pm %.3f ps"%(sigma,sigma_error))
         # Save
-        c1.SaveAs(self.output_path+'/'+model+".pdf")
-        c1.SaveAs(self.output_path+'/'+model+".C")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".C")
 
-    def amplitude_fit(self, input_data, model):
+    def amplitude_fit(self, input_data, model, tag):
         data = remove_none(input_data)
         try:
             x2_min = min(data)
@@ -401,10 +418,10 @@ class WaveformStatistics():
         tex.SetTextSize(25)
         tex.DrawLatexNDC(0.65, 0.6, "%.3g #pm %.3g a.u."%(mean,sigma))
         # Save
-        c1.SaveAs(self.output_path+'/'+model+".pdf")
-        c1.SaveAs(self.output_path+'/'+model+".C")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".C")
 
-    def gravity_center_fill(self, input_data, model):
+    def gravity_center_fill(self, input_data, model, tag):
         data = remove_none(input_data)
         try:
             x2_min = min(data)
@@ -446,10 +463,10 @@ class WaveformStatistics():
         histo.Draw()
         leg.Draw("same")
         # Save
-        c1.SaveAs(self.output_path+'/'+model+".pdf")
-        c1.SaveAs(self.output_path+'/'+model+".C")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".C")
 
-    def cluster_size_fill(self, input_data, model):
+    def cluster_size_fill(self, input_data, model, tag):
         data = remove_none(input_data)
         histo=ROOT.TH1I("","",11,0,11)
         for i in range(0,len(data)):
@@ -483,10 +500,10 @@ class WaveformStatistics():
         histo.Draw()
         leg.Draw("same")
         # Save
-        c1.SaveAs(self.output_path+'/'+model+".pdf")
-        c1.SaveAs(self.output_path+'/'+model+".C")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".C")
 
-    def gravity_center_error_fit(self, input_data, model):
+    def gravity_center_error_fit(self, input_data, model, tag):
         data = remove_none(input_data)
         try:
             mid = sorted(data)[int(len(data)/2)]
@@ -540,10 +557,10 @@ class WaveformStatistics():
         #tex.DrawLatexNDC(0.65, 0.7, "CFD=0.5")
         tex.DrawLatexNDC(0.65, 0.6, "#sigma = %.3f #pm %.3f"%(sigma,sigma_error))
         # Save
-        c1.SaveAs(self.output_path+'/'+model+".pdf")
-        c1.SaveAs(self.output_path+'/'+model+".C")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".C")
 
-    def ita_calibration(self, data, original_x, pitch_x, model):
+    def ita_calibration(self, data, original_x, pitch_x, model, tag):
         print(len(data),len(original_x))
         new_data = []
         new_original_x = []
@@ -587,33 +604,25 @@ class WaveformStatistics():
 
         histo.Draw("COLZ")
         # Save
-        c1.SaveAs(self.output_path+'/'+model+".pdf")
-        c1.SaveAs(self.output_path+'/'+model+".C")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".pdf")
+        c1.SaveAs(self.output_path+'/'+tag+"_"+model+".C")
 
 
 def main(kwargs):
     det_name = kwargs['det_name']
-    device_json = os.getenv("RASER_SETTING_PATH")+"/detector/" + det_name + ".json"
-    with open(device_json) as f:
-        device_dict = json.load(f)
-        if device_dict['det_model'] == 'planar' or device_dict['det_model'] == 'lgad':
-            read_ele_num = 1
-            pitch_x = device_dict['l_x']
-            pitch_y = device_dict['l_y']
-        elif device_dict['det_model'] == 'strip':
-            read_ele_num = device_dict['read_ele_num']
-            pitch_x = device_dict['p_x']
-            pitch_y = device_dict['l_y']
-        elif device_dict['det_model'] == 'pixel':
-            read_ele_num = device_dict['x_ele_num'] * device_dict['y_ele_num']
-            pitch_x = device_dict['p_x']
-            pitch_y = device_dict['p_y']
-        daq_name = device_dict['daq']
-
+    my_d = bdv.Detector(det_name)
+    if kwargs['voltage'] != None:
+        my_d.voltage = kwargs['voltage']
+    if kwargs['irradiation'] != None:
+        my_d.irradiation_flux = float(kwargs['irradiation'])
+    if kwargs['g4experiment'] != None:
+        my_d.g4_experiment = kwargs['g4experiment']
+    if kwargs['amplifier'] != None:
+        my_d.amplifier = kwargs['amplifier']
     if kwargs['daq'] != None:
-        daq_name = kwargs['daq']
-
-    daq_json = os.getenv("RASER_SETTING_PATH")+"/daq/" + daq_name + ".json"
+        my_d.daq = kwargs['daq']
+   
+    daq_json = os.getenv("RASER_SETTING_PATH")+"/daq/" + my_d.daq + ".json"
     with open(daq_json) as f:
         daq_dict = json.load(f)
         threshold = daq_dict['threshold']
@@ -626,4 +635,4 @@ def main(kwargs):
         input_path = "output/signal/" + det_name + "/batch"
 
     output_path = output(__file__, det_name)
-    WaveformStatistics(input_path, read_ele_num, pitch_x, pitch_y, threshold, amplitude_threshold, output_path)
+    WaveformStatistics(input_path, my_d, threshold, amplitude_threshold, output_path)

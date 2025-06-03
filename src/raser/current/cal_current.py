@@ -448,7 +448,6 @@ class CalCurrent:
             legend = ROOT.TLegend(0.5, 0.2, 0.8, 0.5)
             legend.AddEntry(self.negative_cu[read_ele_num], "electron", "l")
             legend.AddEntry(self.positive_cu[read_ele_num], "hole", "l")
-            legend.AddEntry(self.sum_cu[read_ele_num], "e+h", "l")
 
             if "lgad" in self.det_model:
                 legend.AddEntry(self.gain_current.negative_cu[read_ele_num], "electron gain", "l")
@@ -456,6 +455,8 @@ class CalCurrent:
 
             if "strip" in self.det_model:
                 legend.AddEntry(self.cross_talk_cu[read_ele_num], "cross talk", "l")
+
+            legend.AddEntry(self.sum_cu[read_ele_num], "total", "l")
             
             legend.SetBorderSize(0)
             #legend.SetTextFont(43)
@@ -467,6 +468,29 @@ class CalCurrent:
             c.SaveAs(path+'/'+tag+"No_"+str(read_ele_num+1)+"electrode"+"_basic_infor.root")
             del c
 
+    def charge_collection(self, path):
+        charge=array('d')
+        x=array('d')
+        for i in range(self.read_ele_num):
+            x.append(i+1)
+            sum_charge=0
+            for j in range(self.n_bin):
+                if "strip" in self.det_model:
+                    sum_charge=sum_charge+self.cross_talk_cu[i].GetBinContent(j)*self.t_bin
+                else:
+                    sum_charge=sum_charge+self.sum_cu[i].GetBinContent(j)*self.t_bin
+            charge.append(sum_charge/1.6e-19)
+        print("===========RASER info================\nCollected Charge is {} e\n==============Result==============".format(list(charge)))
+        n=int(len(charge))
+        c1=ROOT.TCanvas("c1","canvas1",1000,1000)
+        cce=ROOT.TGraph(n,x,charge)
+        cce.SetMarkerStyle(3)
+        cce.Draw()
+        cce.SetTitle("Charge Collection Efficiency")
+        cce.GetXaxis().SetTitle("elenumber")
+        cce.GetYaxis().SetTitle("charge[Coulomb]")
+        c1.SaveAs(path+"/cce.pdf")
+        c1.SaveAs(path+"/cce.root")
     
 class CalCurrentGain(CalCurrent):
     '''Calculation of gain carriers and gain current, simplified version'''

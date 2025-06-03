@@ -23,7 +23,7 @@ from interaction.interaction import GeneralG4Interaction
 from field import devsim_field as devfield
 from current import cal_current as ccrt
 from afe import readout as rdo
-from .draw_save import energy_deposition, draw_drift_path, draw_current, cce
+from .draw_save import energy_deposition, draw_drift_path
 from util.output import output
 
 
@@ -89,7 +89,7 @@ def main(kwargs):
                 my_current.draw_currents(path) # Draw current
                 ele_current.draw_waveform(my_current.sum_cu, path) # Draw waveform
                 if 'strip' in my_d.det_model:
-                    cce(my_current, path)
+                    my_current.charge_collection(path)
             
             del my_f
             end = time.time()
@@ -137,7 +137,7 @@ def main(kwargs):
                 my_current.draw_currents(path) # Draw current
                 ele_current.draw_waveform(my_current.sum_cu, path) # Draw waveform
                 if 'strip' in my_d.det_model:
-                    cce(my_current, path)
+                    my_current.charge_collection(path)
             
             del my_f
             end = time.time()
