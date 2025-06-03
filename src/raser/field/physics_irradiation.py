@@ -11,7 +11,7 @@ Description:  physics_irradiation.py
 import devsim
 from .model_create import *
 
-def CreateIrradiation(device, region, label="Xingchen", flux=1e15, custom_defect = {}):
+def CreateIrradiation(device, region, label="XingChen", flux=1e15, custom_defect = {}):
 
     # if not InEdgeModelList(device, region, "ElectricField"):
     #     CreateEdgeModel(device, region, "ElectricField", "(Potential@n0-Potential@n1)*EdgeInverseLength")
@@ -83,10 +83,11 @@ def CreateIrradiationModel_XingChen(device, region):
     """
     
     defects = []
-    defects.append({"name" : "DA1", "E_t_ev" : 0.56-0.42,  "g_int" : 0.209*0.7, "sigma_n_irr" : 1e-15,     "sigma_p_irr" : 1e-14})#右
-    defects.append({"name" : "DA2", "E_t_ev" : 0.56-0.46,  "g_int" : 0.155,  "sigma_n_irr" : 7e-15,     "sigma_p_irr" : 7e-14})#右
-    defects.append({"name" : "DD1", "E_t_ev" : -0.56+0.36, "g_int" : 0.025*2.6, "sigma_n_irr" : 3.23e-13,  "sigma_p_irr" : 3.23e-14})#左
-    defects.append({"name" : "DD2", "E_t_ev" : -0.56+0.48, "g_int" : 0.321*0.85, "sigma_n_irr" : 4.166e-15, "sigma_p_irr" : 1.965e-16})#左
+    defects.append({"name" : "E30K", "E_t_ev" : 0.56-0.1,   "g_int" : 2.0810, "sigma_n_irr" : 2.300e-14, "sigma_p_irr" : 2.920e-16})
+    defects.append({"name" : "V3",   "E_t_ev" : 0.56-0.458, "g_int" : 1.6504, "sigma_n_irr" : 2.551e-14, "sigma_p_irr" : 1.551e-13})
+    defects.append({"name" : "Ip",   "E_t_ev" : 0.56-0.545, "g_int" : 0.6936, "sigma_n_irr" : 4.478e-15, "sigma_p_irr" : 6.709e-15})
+    defects.append({"name" : "H220", "E_t_ev" : -0.56+0.48, "g_int" : 2.6112, "sigma_n_irr" : 4.166e-15, "sigma_p_irr" : 1.965e-16})
+    defects.append({"name" : "CiOi", "E_t_ev" : -0.56+0.36, "g_int" : 1.6511, "sigma_n_irr" : 3.230e-17, "sigma_p_irr" : 2.036e-14})
 
     return defects
 

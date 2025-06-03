@@ -69,6 +69,10 @@ parser_resolution = subparsers.add_parser('resolution', help='resolution calcula
 parser_resolution.add_argument('det_name', help='name of the detector')
 parser_resolution.add_argument('-tct', type=str, help='specify TCT signal class')
 parser_resolution.add_argument('-daq', type=str, help='specify DAQ system')
+parser_resolution.add_argument('-vol', '--voltage', type=str, help='bias voltage')
+parser_resolution.add_argument('-irr', '--irradiation', type=str, help='irradiation flux')
+parser_resolution.add_argument('-g4', '--g4experiment', type=str, help='model of Geant4 experiment')
+parser_resolution.add_argument('-amp', '--amplifier', type=str, help='amplifier')
 
 parser_signal = subparsers.add_parser('signal', help='generate signal')
 parser_signal.add_argument('det_name', help='name of the detector')

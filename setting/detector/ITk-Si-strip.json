@@ -22,7 +22,7 @@
     
     "temperature" : 254.0,
     "irradiation" : {
-        "irradiation_model" : "Schwandt",
+        "irradiation_model" : "XingChen",
         "irradiation_flux" : 1.7e15
     },
 
@@ -30,8 +30,6 @@
     "default_dimension" : 2,
     "read_out_contact" : [{"x_span":0, "y_span":0, "name":"top1"}, {"x_span":0, "y_span":0, "name":"top2"}, {"x_span":0, "y_span":0, "name":"top3"}],
     "field_shift_x" : 0,
-    "read_out_contact" : [{"x_span":1, "y_span":0, "name":"top2"}],
-    "field_shift_x" : 87.5,
 
     "mesh" : {
         "2D_mesh" : {

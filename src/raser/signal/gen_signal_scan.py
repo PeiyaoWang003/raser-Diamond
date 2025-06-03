@@ -26,7 +26,7 @@ from afe import readout as rdo
 from util.output import output
 from util.math import inversed_fast_fourier_transform as ifft
 
-def batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_number):
+def batch_loop(my_d, my_f, my_g4, g4_seed, total_events, instance_number):
     """
     Description:
         Batch run some events to get time resolution
@@ -50,6 +50,8 @@ def batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_num
 
     effective_number = 0
 
+    # datas that varies in each event
+
     event_array = array('i', [0])
     e_dep_array = array('d', [0.])
     par_in_array = array('d', [0., 0., 0.])
@@ -62,6 +64,20 @@ def batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_num
     tree.Branch("e_dep", e_dep_array, "e_dep/D")
     tree.Branch("par_in", par_in_array, "par_in[3]/D")
     tree.Branch("par_out", par_out_array, "par_out[3]/D")
+
+    # datas that are constant in each event
+
+    voltage_array = array('d', [my_d.voltage])
+    irradiation_array = array('d', [my_d.irradiation_flux])
+    g4_str = ROOT.std.string()
+    g4_str.assign(my_d.g4experiment)
+    amplifier_str = ROOT.std.string()
+    amplifier_str.assign(my_d.amplifier)
+    
+    tree.Branch("voltage", voltage_array, "voltage/D")
+    tree.Branch("irradiation_flux", irradiation_array, "irradiation_flux/D")
+    tree.Branch("g4experiment", g4_str)
+    tree.Branch("amplifier", amplifier_str)
 
     current_time_bin = 10e-12 # TODO: relate this to setting in calcurrent.py
     current_duration = 10e-9
@@ -90,7 +106,7 @@ def batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_num
             else:
                 my_current.cross_talk_cu = my_current.sum_cu
 
-            ele_current = rdo.Amplifier(my_current.cross_talk_cu, amplifier, seed=event, is_cut=True)
+            ele_current = rdo.Amplifier(my_current.cross_talk_cu, my_d.amplifier, seed=event, is_cut=True)
 
             event_array[0] = event
             e_dep_array[0] = my_g4.edep_devices[event-start_n]
@@ -115,7 +131,14 @@ def batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_num
     detection_efficiency =  effective_number/(end_n-start_n) 
     print("detection_efficiency=%s"%detection_efficiency)
 
-    file_path = os.path.join(output(__file__, my_d.det_name, 'batch'),"signal_"+str(instance_number)+".root")
+    file_path = os.path.join(output(__file__, my_d.det_name, 'batch'),
+                             "signal_"+
+                             str(instance_number)+
+                             str(my_d.voltage)+
+                             str(my_d.irradiation_flux)+
+                             str(my_d.g4experiment)+
+                             str(my_d.amplifier)+
+                             ".root")
     file = ROOT.TFile(file_path, "RECREATE")
     tree.Write()
     file.Close()
@@ -124,24 +147,22 @@ def main(kwargs):
     det_name = kwargs['det_name']
     my_d = bdv.Detector(det_name)
     
+    my_d = bdv.Detector(det_name)
     if kwargs['voltage'] != None:
-        voltage = kwargs['voltage']
-    else:
-        voltage = my_d.voltage
+        my_d.voltage = kwargs['voltage']
+
+    if kwargs['irradiation'] != None:
+        my_d.irradiation_flux = float(kwargs['irradiation'])
 
     if kwargs['g4experiment'] != None:
-        g4experiment = kwargs['g4experiment']
-    else:
-        g4experiment = my_d.g4experiment
+        my_d.g4experiment = kwargs['g4experiment']
 
     if kwargs['amplifier'] != None:
-        amplifier = kwargs['amplifier']
-    else:
-        amplifier = my_d.amplifier
+        my_d.amplifier = kwargs['amplifier']
 
-    my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, my_d.irradiation_flux)
+    my_f = devfield.DevsimField(my_d.device, my_d.dimension, my_d.voltage, my_d.read_out_contact, my_d.irradiation_flux)
 
-    geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/" + g4experiment + ".json"
+    geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/" + my_d.g4experiment + ".json"
     with open(geant4_json) as f:
         g4_dic = json.load(f)
     total_events = int(g4_dic['total_events'])
@@ -150,10 +171,10 @@ def main(kwargs):
     instance_number = job_number
 
     g4_seed = instance_number * total_events
-    my_g4 = GeneralG4Interaction(my_d, g4experiment, g4_seed)
+    my_g4 = GeneralG4Interaction(my_d, my_d.g4experiment, g4_seed)
 
-    ele_json = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier + ".json"
-    ele_cir = os.getenv("RASER_SETTING_PATH")+"/electronics/" + amplifier + ".cir"
+    ele_json = os.getenv("RASER_SETTING_PATH")+"/electronics/" + my_d.amplifier + ".json"
+    ele_cir = os.getenv("RASER_SETTING_PATH")+"/electronics/" + my_d.amplifier + ".cir"
     if os.path.exists(ele_json):
         ROOT.gRandom.SetSeed(instance_number) # to ensure time resolution result reproducible
     elif os.path.exists(ele_cir):
@@ -172,6 +193,6 @@ def main(kwargs):
         # TODO: fix noise seed, add noise from ngspice .noise spectrum
         pass
     
-    batch_loop(my_d, my_f, my_g4, amplifier, g4_seed, total_events, instance_number)
+    batch_loop(my_d, my_f, my_g4, g4_seed, total_events, instance_number)
     del my_g4
 

@@ -26,7 +26,7 @@ from field import devsim_field as devfield
 from current import cal_current as ccrt
 from current.cross_talk import cross_talk
 from afe import readout as rdo
-from .draw_save import energy_deposition, draw_drift_path, cce
+from .draw_save import energy_deposition, draw_drift_path
 from util.output import output
 
 
@@ -59,27 +59,23 @@ def main(kwargs):
         my_d.irradiation_flux = float(kwargs['irradiation'])
 
     if kwargs['g4experiment'] != None:
-        g4experiment = kwargs['g4experiment']
-    else:
-        g4experiment = my_d.g4experiment
+        my_d.g4experiment = kwargs['g4experiment']
 
     if kwargs['amplifier'] != None:
-        amplifier = kwargs['amplifier']
-    else:
-        amplifier = my_d.amplifier
+        my_d.amplifier = kwargs['amplifier']
 
     g4_vis = kwargs['g4_vis']
 
     my_f = devfield.DevsimField(my_d.device, my_d.dimension, my_d.voltage, my_d.read_out_contact, my_d.irradiation_flux)
     
     g4_seed = random.randint(0,1e7)
-    my_g4 = GeneralG4Interaction(my_d, g4experiment, g4_seed, g4_vis)
+    my_g4 = GeneralG4Interaction(my_d, my_d.g4experiment, g4_seed, g4_vis)
     my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, -1)
     if "strip" in my_d.det_model:
         my_current.cross_talk_cu = cross_talk(det_name, my_current.sum_cu)
-        ele_current = rdo.Amplifier(my_current.cross_talk_cu, amplifier)
+        ele_current = rdo.Amplifier(my_current.cross_talk_cu, my_d.amplifier)
     else:
-        ele_current = rdo.Amplifier(my_current.sum_cu, amplifier)
+        ele_current = rdo.Amplifier(my_current.sum_cu, my_d.amplifier)
 
     now = time.strftime("%Y_%m%d_%H%M%S")
     path = output(__file__, my_d.det_name, now)
@@ -92,7 +88,7 @@ def main(kwargs):
         ele_current.draw_waveform(my_current.sum_cu, path)
 
     if 'strip' in my_d.det_model:
-        cce(my_current, path)
+        my_current.charge_collection(path)
     
     del my_f
     end = time.time()

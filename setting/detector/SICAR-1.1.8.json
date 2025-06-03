@@ -24,7 +24,7 @@
 
     "temperature" : 300.0,
 
-    "area_factor" : 127.32,
+    "area_factor" : 0.01,
     "default_dimension" : 1,
     "read_out_contact" : [{"x_span":0, "y_span":0, "name":"top"}],
 
@@ -54,7 +54,7 @@
         }
     },
 
-    "g4experiment" : "time_resolution",
+    "g4experiment" : "beta_source",
     "amplifier" : "Broad_Band_UCSC",
     "daq" : "Alibava"
 }
