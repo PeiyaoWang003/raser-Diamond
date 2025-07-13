@@ -6,7 +6,7 @@ fi
 
 dir_raser=$(cd $(dirname $(dirname $BASH_SOURCE[0])) && pwd)
 
-dir_geant4_data=/home/user/Geant4/geant4-v11.3.2-install/share/Geant4-11.3.2/data
+dir_geant4_data=/home/user/Geant4/geant4-v11.3.2-install/share/Geant4/data
 GEANT4_INSTALL=/home/user/Geant4/geant4-v11.3.2-install
 
 cfg_env=$dir_raser/cfg/env
