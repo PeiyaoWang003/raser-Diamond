@@ -28,9 +28,10 @@ def main(kwargs):
         else:
             import subprocess
             import sys
-            args = sys.argv[1:]
-            args.remove('-umf')
-            command_tail = " ".join(args)
-            command_head = "python3 -mdevsim.umfpack.umfshim src/raser/__main__.py"
+            import os
+            command_tail = "\""+str(kwargs)+"\""
+            dirname = os.path.dirname(os.path.abspath(__file__))
+            solver_path = os.path.abspath(os.path.join(dirname, "solver_section.py"))
+            command_head = "python3 -mdevsim.umfpack.umfshim " + solver_path
             command = command_head + " " + command_tail
             subprocess.run([command], shell=True)

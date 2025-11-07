@@ -9,6 +9,9 @@ import math
 import devsim 
 import numpy as np
 
+if __name__ == "__main__":
+    __package__ = "src.raser.field"
+
 from ..device.build_device import Detector
 from .create_mesh import DevsimMesh
 from .create_parameter import create_parameter, delete_init
@@ -235,3 +238,9 @@ def main (kwargs):
             draw_noise(device, V=loop.get_voltage_values(), noise=loop.get_noise_values(),path=path)
     T2 =time.time()
     print("=========RASER info===========\nSimulation finish ,total used time: {}s !^w^!\n================".format(T2-T1))
+
+if __name__ == "__main__":
+    import sys
+    args = sys.argv[1] # str(kwargs)
+    print(args)
+    main(eval(args))
