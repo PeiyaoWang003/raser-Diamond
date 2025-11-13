@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+'''
+Description:  Define physical models for different materials  
+@Date       : 2025/11/11 
+@Author     : Yuhang Tan, Tao Yang, Chenxi Fu
+@version    : 3.0
+'''
+
 import json
 import os
+
+import numpy as np
+
+from ..current.model import Material
+from ..util.math import Vector
 
 class Detector:
     """
@@ -31,6 +43,7 @@ class Detector:
         self.l_x = self.device_dict['l_x'] 
         self.l_y = self.device_dict["l_y"]  
         self.l_z = self.device_dict["l_z"] 
+        self.bound = {'x':(0, self.l_x), 'y':(0, self.l_y), 'z':(0, self.l_z)}
         
         self.voltage = float(self.device_dict['bias']['voltage'])
         self.temperature = self.device_dict['temperature']
@@ -119,11 +132,6 @@ class Detector:
         if "lgad" in self.det_model:
             self.avalanche_bond = self.device_dict['avalanche_bond']
             self.avalanche_model = self.device_dict['avalanche_model']
-            
-        if "3D" in self.det_model: 
-            self.e_r = self.device_dict['e_r']
-            self.e_gap = self.device_dict['e_gap']
-            self.e_t = self.device_dict['e_t']
 
         if "planar" in self.det_model or "lgad" == self.det_model:
             self.p_x = self.device_dict['l_x']
@@ -139,6 +147,68 @@ class Detector:
 
         if "hexagonal" in self.det_model:
             self.p_r = self.device_dict["p_r"]
+
+    def is_plugin(self):
+        if "plugin" in self.det_model or "3d" in self.det_model or "3D" in self.det_model:
+            return True
+        else:
+            return False
+
+    def gain_rate_cal(self, my_f):
+        # gain = exp[K(d_gain)] / {1-int[alpha_minor * K(x) dx]}
+        # K(x) = exp{int[(alpha_major - alpha_minor) dx]}
+
+        # TODO: support non-uniform field in gain layer
+        if "lgad" not in self.det_model:
+            self.gain_rate = 0
+            return
+        
+        cal_coefficient = Material(self.material).cal_coefficient
+
+        n = 1001
+        if "ilgad" in self.det_model:
+            z_list = np.linspace(self.avalanche_bond * 1e-4, self.l_z, n) # in cm
+        else:
+            z_list = np.linspace(0, self.avalanche_bond * 1e-4, n) # in cm
+        alpha_n_list = np.zeros(n)
+        alpha_p_list = np.zeros(n)
+        for i in range(n):
+            Ex,Ey,Ez = my_f._get_e_field(0.5*self.l_x,0.5*self.l_y,z_list[i] * 1e4) # in V/cm, get original field to improve accuracy
+            E_field = Vector(Ex,Ey,Ez).get_length()
+            alpha_n = cal_coefficient(E_field, -1, self.temperature)
+            alpha_p = cal_coefficient(E_field, +1, self.temperature)
+            alpha_n_list[i] = alpha_n
+            alpha_p_list[i] = alpha_p
+
+        if my_f._get_e_field(0, 0, self.avalanche_bond)[2] > 0:
+            alpha_major_list = alpha_n_list # multiplication contributed mainly by electrons in conventional Si LGAD
+            alpha_minor_list = alpha_p_list
+        else:
+            alpha_major_list = alpha_p_list # multiplication contributed mainly by holes in conventional SiC LGAD
+            alpha_minor_list = alpha_n_list
+
+        # the integral supports iLGAD as well
+        
+        diff_list = alpha_major_list - alpha_minor_list
+        int_alpha_list = np.zeros(n-1)
+
+        for i in range(1,n):
+            int_alpha = 0
+            for j in range(i):
+                int_alpha += (diff_list[j] + diff_list[j+1]) * (z_list[j+1] - z_list[j]) /2
+            int_alpha_list[i-1] = int_alpha
+        exp_list = np.exp(int_alpha_list)
+
+        det = 0 # determinant of breakdown
+        for i in range(0,n-1):
+            average_alpha_minor = (alpha_minor_list[i] + alpha_minor_list[i+1])/2
+            det_derivative = average_alpha_minor * exp_list[i]
+            det += det_derivative*(z_list[i+1]-z_list[i])        
+        if det>1:
+            print("determinant=%s, larger than 1, detector break down", det)
+            raise(ValueError)
+        
+        self.gain_rate = exp_list[n-2]/(1-det) -1
 
 if __name__ == "__main__":
     import sys

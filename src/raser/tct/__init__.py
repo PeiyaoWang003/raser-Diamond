@@ -7,6 +7,13 @@
 #     else:
 #         raise NameError
 
+'''
+Description:  tct/__init__.py
+@Date       : 2025
+@Author     : Xin Shi, Chenxi Fu, Lin Zhu
+@version    : 2.0
+'''
+
 def main(kwargs):    
     print(kwargs)
     label = kwargs['label']

@@ -17,7 +17,7 @@ import devsim
 from .save_milestone import save_milestone
 from ..device.build_device import Detector
 
-def main(tdr_file):
+def main(tdr_file, is_flip=False):
     # make sure the file is in output/[det_name]/ or output/[det_name]/weightingfield/[electrode_name]/
     # and named as [bias voltage]V.tdr
     dir_name = os.path.dirname(tdr_file)
@@ -45,7 +45,7 @@ def main(tdr_file):
     print(devsim.get_device_list()[0])
     device = devsim.get_device_list()[0]
 
-    save_milestone(device, bias_voltage, dir_name, my_detector.dimension, None, False, is_tcad=True)
+    save_milestone(device, bias_voltage, dir_name, my_detector.dimension, None, False, is_tcad=True, is_flip=is_flip)
 
     devsim.reset_devsim()
 

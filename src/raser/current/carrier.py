@@ -1,3 +1,11 @@
+'''
+Description:  
+   Carrier system using vectorization
+@Date       : 2025/11/11
+@Author     : Dai Zhong, Chenxi Fu
+@version    : 1.0
+'''
+
 import math
 import logging
 import time
@@ -7,6 +15,8 @@ import numpy as np
 
 from .model import Material
 from ..util.math import Vector
+
+tolerance_default = 1e-6
 
 min_intensity = 1 # V/cm
 
@@ -26,7 +36,7 @@ class VectorizedCarrierSystem:
         # 初始化数组
         self.positions = np.array(all_positions, dtype=np.float64)
         self.charges = np.array(all_charges, dtype=np.float64)
-        self.times = np.array(all_times, dtype=np.float64)
+        self.times = np.array(all_times, dtype=np.int32)
         self.active = np.ones(len(all_charges), dtype=bool)
         self.end_conditions = np.zeros(len(all_charges), dtype=np.int8)
         self.steps_drifted = np.zeros(len(all_charges), dtype=np.int32)
@@ -102,8 +112,8 @@ class VectorizedCarrierSystem:
         self.paths_reduced = [[] for _ in range(len(all_positions))]
         
         # 初始化每个载流子的路径
-        for i in range(len(all_positions)):
-            x, y, z = all_positions[i]
+        for i, pos in enumerate(all_positions):
+            x, y, z = pos
             t = self.times[i]
             
             # 完整路径
@@ -188,7 +198,7 @@ class VectorizedCarrierSystem:
         except (TypeError, ValueError):
             resolution = None
         if resolution is None or resolution <= 0:
-            resolution = 1.0
+            resolution = tolerance_default
         my_d.resolution = resolution
 
     def _resolve_boundary_tolerance(self, my_d):
@@ -204,7 +214,7 @@ class VectorizedCarrierSystem:
             return custom_tol
 
         field_res = my_d.resolution
-        tolerance = max(5.0, field_res)
+        tolerance = max(tolerance_default, field_res)
         logger.info(
             "自动计算边界容差: %.2f um (field_res=%.2f)",
             tolerance, field_res
@@ -227,29 +237,6 @@ class VectorizedCarrierSystem:
             logger.info("使用用户配置的最小电场强度: %.2f V/cm", custom_min_field)
             return custom_min_field
         return 1.0
-    
-    def _initialize_other_attributes(self, all_positions):
-        """初始化其他属性"""
-        # 初始化 reduced_positions
-        self.reduced_positions = np.zeros((len(all_positions), 2), dtype=np.float64)
-        for i, pos in enumerate(all_positions):
-            x, y, z = pos
-            x_reduced, y_reduced = self._calculate_reduced_coords(x, y, self.my_d)
-            self.reduced_positions[i] = [x_reduced, y_reduced]
-        
-        # 存储路径
-        self.paths = [[] for _ in range(len(all_positions))]
-        self.paths_reduced = [[] for _ in range(len(all_positions))]
-        
-        # 初始化路径数据
-        for i in range(len(all_positions)):
-            x, y, z = all_positions[i]
-            t = self.times[i]
-            self.paths[i].append([x, y, z, t])
-            
-            x_reduced, y_reduced = self.reduced_positions[i]
-            x_num, y_num = self._calculate_electrode_numbers(x, y, self.my_d)
-            self.paths_reduced[i].append([x_reduced, y_reduced, z, t, x_num, y_num])
     
     def _calculate_reduced_coords(self, x, y, my_d):
         """计算简化坐标"""
@@ -278,8 +265,8 @@ class VectorizedCarrierSystem:
     def _calculate_electrode_numbers(self, x, y, my_d):
         """计算电极编号"""
         try:
-            x_num = int((x - my_d.l_x/2) // my_d.p_x + my_d.x_ele_num/2.0)
-            y_num = int((y - my_d.l_y/2) // my_d.p_y + my_d.y_ele_num/2.0)
+            x_num = int((x - my_d.l_x/2 + (my_d.x_ele_num%2)*my_d.p_x/2.0) // my_d.p_x + my_d.x_ele_num/2)
+            y_num = int((y - my_d.l_y/2 + (my_d.y_ele_num%2)*my_d.p_y/2.0) // my_d.p_y + my_d.y_ele_num/2)
             return x_num, y_num
         except Exception as e:
             logger.warning(f"电极编号计算失败，使用默认值: {e}")
@@ -306,7 +293,7 @@ class VectorizedCarrierSystem:
         
         return out_of_bound
 
-    def drift_batch(self, my_d, field_cache, delta_t=1e-12, max_steps=None):
+    def drift_batch(self, my_d, my_f, delta_t=1e-12, max_steps=None):
         """批量漂移主函数 - 大型器件优化"""
         params = self._params
         max_drift_time = params.get('max_drift_time', 0.0)
@@ -347,9 +334,9 @@ class VectorizedCarrierSystem:
         
         for step in range(planned_steps):
             if step % 100 == 0:
-                self._log_progress(step, total_carriers)
+                self._log_progress_drift(step, total_carriers)
             
-            n_terminated = self.drift_step_batch(my_d, field_cache, delta_t, step)
+            n_terminated = self.drift_step_batch(my_d, my_f, delta_t, step)
             self.performance_stats['total_steps'] += 1
             
             if not np.any(self.active):
@@ -367,7 +354,7 @@ class VectorizedCarrierSystem:
         self._log_final_stats(start_time, executed_steps)
         return True
 
-    def drift_step_batch(self, my_d, field_cache, delta_t, step=0):
+    def drift_step_batch(self, my_d, my_f, delta_t, step=0):
         """批量单步漂移 - 核心算法"""
         if not np.any(self.active):
             return 0
@@ -393,14 +380,15 @@ class VectorizedCarrierSystem:
                 continue
             
             # 时间检查
-            if self.times[idx] > params['max_drift_time']:
+            #if self.times[idx] > params['max_drift_time']:
+            if self.times[idx] > params['max_vector_steps']:
                 self.active[idx] = False
                 self.end_conditions[idx] = 4
                 n_terminated += 1
                 continue
             
             # 电场获取和处理
-            e_field = self._get_e_field(field_cache, x, y, z, idx, x_reduced, y_reduced)
+            e_field = self._get_e_field_reduced(my_f, x, y, z, idx, x_reduced, y_reduced)
             if e_field is None:
                 continue
                 
@@ -417,7 +405,7 @@ class VectorizedCarrierSystem:
             
             # 迁移率计算
             try:
-                doping = field_cache.get_doping_cached(x_reduced, y_reduced, z)
+                doping = my_f.get_doping_cached(x_reduced, y_reduced, z)
                 mu = self.mobility(params['temperature'], doping, charge, intensity)
                 diffusion_constant = math.sqrt(2.0 * self.kboltz * params['temperature'] * mu * delta_t) * 1e4
             except Exception as e:
@@ -430,18 +418,18 @@ class VectorizedCarrierSystem:
             dif_x, dif_y, dif_z = self._calculate_diffusion(diffusion_constant)
             
             # 更新位置
-            self._update_carrier_position(idx, delta_x, delta_y, delta_z, dif_x, dif_y, dif_z, delta_t)
+            self._update_carrier_position(idx, delta_x, delta_y, delta_z, dif_x, dif_y, dif_z)
         
         self.performance_stats['carriers_terminated'] += n_terminated
         return n_terminated
 
-    def _get_e_field(self, field_cache, x, y, z, idx, field_x=None, field_y=None):
+    def _get_e_field_reduced(self, my_f, x, y, z, idx, field_x=None, field_y=None):
         """安全的电场获取"""
         fx = x if field_x is None else field_x
         fy = y if field_y is None else field_y
         try:
             self.performance_stats['field_calculations'] += 1
-            e_field = field_cache.get_e_field_cached(fx, fy, z)
+            e_field = my_f.get_e_field_cached(fx, fy, z)
             if e_field is None or len(e_field) != 3:
                 raise ValueError("无效的电场值")
             return e_field
@@ -474,7 +462,7 @@ class VectorizedCarrierSystem:
         except:
             return 0.0, 0.0, 0.0
 
-    def _update_carrier_position(self, idx, delta_x, delta_y, delta_z, dif_x, dif_y, dif_z, delta_t):
+    def _update_carrier_position(self, idx, delta_x, delta_y, delta_z, dif_x, dif_y, dif_z):
         """更新载流子位置"""
         x, y, z = self.positions[idx]
         
@@ -485,7 +473,7 @@ class VectorizedCarrierSystem:
         # 更新坐标
         self.positions[idx] = [new_x, new_y, new_z]
         self.reduced_positions[idx] = self._calculate_reduced_coords(new_x, new_y, self.my_d)
-        self.times[idx] += delta_t
+        self.times[idx] += 1
         self.steps_drifted[idx] += 1
         
         # 更新路径
@@ -496,7 +484,7 @@ class VectorizedCarrierSystem:
             new_z, self.times[idx], x_num, y_num
         ])
 
-    def _log_progress(self, step, total_carriers):
+    def _log_progress_drift(self, step, total_carriers):
         """记录进度"""
         active_count = np.sum(self.active)
         progress = (total_carriers - active_count) / total_carriers * 100
@@ -564,7 +552,7 @@ class VectorizedCarrierSystem:
         except Exception as e:
             carrier.signal = [[]]
 
-    def get_signal_batch(self, my_d, field_cache):
+    def get_signal_batch(self, my_d, my_f, delta_t=1e-12):
         """批量计算载流子信号 - 重新设计版本"""
         start_time = time.time()
         e0 = 1.60217733e-19
@@ -594,9 +582,9 @@ class VectorizedCarrierSystem:
         all_indices = np.arange(len(self.positions))
         
         if len(self.read_out_contact) == 1:
-            self._calculate_signal_single_contact(all_indices, field_cache, e0, has_irradiation, my_d)
+            self._calculate_signal_single_contact(all_indices, my_f, e0, delta_t, has_irradiation, my_d)
         else:
-            self._calculate_signal_multi_contact(all_indices, field_cache, e0, has_irradiation, my_d)
+            self._calculate_signal_multi_contact(all_indices, my_f, e0, delta_t, has_irradiation, my_d)
         
         # 统计信号计算结果
         total_carriers_with_signals = sum(1 for carrier_signals in self.signals if carrier_signals)
@@ -610,7 +598,7 @@ class VectorizedCarrierSystem:
         end_time = time.time()
         logger.info(f"批量信号计算完成: 耗时{end_time - start_time:.2f}秒")
 
-    def _calculate_signal_single_contact(self, all_indices, field_cache, e0, has_irradiation, my_d):
+    def _calculate_signal_single_contact(self, all_indices, my_f, e0, delta_t, has_irradiation, my_d):
         """单电极情况下的信号计算"""
         x_span = self.read_out_contact[0]['x_span']
         y_span = self.read_out_contact[0]['y_span']
@@ -623,15 +611,18 @@ class VectorizedCarrierSystem:
         # 处理所有载流子
         processed_count = 0
         for carrier_idx in all_indices:
-            if self._process_carrier_signal_single(carrier_idx, field_cache, e0, has_irradiation, 
+            if self._process_carrier_signal_single(carrier_idx, my_f, e0, delta_t, has_irradiation, 
                                                 x_span, y_span, p_x, p_y, total_electrodes):
                 processed_count += 1
+
+            if carrier_idx % 10 == 0:
+                self._log_progress_signal(carrier_idx, len(all_indices))
         
         # 统计信号数据
         total_carriers_with_signals = sum(1 for carrier_signals in self.signals if carrier_signals)
         logger.info(f"单电极信号计算完成: 处理了{processed_count}个载流子, {total_carriers_with_signals}个载流子有信号")
 
-    def _process_carrier_signal_single(self, carrier_idx, field_cache, e0, has_irradiation, 
+    def _process_carrier_signal_single(self, carrier_idx, my_f, e0, delta_t, has_irradiation, 
                                     x_span, y_span, p_x, p_y, total_electrodes):
         """处理单个载流子在单电极配置下的信号 - 修复存储结构"""
         charge = self.charges[carrier_idx]
@@ -651,6 +642,9 @@ class VectorizedCarrierSystem:
             x_coords = [point[0] for point in path_reduced[:-1]]
             y_coords = [point[1] for point in path_reduced[:-1]]  
             z_coords = [point[2] for point in path_reduced[:-1]]
+
+            delta_n_x = [path_reduced[i+1][4] - path_reduced[i][4] for i in range(len(path_reduced)-1)]
+            delta_n_y = [path_reduced[i+1][5] - path_reduced[i][5] for i in range(len(path_reduced)-1)]
             
             # 计算时间差
             d_times = [path_reduced[i+1][3] - path_reduced[i][3] for i in range(len(path_reduced)-1)]
@@ -667,9 +661,9 @@ class VectorizedCarrierSystem:
                     try:
                         # 批量计算起点和终点的权重电势
                         U_w_1 = self._get_weighting_potentials_batch(
-                            field_cache, 
-                            [x - x_shift for x in x_coords], 
-                            [y - y_shift for y in y_coords], 
+                            my_f, 
+                            [x - x_shift + delta_n_x * p_x for (x,delta_n_x) in zip(x_coords, delta_n_x)], 
+                            [y - y_shift + delta_n_y * p_y for (y,delta_n_y) in zip(y_coords, delta_n_y)], 
                             z_coords, 0
                         )
                         
@@ -679,9 +673,9 @@ class VectorizedCarrierSystem:
                         z_coords_end = [point[2] for point in path_reduced[1:]]
                         
                         U_w_2 = self._get_weighting_potentials_batch(
-                            field_cache, 
-                            [x - x_shift for x in x_coords_end], 
-                            [y - y_shift for y in y_coords_end], 
+                            my_f, 
+                            [x - x_shift + delta_n_x * p_x for (x,delta_n_x) in zip(x_coords_end, delta_n_x)],
+                            [y - y_shift + delta_n_y * p_y for (y,delta_n_y) in zip(y_coords_end, delta_n_y)],
                             z_coords_end, 0
                         )
                         
@@ -691,7 +685,7 @@ class VectorizedCarrierSystem:
                         # 处理陷阱效应
                         if has_irradiation:
                             charges = self._calculate_trapped_charges(
-                                charge, x_coords, y_coords, z_coords, d_times, field_cache
+                                charge, x_coords, y_coords, z_coords, d_times, delta_t, my_f
                             )
                         else:
                             charges = [charge] * n_points
@@ -719,113 +713,8 @@ class VectorizedCarrierSystem:
         except Exception as e:
             logger.warning(f"处理载流子{carrier_idx}信号时出错: {e}")
             return False
-
-    def _calculate_signal_multi_contact(self, all_indices, field_cache, e0, has_irradiation, my_d):
-        """多电极情况下的信号计算"""
-        n_electrodes = len(self.read_out_contact)
-        logger.info(f"多电极配置: {n_electrodes}个电极")
-        
-        # 处理所有载流子
-        processed_count = 0
-        for carrier_idx in all_indices:
-            if self._process_carrier_signal_multi(carrier_idx, field_cache, e0, has_irradiation, n_electrodes):
-                processed_count += 1
-        
-        # 统计信号数据
-        total_carriers_with_signals = sum(1 for carrier_signals in self.signals if carrier_signals)
-        logger.info(f"多电极信号计算完成: 处理了{processed_count}个载流子, {total_carriers_with_signals}个载流子有信号")
-
-    def _process_carrier_signal_multi(self, carrier_idx, field_cache, e0, has_irradiation, n_electrodes):
-        """处理单个载流子在多电极配置下的信号"""
-        charge = self.charges[carrier_idx]
-        path_reduced = self.paths_reduced[carrier_idx]
-        
-        if len(path_reduced) <= 1:
-            return False
-        
-        try:
-            n_points = len(path_reduced) - 1
-            
-            # 调试信息
-            if carrier_idx < 5:
-                logger.debug(f"多电极-载流子{carrier_idx}: 电荷={charge}, 路径点数={len(path_reduced)}")
-            
-            # 提取坐标和时间
-            x_coords = [point[0] for point in path_reduced[:-1]]
-            y_coords = [point[1] for point in path_reduced[:-1]]
-            z_coords = [point[2] for point in path_reduced[:-1]]
-            d_times = [path_reduced[i+1][3] - path_reduced[i][3] for i in range(len(path_reduced)-1)]
-            
-            # 为这个载流子初始化电极信号存储
-            carrier_electrode_signals = [[] for _ in range(n_electrodes)]
-            
-            # 为每个电极计算信号
-            success_count = 0
-            
-            for electrode_idx in range(n_electrodes):
-                try:
-                    # 批量计算起点和终点的权重电势
-                    U_w_1 = self._get_weighting_potentials_batch(
-                        field_cache, x_coords, y_coords, z_coords, electrode_idx
-                    )
-                    
-                    # 获取终点的权重电势
-                    x_coords_end = [point[0] for point in path_reduced[1:]]
-                    y_coords_end = [point[1] for point in path_reduced[1:]]
-                    z_coords_end = [point[2] for point in path_reduced[1:]]
-                    
-                    U_w_2 = self._get_weighting_potentials_batch(
-                        field_cache, x_coords_end, y_coords_end, z_coords_end, electrode_idx
-                    )
-                    
-                    # 计算电势差
-                    dU_w = [u2 - u1 for u1, u2 in zip(U_w_1, U_w_2)]
-                    
-                    # 处理陷阱效应
-                    if has_irradiation:
-                        charges = self._calculate_trapped_charges(
-                            charge, x_coords, y_coords, z_coords, d_times, field_cache
-                        )
-                    else:
-                        charges = [charge] * n_points
-                    
-                    # 计算信号
-                    signals = [q * e0 * du for q, du in zip(charges, dU_w)]
-                    
-                    # 存储到这个载流子的对应电极
-                    carrier_electrode_signals[electrode_idx] = signals
-                    success_count += 1
-                    
-                    # 调试信息
-                    if carrier_idx < 3 and electrode_idx < 3:
-                        non_zero_signals = [s for s in signals ]
-                        if non_zero_signals:
-                            logger.debug(f"载流子{carrier_idx}电极{electrode_idx}: {len(non_zero_signals)}个非零信号")
-                    
-                except Exception as e:
-                    if not self._signal_warning_logged:
-                        carrier_type = "hole" if charge > 0 else "electron"
-                        logger.warning("%s 载流子%d电极%d信号计算失败: %s", carrier_type, carrier_idx, electrode_idx, e)
-                        self._signal_warning_logged = True
-                    continue
-            
-            # 存储这个载流子的所有电极信号
-            if success_count > 0:
-                self.signals[carrier_idx] = carrier_electrode_signals
-                
-                # 记录统计
-                if carrier_idx < 3:
-                    total_points = sum(len(sigs) for sigs in carrier_electrode_signals)
-                    non_zero_points = sum(1 for sigs in carrier_electrode_signals for s in sigs )
-                    logger.debug(f"多电极-载流子{carrier_idx}: {success_count}个电极有信号, {total_points}总点数, {non_zero_points}非零点")
-            
-            return success_count > 0
-            
-        except Exception as e:
-            logger.warning(f"处理载流子{carrier_idx}多电极信号时出错: {e}")
-            return False
-        
-    def _calculate_signal_multi_contact(self, all_indices, field_cache, e0, has_irradiation, my_d):
+     
+    def _calculate_signal_multi_contact(self, all_indices, my_f, e0, delta_t, has_irradiation, my_d):
         """多电极情况下的向量化信号计算 - 处理所有载流子"""
         n_electrodes = len(self.read_out_contact)
         
@@ -834,8 +723,11 @@ class VectorizedCarrierSystem:
         # 批量处理所有载流子
         processed_count = 0
         for carrier_idx in all_indices:
-            if self._process_carrier_signal_multi(carrier_idx, field_cache, e0, has_irradiation, n_electrodes):
+            if self._process_carrier_signal_multi(carrier_idx, my_f, e0, delta_t, has_irradiation, n_electrodes):
                 processed_count += 1
+
+            if carrier_idx % 10 == 0:
+                self._log_progress_signal(carrier_idx, len(all_indices))
         
         # 统计信号数据
         total_signal_points = sum(len(sig_list) for sig_list in self.signals[:n_electrodes])
@@ -844,7 +736,7 @@ class VectorizedCarrierSystem:
         logger.info(f"多电极信号计算完成: 处理了{processed_count}个载流子, {n_electrodes}个电极")
         logger.info(f"有信号的电极: {non_empty_electrodes}/{n_electrodes}, 总信号点数={total_signal_points}")
 
-    def _process_carrier_signal_multi(self, carrier_idx, field_cache, e0, has_irradiation, n_electrodes):
+    def _process_carrier_signal_multi(self, carrier_idx, my_f, e0, delta_t, has_irradiation, n_electrodes):
         """处理单个载流子在多电极配置下的信号 - 返回是否成功处理"""
         charge = self.charges[carrier_idx]
         path_reduced = self.paths_reduced[carrier_idx]
@@ -874,7 +766,7 @@ class VectorizedCarrierSystem:
                 try:
                     # 批量计算起点和终点的权重电势
                     U_w_1 = self._get_weighting_potentials_batch(
-                        field_cache, x_coords, y_coords, z_coords, j
+                        my_f, x_coords, y_coords, z_coords, j
                     )
                     
                     # 获取终点的权重电势
@@ -883,7 +775,7 @@ class VectorizedCarrierSystem:
                     z_coords_end = [point[2] for point in path_reduced[1:]]
                     
                     U_w_2 = self._get_weighting_potentials_batch(
-                        field_cache, x_coords_end, y_coords_end, z_coords_end, j
+                        my_f, x_coords_end, y_coords_end, z_coords_end, j
                     )
                     
                     # 计算电势差
@@ -896,7 +788,7 @@ class VectorizedCarrierSystem:
                     # 处理陷阱效应
                     if has_irradiation:
                         charges = self._calculate_trapped_charges(
-                            charge, x_coords, y_coords, z_coords, d_times, field_cache
+                            charge, x_coords, y_coords, z_coords, d_times, delta_t, my_f
                         )
                     else:
                         charges = [charge] * n_points
@@ -938,26 +830,60 @@ class VectorizedCarrierSystem:
             logger.warning(f"处理载流子{carrier_idx}多电极信号时出错: {e}")
             return False
     
-    def _get_weighting_potentials_batch(self, field_cache, x_coords, y_coords, z_coords, electrode_idx):
-        """批量获取权重电势 - 增强调试版本"""
+    def _get_weighting_potentials_batch(self, my_f, x_coords, y_coords, z_coords, electrode_idx):
+        """批量获取权重电势 - 带缺失值处理版本"""
         potentials = []
+        valid_points = []  # 存储有效点的坐标和电势值
         
+        # 第一次遍历：收集所有有效点
         for i in range(len(x_coords)):
             try:
-                potential = field_cache.get_w_p_cached(x_coords[i], y_coords[i], z_coords[i], electrode_idx)
-                potentials.append(potential)
-                
-                # 调试前几个点
-                if i < 3 and len(potentials) < 10:
-                    logger.debug(f"权重电势[{i}]: ({x_coords[i]:.1f}, {y_coords[i]:.1f}, {z_coords[i]:.1f}) -> {potential:.6f}")
-                    
+                potential = my_f.get_w_p_cached(x_coords[i], y_coords[i], z_coords[i], electrode_idx)
             except Exception as e:
                 logger.warning(f"权重电势获取失败: ({x_coords[i]}, {y_coords[i]}, {z_coords[i]}), 电极{electrode_idx}: {e}")
-                potentials.append(0.0)
+                potentials.append(None)
+                
+            potentials.append(potential)
+            valid_points.append((x_coords[i], y_coords[i], z_coords[i], potential))
+            
+            if i < 3 and len(potentials) < 10:
+                logger.debug(f"权重电势[{i}]: ({x_coords[i]:.1f}, {y_coords[i]:.1f}, {z_coords[i]:.1f}) -> {potential:.6f}")
+        
+        # 如果有缺失值，进行插值处理
+        if None in potentials and valid_points:
+            potentials = self._fill_missing_potentials(potentials, x_coords, y_coords, z_coords, valid_points)
         
         return potentials
 
-    def _calculate_trapped_charges(self, initial_charge, x_coords, y_coords, z_coords, d_times, field_cache):
+    def _fill_missing_potentials(self, potentials, x_coords, y_coords, z_coords, valid_points):
+        """使用最近邻有效值填充缺失的电势值"""
+        filled_potentials = potentials.copy()
+        
+        for i, potential in enumerate(potentials):
+            if potential is None:
+                # 找到最近的有效点
+                nearest_potential = self._find_nearest_valid_potential(
+                    x_coords[i], y_coords[i], z_coords[i], valid_points
+                )
+                filled_potentials[i] = nearest_potential
+                logger.debug(f"填充缺失电势[{i}]: 使用最近邻值 {nearest_potential:.6f}")
+        
+        return filled_potentials
+
+    def _find_nearest_valid_potential(self, x, y, z, valid_points):
+        """找到距离最近的有效点电势"""
+        min_distance = float('inf')
+        nearest_potential = 0.0  # 默认值
+        
+        for vx, vy, vz, potential in valid_points:
+            distance = ((x - vx) ** 2 + (y - vy) ** 2 + (z - vz) ** 2) ** 0.5
+            if distance < min_distance:
+                min_distance = distance
+                nearest_potential = potential
+        
+        return nearest_potential
+
+    def _calculate_trapped_charges(self, initial_charge, x_coords, y_coords, z_coords, d_times, delta_t, my_f):
         """计算考虑陷阱效应的电荷 - 使用列表推导式版本"""
         n_points = len(x_coords)
         
@@ -966,9 +892,9 @@ class VectorizedCarrierSystem:
         for i in range(n_points):
             try:
                 if initial_charge >= 0:  # 空穴
-                    trapping_rate = field_cache.get_trap_h_cached(x_coords[i], y_coords[i], z_coords[i])
+                    trapping_rate = my_f.get_trap_h_cached(x_coords[i], y_coords[i], z_coords[i])
                 else:  # 电子
-                    trapping_rate = field_cache.get_trap_e_cached(x_coords[i], y_coords[i], z_coords[i])
+                    trapping_rate = my_f.get_trap_e_cached(x_coords[i], y_coords[i], z_coords[i])
                 trapping_rates.append(trapping_rate)
             except Exception as e:
                 trapping_rates.append(0.0)
@@ -977,7 +903,7 @@ class VectorizedCarrierSystem:
         decay_factors = []
         cumulative_factor = 0.0
         for i in range(n_points):
-            cumulative_factor += trapping_rates[i] * d_times[i]
+            cumulative_factor += trapping_rates[i] * d_times[i] * delta_t
             decay_factors.append(math.exp(-cumulative_factor))
         
         return [initial_charge * factor for factor in decay_factors]
@@ -1016,3 +942,7 @@ class VectorizedCarrierSystem:
         else:
             return True
 
+    def _log_progress_signal(self, carrier_idx, len_all_indices):
+        """记录进度"""
+        progress = carrier_idx / len_all_indices * 100
+        logger.info(f"第{carrier_idx}个载流子收集到信号 ({progress:.1f}%完成)")

@@ -1,4 +1,12 @@
 #!/usr/bin/env python3 
+
+'''
+Description:  g4_sic_energy_deposition.py
+@Date       : 2025
+@Author     : Lin Zhu (Original: Geant4)
+@version    : 2.0
+'''
+
 import sys
 import os
 import array

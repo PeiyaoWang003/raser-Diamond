@@ -2,6 +2,13 @@
 # regincr-sim <input-values>
 #=========================================================================
 
+'''
+Description:  This module is a simple register-incrementer. It has an input
+@Date       : 2023
+@Author     : Chenxi Fu (Copied from PyMTL3 examples)
+@version    : 0.1
+'''
+
 import pymtl3 as mtl
 from util.output import create_path
 

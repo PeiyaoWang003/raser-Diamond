@@ -14,10 +14,10 @@ An environment with
 
     ROOT
     Geant4
-        you need to change the ```dir_geant4_data``` and the ```GEANT4_INSTALL``` in cfg/setup.sh by your Geant4 data path and install path.
-    A virtual environment with all other prerequisites, mainly all kinds of python packages
-        we recommand use apptainer and our .sif: https://ihepbox.ihep.ac.cn/ihepbox/index.php/s/Gp2SQIXLOUcKh4C
-        or you could refer to `cfg/raser.def`. 
+    python packages in `cfg/raser.def`
+        
+you need to change the ```dir_geant4_data``` and the ```GEANT4_INSTALL``` in cfg/setup.sh by your Geant4 data path and install path.
+we recommand use apptainer and our .sif: https://ihepbox.ihep.ac.cn/ihepbox/index.php/s/Gp2SQIXLOUcKh4C
 
 For external users, .sif should be in `img/`.
 
@@ -57,16 +57,27 @@ checkout __main__.py for detail.
 Tutorial
 ======
 
-For signal simulation of HPK devices:
+For signal simulation of 
+    HPK-Si-PiN and HPK-Si-LGAD in 10.1016/j.nima.2024.169479 (under reorganization):
 
     raser field [-cv] <device_name in `setting/detector`>
     raser field -wf <device_name>
     raser signal <device_name>
     raser tct signal <device_name> <laser_name in `setting/laser`>
 
-For time resolution of NJU SiC PiN in https://doi.org/10.3389/fphy.2022.718071 :
+For time resolution of 
+    NJU-PiN in 10.3389/fphy.2022.718071
+    SICAR-1 in 10.1007/s41605-023-00431-y and 10.1109/TNS.2024.3471863:
 
-    raser field [-cv] NJU-PIN
-    raser field -wf NJU-PIN
-    raser signal -s 20 NJU-PIN
-    raser resolution NJU-PIN
+    raser field [-cv] <device_name>
+    raser field -wf <device_name>
+    raser signal -s 20 <device_name>
+    raser resolution <device_name>
+
+For irradiation simulation of 
+    ATLAS ITk-md8 and ITk-Si-strip in arXiv:2504.20463
+    NJU-PiN in arXiv:2503.0901 6 (under reorganization):
+
+    raser field [-cv] <device_name>
+    raser field -wf <device_name>
+    raser signal <device_name>

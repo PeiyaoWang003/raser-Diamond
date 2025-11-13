@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+'''
+Description:  telescope_g4.py
+@Date       : 2023
+@Author     : Jiaqi Zhou
+@version    : 2.0
+'''
+
 from geant4_pybind import *
 import numpy as np
 

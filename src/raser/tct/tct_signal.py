@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+'''
+Description:  tct_signal.py
+@Date       : 2023
+@Author     : Yu Zhao, Chenxi Fu
+@version    : 2.0
+'''
+
 import sys
 import os
 import array
@@ -61,7 +68,7 @@ def main(kwargs):
     else:
         amplifier = my_d.amplifier
 
-    my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, my_d.irradiation_flux)
+    my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, is_plugin=my_d.is_plugin(), irradiation_flux=my_d.irradiation_flux, bounds=my_d.bound)
     my_l = LaserInjection(my_d, laser_dic)
 
     my_current = ccrt.CalCurrentLaser(my_d, my_f, my_l)

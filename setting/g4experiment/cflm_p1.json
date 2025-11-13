@@ -77,7 +77,7 @@
         ]
     ],
     "maxStep": 2,
-    "DetModule": "NJU-PIN-cflm.json",
+    "DetModule": "NJU-PiN-cflm.json",
     "vis": 0,
     "EdepBaseName": "test.root",
     "CurrentName": "test.root"

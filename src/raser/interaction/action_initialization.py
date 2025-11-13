@@ -1,3 +1,10 @@
+'''
+Description:  action_initialization.py
+@Date       : 2025
+@Author     : Yuhang Tan, Chenxi Fu (Original: Geant4)
+@version    : 2.0
+'''
+
 import numpy as np
 import geant4_pybind as g4b
 

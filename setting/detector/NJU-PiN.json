@@ -1,5 +1,5 @@
 {
-    "det_name" : "NJU-PIN",
+    "det_name" : "NJU-PiN",
     "det_model" : "planar",
     "material" : "SiC",
 
@@ -40,7 +40,7 @@
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
-                    "region" : "NJU-PIN", 
+                    "region" : "NJU-PiN", 
                     "tag1" : "top", 
                     "tag2" : "bot"
                 }
@@ -63,7 +63,7 @@
             "region" : [
                 {
                     "material" : "SiliconCarbide", 
-                    "region" : "NJU-PIN"
+                    "region" : "NJU-PiN"
                 },
                 {
                     "material" : "air",
@@ -79,14 +79,14 @@
                 }
             ],
             "contact" : [
-                {"name" : "top", "material" : "metal", "region" : "NJU-PIN",
+                {"name" : "top", "material" : "metal", "region" : "NJU-PiN",
                  "xl" : 0,     "xh" : 0,     "bloat" : 1e-5},
-                {"name" : "bot", "material" : "metal", "region" : "NJU-PIN",
+                {"name" : "bot", "material" : "metal", "region" : "NJU-PiN",
                  "xl" : 100e-4, "xh" : 100e-4, "bloat" : 1e-5}
             ]
         }
     },
     "g4experiment" : "time_resolution",
     "amplifier" : "Charge_Sensitive_UCSC",
-    "daq" : "NJU-PIN"
+    "daq" : "NJU-PiN"
 }

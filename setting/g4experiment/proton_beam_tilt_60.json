@@ -1,6 +1,6 @@
 {
     "geant4_model" : "proton_beam_tilt_60",
-    "total_events" : 50,
+    "total_events" : 1000,
     
     "object":{},
 
@@ -9,8 +9,8 @@
     "par_energy" : 3000,
     "maxstep" : 2,
     "g4_vis" : false,
-    "par_in" : [-200000, 0, -100000],
-    "par_out" : [200000, 0, 100000],
-    "par_randx": 1000,
-    "par_randy": 1000
+    "par_in" : [-2000, 0, -1000],
+    "par_out" : [2000, 0, 1000],
+    "par_randx": 500,
+    "par_randy": 500
 }

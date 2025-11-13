@@ -1,3 +1,10 @@
+'''
+Description:  carrier_list.py
+@Date       : 2025
+@Author     : Yuhang Tan, Chenxi Fu
+@version    : 2.0
+'''
+
 import ROOT
 ROOT.gROOT.SetBatch(True)
 class CarrierListFromG4P:

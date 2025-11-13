@@ -4,6 +4,13 @@ import devsim
 
 from . import model_create
 
+'''  
+Description:  This module creates various physical and material parameters.
+@Date       : 2023
+@Author     : Tao Yang, Xingchen Li, Zaiyi Li, Chenxi Fu (Copied and modified from devsim examples)
+@version    : 2.0
+'''
+
 def CreateGlobalConstant(T, device, region):
     # define global constant
     q = 1.60217646e-19 # coul

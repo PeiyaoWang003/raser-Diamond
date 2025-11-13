@@ -1,4 +1,13 @@
 #!/usr/bin/env python3 
+
+'''
+@Description:
+    Geant4 simulation for bmos detector
+@Date       : 2024
+@Author     : Ye He, Kaibo Xie
+@version    : 2.0
+'''
+
 import os
 import math
 

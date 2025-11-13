@@ -1,3 +1,10 @@
+'''
+Description:  primary_generator_action.py
+@Date       : 2025
+@Author     : Yuhang Tan, Chenxi Fu (Original: Geant4)
+@version    : 2.0
+'''
+
 import random
 
 import geant4_pybind as g4b

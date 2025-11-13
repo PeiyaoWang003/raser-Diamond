@@ -3,7 +3,7 @@
 '''
 @Description: Draw and plot drift path and induced current       
 @Date       : 2021/08/31 11:09:40
-@Author     : tanyuhang
+@Author     : Yuhang Tan
 @version    : 1.0
 '''
 from array import array
@@ -78,17 +78,10 @@ def draw_drift_path(my_d, my_g4, my_f, my_current, path):
 
     c1.cd(1)
     ROOT.gPad.SetMargin(0.15, 0.1, 0.1, 0.1)
-    if "3Dpixel" in my_d.det_model:
-        n_bin=[int((my_f.sx_r-my_f.sx_l)/5),
-                int((my_f.sy_r-my_f.sy_l)/5),int((my_d.l_z)/10)]
-        structure = ROOT.TH3D("","",n_bin[0],my_f.sx_l,my_f.sx_r,
-                                    n_bin[1],my_f.sy_l,my_f.sy_r,
-                                    n_bin[2],0,my_d.l_z)
-    else:
-        n_bin=[int(my_d.l_x/50),int(my_d.l_y/50),int(my_d.l_z)]
-        structure = ROOT.TH3D("","",n_bin[0],0,my_d.l_x,
-                                    n_bin[1],0,my_d.l_y,
-                                    n_bin[2],0,my_d.l_z)
+    n_bin=[int(my_d.l_x/50),int(my_d.l_y/50),int(my_d.l_z)]
+    structure = ROOT.TH3D("","",n_bin[0],0,my_d.l_x,
+                                n_bin[1],0,my_d.l_y,
+                                n_bin[2],0,my_d.l_z)
         
     structure.SetFillColor(1)
     structure.GetXaxis().SetTitle("x axis [\mum]")

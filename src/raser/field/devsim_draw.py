@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+'''  
+Description:  This module is for drawing IV, CV, noise, electron, hole, electric field plots.
+@Date       : 2023
+@Author     : Tao Yang, Xingchen Li, Zaiyi Li
+@version    : 2.0
+'''
+
 import csv
 from array import array
 import os

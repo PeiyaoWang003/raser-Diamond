@@ -5,6 +5,13 @@
 # instantiate and connect two instances of the single-stage registered
 # incrementer.
 
+'''
+Description:  This module is a simple two-stage register-incrementer. It has an input
+@Date       : 2023
+@Author     : Chenxi Fu (Copied from PyMTL3 examples)
+@version    : 0.1
+'''
+
 import pymtl3 as mtl
 from .regincr import RegIncr
 from ..util.output import create_path

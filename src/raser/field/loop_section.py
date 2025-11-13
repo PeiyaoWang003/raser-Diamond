@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+'''
+@File    :   loop_section.py
+@Time    :   2025/05
+@Author  :   Sen Zhao
+@Version :   1.0
+'''
+
 import os
 import pickle
 

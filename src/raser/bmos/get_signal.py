@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+'''
+@Description:
+    Get the signal induced by particle interaction in BMOS detector
+@Date       : 2024
+@Author     : Ye He, Kaibo Xie
+@version    : 2.0
+'''
+
 import sys
 import os
 import array
@@ -41,7 +49,7 @@ def get_signal():
 #     print(my_d.device)
 #     print(voltage)
     
-    my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, my_d.irradiation_flux)
+    my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, is_plugin=my_d.is_plugin(), irradiation_flux=my_d.irradiation_flux, bounds=my_d.bound)
 
     my_g4 = bmos.bmosG4Interaction(my_d)
 

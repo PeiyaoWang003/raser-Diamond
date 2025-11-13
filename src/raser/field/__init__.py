@@ -1,3 +1,9 @@
+'''  
+@Date       : 2025/06/05
+@Author     : Tao Yang, Chenxi Fu
+@version    : 2.0
+'''
+
 import logging
 
 def main(kwargs):
@@ -17,7 +23,7 @@ def main(kwargs):
 
     if is_ext is True:
         from . import extract_from_tcad
-        extract_from_tcad.main(label)
+        extract_from_tcad.main(label, is_flip=kwargs['flip'])
     elif wf_sub is not None:
         from . import weighting_potential
         weighting_potential.main(wf_sub[0], wf_sub[1], label)

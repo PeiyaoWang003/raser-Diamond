@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
+
 '''
 @Description: Signal re-formation for events of great amount
 @Date       : 2025/04/09 15:24:27
 @Author     : Chenxi Fu
 @version    : 1.0
 '''
+
 import os
 from array import array
 

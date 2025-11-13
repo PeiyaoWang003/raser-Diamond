@@ -3,7 +3,7 @@
 '''
 @Description: The main program of Raser induced current simulation      
 @Date       : 2024/02/20 18:12:26
-@Author     : tanyuhang, Chenxi Fu
+@Author     : Yuhang Tan, Chenxi Fu
 @version    : 2.0
 '''
 import sys
@@ -66,7 +66,9 @@ def main(kwargs):
 
     g4_vis = kwargs['g4_vis']
 
-    my_f = devfield.DevsimField(my_d.device, my_d.dimension, my_d.voltage, my_d.read_out_contact, my_d.irradiation_flux)
+    my_f = devfield.DevsimField(my_d.device, my_d.dimension, my_d.voltage, my_d.read_out_contact, is_plugin=my_d.is_plugin(), irradiation_flux=my_d.irradiation_flux, bounds=my_d.bound)
+    if "lgad" in my_d.det_model:
+        my_d.gain_rate_cal(my_f)
     
     g4_seed = random.randint(0,1e7)
     my_g4 = GeneralG4Interaction(my_d, my_d.g4experiment, g4_seed, g4_vis)
