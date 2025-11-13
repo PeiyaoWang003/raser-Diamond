@@ -1,3 +1,10 @@
+'''
+Description:  tct_signal_position_scan_draw.py
+@Date       : 2025
+@Author     : Lin Zhu
+@version    : 1.0
+'''
+
 import sys
 import os
 from array import array

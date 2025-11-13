@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
 
+'''
+@Date       : 2023
+@Author     : Ye He, Kaibo Xie
+@version    : 2.0
+'''
+
 import sys
 import os
 import array

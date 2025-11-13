@@ -1,3 +1,10 @@
+'''
+Description:  interaction.py
+@Date       : 2025
+@Author     : Chenxi Fu (Original: Geant4)
+@version    : 1.0
+'''
+
 import sys
 import random
 import math

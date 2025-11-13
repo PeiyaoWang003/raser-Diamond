@@ -1,3 +1,10 @@
+'''
+Description:  laser.py
+@Date       : 2023
+@Author     : Yu Zhao, Chenxi Fu
+@version    : 2.0
+'''
+
 import math
 
 import ROOT

@@ -1,3 +1,10 @@
+'''
+@File       : save_milestone.py
+@Date       : 2024
+@Author     : Sen Zhao
+@version    : 1.0
+'''
+
 import os
 import pickle
 
@@ -42,7 +49,7 @@ def milestone_save_1D(device, v, path, is_tcad):
     TrappingRate_p = []
 
     for region in devsim.get_region_list(device=device):
-        if devsim.get_material(device=device, region=region) == "air":
+        if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
             continue
         x.extend(devsim.get_node_model_values(device=device, region=region, name="x"))
         Potential.extend(devsim.get_node_model_values(device=device, region=region, name=U)) # get the potential dat
@@ -69,7 +76,7 @@ def milestone_save_1D(device, v, path, is_tcad):
     if is_tcad:
         ElectricField = []
         for region in devsim.get_region_list(device=device):
-            if devsim.get_material(device=device, region=region) == "air":
+            if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
                 continue
             ElectricField.extend(devsim.get_node_model_values(device=device, region=region, name=E))
         ElectricField = np.array(ElectricField)
@@ -78,7 +85,7 @@ def milestone_save_1D(device, v, path, is_tcad):
         x_mid = []
         ElectricField = []
         for region in devsim.get_region_list(device=device): 
-            if devsim.get_material(device=device, region=region) == "air":
+            if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
                 continue
             devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
             x_mid.extend(devsim.get_edge_model_values(device=device, region=region, name="xmid")) # get x-node values 
@@ -113,7 +120,7 @@ def milestone_save_wf_1D(device, v, path, contact_name, is_tcad):
     x_mid = []
 
     for region in devsim.get_region_list(device=device):
-        if devsim.get_material(device=device, region=region) == "air":
+        if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
             continue
         x.extend(devsim.get_node_model_values(device=device, region=region, name="x"))
         Potential.extend(devsim.get_node_model_values(device=device, region=region, name="Potential")) # get the potential data
@@ -141,7 +148,7 @@ def milestone_save_wf_1D(device, v, path, contact_name, is_tcad):
             data['metadata'] = metadata
             pickle.dump(data, file)
 
-def milestone_save_2D(device, v, path, is_tcad):
+def milestone_save_2D(device, v, path, is_tcad, is_flip=False):
     if is_tcad:
         U = "ElectrostaticPotential"
         # TODO: replace E with (ElectricField_0**2 + ElectricField_1**2)**0.5
@@ -176,7 +183,7 @@ def milestone_save_2D(device, v, path, is_tcad):
     TrappingRate_p = []
 
     for region in devsim.get_region_list(device=device):
-        if devsim.get_material(device=device, region=region) == "air":
+        if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
             continue
         x.extend(devsim.get_node_model_values(device=device, region=region, name="x"))
         y.extend(devsim.get_node_model_values(device=device, region=region, name="y"))
@@ -198,6 +205,9 @@ def milestone_save_2D(device, v, path, is_tcad):
     TrappingRate_n = np.array(TrappingRate_n)
     TrappingRate_p = np.array(TrappingRate_p)
 
+    if is_flip:
+        x, y = y, x
+
     devsim_draw.draw2D(x,y,Potential,"Potential", v, path)
     devsim_draw.draw2D(x,y,TrappingRate_n,"Electron Trapping Rate", v, path)
     devsim_draw.draw2D(x,y,TrappingRate_p,"Hole Trapping Rate", v, path)
@@ -205,7 +215,7 @@ def milestone_save_2D(device, v, path, is_tcad):
     if is_tcad:
         ElectricField = []
         for region in devsim.get_region_list(device=device):
-            if devsim.get_material(device=device, region=region) == "air":
+            if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
                 continue
             ElectricField.extend(devsim.get_node_model_values(device=device, region=region, name=E))
         ElectricField = np.array(ElectricField)
@@ -215,7 +225,7 @@ def milestone_save_2D(device, v, path, is_tcad):
         y_mid = []
         ElectricField = []
         for region in devsim.get_region_list(device=device):
-            if devsim.get_material(device=device, region=region) == "air":
+            if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
                 continue 
             devsim.element_from_edge_model(edge_model=E,   device=device, region=region)
             devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
@@ -226,6 +236,8 @@ def milestone_save_2D(device, v, path, is_tcad):
         x_mid = np.array(x_mid) # get x-node values
         y_mid = np.array(y_mid) # get y-node values
         ElectricField = np.array(ElectricField) # get y-node values
+        if is_flip:
+            x_mid, y_mid = y_mid, x_mid
         devsim_draw.draw2D(x_mid,y_mid,ElectricField,"Electric Field", v, path)
 
     metadata = {}
@@ -247,7 +259,7 @@ def milestone_save_2D(device, v, path, is_tcad):
             pickle.dump(data, file)
 
 
-def milestone_save_wf_2D(device, v, path, contact_name, is_tcad):
+def milestone_save_wf_2D(device, v, path, contact_name, is_tcad, is_flip=False):
     save_wf_path = os.path.join(path,contact_name)
     create_path(save_wf_path)
 
@@ -260,7 +272,7 @@ def milestone_save_wf_2D(device, v, path, contact_name, is_tcad):
 
     for region in devsim.get_region_list(device=device):
         print(devsim.get_material(device=device, region=region))
-        if devsim.get_material(device=device, region=region) == "air":
+        if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
             continue    
         x.extend(devsim.get_node_model_values(device=device, region=region, name="x"))
         y.extend(devsim.get_node_model_values(device=device, region=region, name="y"))
@@ -278,6 +290,10 @@ def milestone_save_wf_2D(device, v, path, contact_name, is_tcad):
     x_mid = np.array(x_mid) # get x-node values
     y_mid = np.array(y_mid) # get y-node values
     ElectricField = np.array(ElectricField) # get y-node values
+
+    if is_flip:
+        x, y = y, x
+        x_mid, y_mid = y_mid, x_mid
 
     devsim_draw.draw2D(x,y,Potential,"Weighting Potential", v, save_wf_path)
     devsim_draw.draw2D(x_mid,y_mid,ElectricField,"Weighting Field", v, save_wf_path)
@@ -333,7 +349,7 @@ def milestone_save_3D(device, v, path, is_tcad):
 
     
     for region in devsim.get_region_list(device=device):
-        if region=="aluminum" or devsim.get_material(device=device, region=region) == "air": 
+        if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air": 
             continue  
         x.extend(devsim.get_node_model_values(device=device, region=region, name="x"))
         y.extend(devsim.get_node_model_values(device=device, region=region, name="y"))
@@ -365,7 +381,7 @@ def milestone_save_3D(device, v, path, is_tcad):
    
     if is_tcad:
         for region in devsim.get_region_list(device=device):
-            if devsim.get_material(device=device, region=region) == "aluminum" or devsim.get_material(device=device, region=region) == "air":
+            if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
                 continue 
             ElectricField.extend(devsim.get_node_model_values(device=device, region=region, name=E))
         ElectricField = np.array(ElectricField)     
@@ -375,7 +391,7 @@ def milestone_save_3D(device, v, path, is_tcad):
         y_mid = []
         z_mid = []
         for region in devsim.get_region_list(device=device):
-            if devsim.get_material(device=device, region=region) == "aluminum" or devsim.get_material(device=device, region=region) == "air":
+            if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
                 continue      
             devsim.element_from_edge_model(edge_model=E, device=device, region=region)
             devsim.edge_average_model(device=device, region=region, node_model="x", edge_model="xmid")
@@ -424,7 +440,7 @@ def milestone_save_wf_3D(device, v, path, contact_name, is_tcad):
     z_mid = []
 
     for region in devsim.get_region_list(device=device):
-        if region == "aluminum" or devsim.get_material(device=device, region=region) == "air":
+        if devsim.get_material(device=device, region=region) == "Aluminum" or devsim.get_material(device=device, region=region) == "air":
             continue
         x.extend(devsim.get_node_model_values(device=device, region=region, name="x"))
         y.extend(devsim.get_node_model_values(device=device, region=region, name="y"))
@@ -465,7 +481,7 @@ def milestone_save_wf_3D(device, v, path, contact_name, is_tcad):
         data['metadata'] = metadata
         pickle.dump(data, file)
 
-def save_milestone(device, v, path, dimension, contact_name, is_wf, is_tcad = False):
+def save_milestone(device, v, path, dimension, contact_name, is_wf, is_tcad = False, is_flip=False):
     if dimension == 1:
         if is_wf == True:
             milestone_save_wf_1D(device, v, path, contact_name, is_tcad)
@@ -475,9 +491,9 @@ def save_milestone(device, v, path, dimension, contact_name, is_wf, is_tcad = Fa
             print("==========RASER info ==========\nis_wf only has 2 values, True or False\n==========Error=========")
     if dimension == 2:
         if is_wf == True:
-            milestone_save_wf_2D(device, v, path, contact_name, is_tcad)
+            milestone_save_wf_2D(device, v, path, contact_name, is_tcad, is_flip)
         elif is_wf == False:
-            milestone_save_2D(device, v, path, is_tcad)
+            milestone_save_2D(device, v, path, is_tcad, is_flip)
         else:
             print("==========RASER info ==========\nis_wf only has 2 values, True or False\n==========Error=========")
     if dimension == 3:

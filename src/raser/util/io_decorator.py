@@ -1,3 +1,10 @@
+'''
+Description:  io_decorator.py
+@Date       : 2022
+@Author     : Yuhang Tan
+@version    : 1.0
+'''
+
 import io
 from contextlib import redirect_stdout, redirect_stderr
 

@@ -3,8 +3,8 @@
 '''
 Description:  
     Simulate e-h pairs diffusing and calculate induced current in MAPS
-@Date       : 2021/09/02 14:01:46
-@Author     : Yuhang Tan, Haobo Wang
+@Date       : 2023
+@Author     : Haobo Wang, Yiming Hu
 @version    : 2.0
 '''
 

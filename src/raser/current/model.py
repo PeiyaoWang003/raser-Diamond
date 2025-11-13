@@ -3,7 +3,7 @@
 '''
 Description:  Define physical models for different materials   
 @Date       : 2021/09/06 18:46:00
-@Author     : yangtao
+@Author     : Tao Yang
 @version    : 1.0
 '''
 

@@ -3,7 +3,7 @@
 '''
 @Description: The main program of Raser induced current simulation      
 @Date       : 2024/09/26 15:11:20
-@Author     : tanyuhang, Chenxi Fu
+@Author     : Yuhang Tan, Chenxi Fu
 @version    : 2.0
 '''
 import sys
@@ -112,8 +112,8 @@ def batch_loop(my_d, my_f, my_g4, g4_seed, total_events, instance_number):
             e_dep_array[0] = my_g4.edep_devices[event-start_n]
             # assume the list of electrons is sorted by particle injection trace
             # and all inside the active region of the detector
-            par_in_array[0], par_in_array[1], par_in_array[2] = my_current.electrons[0].path[0][0], my_current.electrons[0].path[0][1], my_current.electrons[0].path[0][2]
-            par_out_array[0], par_out_array[1], par_out_array[2] = my_current.electrons[0].path[-1][0], my_current.electrons[0].path[-1][1], my_current.electrons[0].path[-1][2]
+            par_in_array[0], par_in_array[1], par_in_array[2] = my_g4.p_steps_current[my_g4.selected_batch_number][0]
+            par_out_array[0], par_out_array[1], par_out_array[2] = my_g4.p_steps_current[my_g4.selected_batch_number][-1]
 
             # Note: TTree.Fill() needs the binded variable (namely the address) to be valid and the same with Branch(), 
             # so don't put Fill() into other methods/functions!
@@ -135,7 +135,7 @@ def batch_loop(my_d, my_f, my_g4, g4_seed, total_events, instance_number):
                              "signal_"+
                              str(instance_number)+
                              str(my_d.voltage)+
-                             str(my_d.irradiation_flux)+
+                             str(my_d.irradiation_flux, my_d.bound)+
                              str(my_d.g4experiment)+
                              str(my_d.amplifier)+
                              ".root")
@@ -160,7 +160,9 @@ def main(kwargs):
     if kwargs['amplifier'] != None:
         my_d.amplifier = kwargs['amplifier']
 
-    my_f = devfield.DevsimField(my_d.device, my_d.dimension, my_d.voltage, my_d.read_out_contact, my_d.irradiation_flux)
+    my_f = devfield.DevsimField(my_d.device, my_d.dimension, my_d.voltage, my_d.read_out_contact, is_plugin=my_d.is_plugin(), irradiation_flux=my_d.irradiation_flux, bounds=my_d.bound) 
+    if "lgad" in my_d.det_model:
+        my_d.gain_rate_cal(my_f)
 
     geant4_json = os.getenv("RASER_SETTING_PATH")+"/g4experiment/" + my_d.g4experiment + ".json"
     with open(geant4_json) as f:

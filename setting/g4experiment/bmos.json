@@ -36,7 +36,7 @@
 
     "maxStep" : 0.5,
 
-    "DetModule" : "NJU-PIN-bmos.json",
+    "DetModule" : "NJU-PiN-bmos.json",
 
     "vis" : 0,
 

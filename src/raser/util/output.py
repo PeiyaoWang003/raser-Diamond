@@ -1,3 +1,10 @@
+'''
+Description:  output.py
+@Date       : 2023
+@Author     : Chenxi Fu
+@version    : 1.0
+'''
+
 import os
 
 def output(current_file_path, *label):

@@ -1,3 +1,13 @@
+
+'''
+Description: 
+    Set PWL input for NGSpice simulation
+
+@Date       : 2023
+@Author     : Ye He, Kaibo Xie, Yanpeng Li
+@version    : 2.0
+'''
+
 import shutil
 import os
 

@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8 -*-
+
+'''
+@File    :   solver_section.py
+@Time    :   2024
+@Author  :   Sen Zhao
+@Version :   1.0
+'''
+
 import sys
 import os
 import subprocess
@@ -169,11 +177,12 @@ def main (kwargs):
         # solve and save at 0V
         if v_goal is None:
             v_goal = float(MyDetector.device_dict['bias']['voltage'])
-        voltage_step = 1.0 
         if v_goal > 0:
             milestone_step = paras['milestone_step']
+            voltage_step = 1.0 
         else:
             milestone_step = -1 * paras['milestone_step']
+            voltage_step = -1.0 
         max_voltage_step = paras['max_voltage_step']
 
         step_too_small = False

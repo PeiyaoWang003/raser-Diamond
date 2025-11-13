@@ -3,9 +3,9 @@
 '''
 Description:  
     Simulate e-h pairs drifting and calculate induced current
-@Date       : 2021/09/02 14:01:46
-@Author     : Yuhang Tan, Chenxi Fu
-@version    : 2.0
+@Date       : 2025/11/11
+@Author     : Yuhang Tan, Chenxi Fu, Dai Zhong
+@version    : 3.0
 '''
 
 import random
@@ -20,18 +20,34 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 from .model import Material
-from .field_cache import FieldCache
 from .carrier import VectorizedCarrierSystem
 
 from ..interaction.carrier_list import CarrierListFromG4P
 from ..util.math import Vector, signal_convolution
 from ..util.output import output
 
-t_bin = 10e-12
-# resolution of oscilloscope
+t_bin = {
+    1: 5e-12,
+    2: 50e-12,
+    3: 50e-12  # resolution of oscilloscope
+}
+
 t_start = 0
-t_end = 10e-9
-delta_t = 1e-12  # simulation time step
+
+t_end = {
+    1: 5e-9,
+    2: 50e-9,
+    3: 50e-9
+}
+
+delta_t = {
+    1: 2e-12,  # simulation time step
+    2: 20e-12,
+    3: 20e-12
+}
+
+t_tol = 1e-20
+
 
 logger = logging.getLogger(__name__)
 if not logging.getLogger().handlers:
@@ -43,8 +59,8 @@ class CalCurrent:
     Description:
         Calculate sum of the generated current by carriers drifting
     Parameters:
-        my_d : R3dDetector
-        my_f : FenicsCal 
+        my_d : Detector
+        my_f : FieldCache
         ionized_pairs : float[]
             the generated carrier amount from MIP or laser
         track_position : float[]
@@ -58,18 +74,22 @@ class CalCurrent:
     def __init__(self, my_d, my_f, ionized_pairs, track_position):
         start_time = time.time()
         logger.info("current calculation start...")
-
-        self.t_bin = t_bin
-        self.t_end = t_end
+        self.t_bin = t_bin[my_d.dimension]
+        self.t_end = t_end[my_d.dimension]
         self.t_start = t_start
-        self.delta_t = delta_t
-        self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
+        self.delta_t = delta_t[my_d.dimension]
+        self.n_bin = int((self.t_end+t_tol-self.t_start)/self.t_bin)
+        if my_d.is_plugin():
+            self.t_bin = t_bin[1]
+            self.t_end = t_end[1]
+            self.t_start = t_start
+            self.delta_t = delta_t[1]
 
         self.read_ele_num = my_d.read_ele_num
         if hasattr(my_d, "x_ele_num") and hasattr(my_d, "y_ele_num"):
             self.x_ele_num = my_d.x_ele_num
             self.y_ele_num = my_d.y_ele_num
-        self.read_out_contact = my_f.read_out_contact
+        self.read_out_contact = my_d.read_out_contact
         
         self.electron_system = None
         self.hole_system = None
@@ -96,6 +116,7 @@ class CalCurrent:
 
         for i in range(len(track_position)):
             x, y, z, t = track_position[i]
+            t_num = int(t / self.delta_t + t_tol)
             charge = ionized_pairs[i]
             
             # 过滤在探测器边界外的载流子
@@ -103,13 +124,13 @@ class CalCurrent:
                 # 电子
                 electron_positions.append([x, y, z])
                 electron_charges.append(-charge)  # 电子带负电
-                electron_times.append(t)
+                electron_times.append(t_num)
                 electron_signals.append([])  # 空信号列表
                 
                 # 空穴
                 hole_positions.append([x, y, z])
                 hole_charges.append(charge)  # 空穴带正电
-                hole_times.append(t)
+                hole_times.append(t_num)
                 hole_signals.append([])
 
         logger.info(f"载流子过滤完成: {len(electron_positions)}个电子, {len(hole_positions)}个空穴")
@@ -180,42 +201,22 @@ class CalCurrent:
         start_time = time.time()
         delta_t_sim = getattr(my_d, "vector_delta_t", self.delta_t)
         
-        try:
-            # 创建电场缓存
-            field_resolution = getattr(my_d, "vector_field_resolution", None)
-            if field_resolution is None:
-                field_resolution = getattr(my_f, "vector_field_resolution", None)
-            bounds = {}
-            for axis, attr in (("x", "l_x"), ("y", "l_y"), ("z", "l_z")):
-                limit = getattr(my_d, attr, None)
-                if limit is not None:
-                    try:
-                        bounds[axis] = (0.0, float(limit))
-                    except (TypeError, ValueError):
-                        bounds[axis] = (None, None)
-            fallback_field = getattr(my_d, "vector_field_fallback", None)
-            field_cache = FieldCache(
-                my_f,
-                resolution=field_resolution, # default 0.1
-                fallback_field=fallback_field,
-                bounds=bounds
-            )
-            
+        try:            
             # 批量处理电子
             if self.electron_system:
                 logger.info(f"电子数量: {len(self.electron_system.positions)}")
-                self.electron_system.drift_batch(my_d, field_cache, delta_t=delta_t_sim)
+                self.electron_system.drift_batch(my_d, my_f, delta_t=delta_t_sim)
                 logger.info("电子漂移结束，开始信号计算...")
-                self.electron_system.get_signal_batch(my_d, field_cache)
+                self.electron_system.get_signal_batch(my_d, my_f)
             
             # 批量处理空穴
             if self.hole_system:
                 logger.info(f"空穴数量: {len(self.hole_system.positions)}")
-                self.hole_system.drift_batch(my_d, field_cache, delta_t=delta_t_sim)
+                self.hole_system.drift_batch(my_d, my_f, delta_t=delta_t_sim)
                 logger.info("空穴漂移结束，开始信号计算...")
-                self.hole_system.get_signal_batch(my_d, field_cache)
+                self.hole_system.get_signal_batch(my_d, my_f)
                             
-            cache_stats = field_cache.get_cache_stats()
+            cache_stats = my_f.get_cache_stats()
             logger.info(
                 "电场缓存统计: 命中=%d, 未命中=%d, 错误=%d, 备用=%d, 命中率=%.2f%%",
                 cache_stats['hits'], cache_stats['misses'], cache_stats['errors'],
@@ -328,9 +329,9 @@ class CalCurrent:
                             current_value = signal_value / self.t_bin
                                     # 根据载流子类型选择正确的电流直方图
                             if carrier_type == "hole":
-                                self.positive_cu[target_electrode].Fill(time_point, current_value)
+                                self.positive_cu[target_electrode].Fill(time_point*self.delta_t+t_tol, current_value)
                             elif carrier_type == "electron":
-                                self.negative_cu[target_electrode].Fill(time_point, current_value)
+                                self.negative_cu[target_electrode].Fill(time_point*self.delta_t+t_tol, current_value)
                             else:
                                 logger.warning(f"未知的载流子类型: {carrier_type}")
                                 return signals_found
@@ -338,7 +339,7 @@ class CalCurrent:
                             
                             # 调试前几个信号
                             if signals_found <= 3:
-                                logger.info(f"{carrier_type}信号: t={time_point:.2e}s, I={current_value:.2e}A, 电极={target_electrode}")
+                                logger.info(f"{carrier_type}信号: t={time_point*self.delta_t+t_tol:.2e}s, I={current_value:.2e}A, 电极={target_electrode}")
         
         return signals_found
     
@@ -550,11 +551,11 @@ class CalCurrent:
 class CalCurrentGain(CalCurrent):
     '''Calculation of gain carriers and gain current, simplified version'''
     def __init__(self, my_d, my_f, my_current):
-        self.t_bin = t_bin
-        self.t_end = t_end
+        self.t_bin = t_bin[my_d.dimension]
+        self.t_end = t_end[my_d.dimension]
         self.t_start = t_start
-        self.n_bin = int((self.t_end-self.t_start)/self.t_bin)
-        self.delta_t = delta_t
+        self.delta_t = delta_t[my_d.dimension]
+        self.n_bin = int((self.t_end+t_tol-self.t_start)/self.t_bin)
     
         self.read_ele_num = my_current.read_ele_num
         self.read_out_contact = my_current.read_out_contact
@@ -563,18 +564,8 @@ class CalCurrentGain(CalCurrent):
         self.electron_system = None
         self.hole_system = None
         
-        cal_coefficient = Material(my_d.material).cal_coefficient
-        gain_rate = self.gain_rate(my_d, my_f, cal_coefficient)
+        gain_rate = my_d.gain_rate
         logger.info("gain_rate=%s", gain_rate)
-        
-        # 保存增益率
-        path = output(__file__, my_d.det_name)
-        with open(path+'/voltage-gain_rate.csv', "a") as f_gain_rate:
-            writer_gain_rate = csv.writer(f_gain_rate)
-            writer_gain_rate.writerow([str(my_f.voltage), str(gain_rate)])
-        
-        with open(path+'/voltage-gain_rate.txt', 'a') as file:
-            file.write(str(my_f.voltage)+' -- '+str(gain_rate)+ '\n')
         
         # 创建增益载流子
         gain_positions = []
@@ -634,59 +625,6 @@ class CalCurrentGain(CalCurrent):
         
         # 计算电流
         self.get_current(my_d.x_ele_num, my_d.y_ele_num, self.read_out_contact)
-
-    def gain_rate(self, my_d, my_f, cal_coefficient):
-
-        # gain = exp[K(d_gain)] / {1-int[alpha_minor * K(x) dx]}
-        # K(x) = exp{int[(alpha_major - alpha_minor) dx]}
-
-        # TODO: support non-uniform field in gain layer
-
-        n = 1001
-        if "ilgad" in my_d.det_model:
-            z_list = np.linspace(my_d.avalanche_bond * 1e-4, my_d.l_z, n) # in cm
-        else:
-            z_list = np.linspace(0, my_d.avalanche_bond * 1e-4, n) # in cm
-        alpha_n_list = np.zeros(n)
-        alpha_p_list = np.zeros(n)
-        for i in range(n):
-            Ex,Ey,Ez = my_f.get_e_field(0.5*my_d.l_x,0.5*my_d.l_y,z_list[i] * 1e4) # in V/cm
-            E_field = Vector(Ex,Ey,Ez).get_length()
-            alpha_n = cal_coefficient(E_field, -1, my_d.temperature)
-            alpha_p = cal_coefficient(E_field, +1, my_d.temperature)
-            alpha_n_list[i] = alpha_n
-            alpha_p_list[i] = alpha_p
-
-        if my_f.get_e_field(0, 0, my_d.avalanche_bond)[2] > 0:
-            alpha_major_list = alpha_n_list # multiplication contributed mainly by electrons in conventional Si LGAD
-            alpha_minor_list = alpha_p_list
-        else:
-            alpha_major_list = alpha_p_list # multiplication contributed mainly by holes in conventional SiC LGAD
-            alpha_minor_list = alpha_n_list
-
-        # the integral supports iLGAD as well
-        
-        diff_list = alpha_major_list - alpha_minor_list
-        int_alpha_list = np.zeros(n-1)
-
-        for i in range(1,n):
-            int_alpha = 0
-            for j in range(i):
-                int_alpha += (diff_list[j] + diff_list[j+1]) * (z_list[j+1] - z_list[j]) /2
-            int_alpha_list[i-1] = int_alpha
-        exp_list = np.exp(int_alpha_list)
-
-        det = 0 # determinant of breakdown
-        for i in range(0,n-1):
-            average_alpha_minor = (alpha_minor_list[i] + alpha_minor_list[i+1])/2
-            det_derivative = average_alpha_minor * exp_list[i]
-            det += det_derivative*(z_list[i+1]-z_list[i])        
-        if det>1:
-            logger.error("determinant=%s, larger than 1, detector break down", det)
-            raise(ValueError)
-        
-        gain_rate = exp_list[n-2]/(1-det) -1
-        return gain_rate
 
     def current_define(self,read_ele_num):
         """

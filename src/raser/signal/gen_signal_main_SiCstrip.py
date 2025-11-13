@@ -3,9 +3,12 @@
 '''
 @Description: The main program of Raser induced current simulation,(quickly checkout under different Votage)      
 @Date       : 2025/02/11 
-@Author     : zhulin
+@Author     : Lin Zhu
 @version    : 2.0
 '''
+
+#TODO: need rewrite
+
 import sys
 import os
 import array
@@ -117,7 +120,7 @@ def main(kwargs):
                 # voltage = int(i)
                 voltage = float(i)
             
-            my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, my_d.irradiation_flux)
+            my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, is_plugin=my_d.is_plugin(), irradiation_flux=my_d.irradiation_flux, bounds=my_d.bound)
             
             my_current = ccrt.CalCurrentG4P(my_d, my_f, my_g4, -1)
             # if "strip" in det_name:

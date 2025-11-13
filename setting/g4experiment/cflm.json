@@ -52,7 +52,7 @@
     
     "maxStep" : 0.5,
 
-    "DetModule" : "NJU-PIN-cflm.json",
+    "DetModule" : "NJU-PiN-cflm.json",
 
     "vis" : 0,
 

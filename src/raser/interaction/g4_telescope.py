@@ -4,7 +4,7 @@
 Description: 
     geat4_pybind simulation   
 @Date       : 2021/09/02 12:46:27
-@Author     : tanyuhang
+@Author     : Yuhang Tan
 @version    : 1.0
    
 @Date       : 2023/04/18

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+'''
+Description:  telescope_acts.py
+@Date       : 2023
+@Author     : Yiming Hu
+@version    : 2.0
+'''
+
 from pathlib import Path
 
 import acts

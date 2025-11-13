@@ -1,3 +1,10 @@
+'''
+Description:  signal/__init__.py
+@Date       : 2025
+@Author     : Xin Shi, Chenxi Fu, Jian Feng
+@version    : 2.0
+'''
+
 import sys
 import subprocess
 from concurrent.futures import ProcessPoolExecutor
@@ -8,7 +15,7 @@ def run_local_job(args_tuple):
     args = ['signal', '--job', str(i)] + command_tail_list
     command = ' '.join(args)
     print(command)
-    subprocess.run(['python3', 'src/raser'] + args, shell=False)
+    subprocess.run(['python3', '-m', 'src.raser'] + args, shell=False)
         
 def main(kwargs):    
     label = kwargs['label']

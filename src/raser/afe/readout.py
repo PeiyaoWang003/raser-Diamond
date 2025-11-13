@@ -5,7 +5,7 @@
 Description: 
     Simulate induced current through Broad_Band or Charge_Sensitive amplifier 
 @Date       : 2024/09/22 15:24:33
-@Author     : tanyuhang, Chenxi Fu
+@Author     : Yuhang Tan, Chenxi Fu
 @version    : 2.0
 '''
 

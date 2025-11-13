@@ -1,3 +1,10 @@
+'''
+Description:  detector_construction.py
+@Date       : 2025
+@Author     : Yuhang Tan, Chenxi Fu (Original: Geant4)
+@version    : 2.0
+'''
+
 import geant4_pybind as g4b
 
 world_size = 25000

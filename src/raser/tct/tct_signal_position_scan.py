@@ -3,7 +3,7 @@
 '''
 @Description: The main program of Raser induced current simulation      
 @Date       : 2024/09/26 15:11:20
-@Author     : zhulin
+@Author     : Lin Zhu
 @version    : 2.0
 '''
 import sys
@@ -244,7 +244,7 @@ def job_main(kwargs):
                     else:
                         amplifier = my_d.amplifier
 
-                    my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, my_d.irradiation_flux)
+                    my_f = devfield.DevsimField(my_d.device, my_d.dimension, voltage, my_d.read_out_contact, is_plugin=my_d.is_plugin(), irradiation_flux=my_d.irradiation_flux, bounds=my_d.bound)
                     my_l = LaserInjection(my_d, laser_dic)
 
                     my_current = ccrt.CalCurrentLaser(my_d, my_f, my_l)

@@ -50,6 +50,7 @@ parser_field.add_argument("-v_current", help="Current voltage for step-by-step s
 parser_field.add_argument("-noise", help="Detector Noise simulation", action="store_true")
 parser_field.add_argument('-umf', help='use umf solver', action="store_true")
 parser_field.add_argument('-ext', '--extract', help='extract field from TCAD file', action="store_true")
+parser_field.add_argument('-flip', help='flip the direction of the electric field', action="store_true")
 parser_field.add_argument('-wf_sub', help='calculate weight field from two devsim file', nargs=2)
 
 parser_interaction = subparsers.add_parser('interaction', help='particle-matter interation module')

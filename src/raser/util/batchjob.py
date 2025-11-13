@@ -3,7 +3,7 @@
 '''
 Description:  Run batch model     
 @Date       : 2023/09/16 23:43:07
-@Author     : tanyuhang, Tao Yang, Chenxi Fu
+@Author     : Yuhang Tan, Tao Yang, Chenxi Fu
 @version    : 3.0
 '''
 

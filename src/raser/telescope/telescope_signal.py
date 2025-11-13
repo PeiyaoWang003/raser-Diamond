@@ -3,7 +3,7 @@
 Description: 
     PixelDetector Telescope's analysis  
 @Date       : 2023/08/22
-@Author     : yiminghu
+@Author     : Yiming Hu
 @version    : 1.0
 '''
 

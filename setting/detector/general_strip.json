@@ -1,12 +1,12 @@
 {
-    "det_name" : "CMOS_strip",
+    "det_name" : "general_strip",
     "det_model" : "strip",
     "material" : "Si",
 
-    "l_x" : 3200,
-    "l_y" : 20000,
+    "l_x" : 1000,
+    "l_y" : 1000,
     "l_z" : 180,
-    "p_x" : 75.5,
+    "p_x" : 25,
     "read_ele_num" : 40,
 
     "doping":{
@@ -27,19 +27,19 @@
     "current_savgol_window": 0,
     "current_savgol_poly": 0,
 
-    "cross_talk" : "./setting/detector/CMOS_strip_tcad_cross_talk.cir",
+    "cross_talk" : null,
 
     "area_factor" : 1,
     "default_dimension" : 2,
-    "read_out_contact" : [{"x_span":2, "y_span":0, "name":"top"}],
-    "field_shift_x" : 151,
+    "read_out_contact" : [{"x_span":4, "y_span":0, "name":"top"}],
+    "field_shift_x" : 100,
     "mesh" : {
         "tcad_mesh" : {
-            "file" : "./output/field/CMOS_strip_tcad/-210.0V.tdr"
+            "file" : "./output/field/general_strip/-210.0V.tdr"
         }
     },
 
-    "g4experiment" : "proton_beam_tilt_60",
+    "g4experiment" : "proton_beam",
     "amplifier" : "ABCStar_fe",
     "daq" : "CMOS_strip"
 }

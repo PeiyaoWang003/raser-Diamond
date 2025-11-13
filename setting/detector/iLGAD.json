@@ -1,6 +1,6 @@
 {
     "det_name" : "iLGAD",
-    "det_model" : "ilgad",
+    "det_model" : "ilgad_planar",
     "material" : "Si",
 
     "l_x" : 180,
