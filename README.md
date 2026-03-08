@@ -7,6 +7,8 @@ Welcome to Fork and contribute!
 
 link: <https://raser.team/docs/raser/> 
 
+Citation: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18905684.svg)](https://doi.org/10.5281/zenodo.18905684)
+
 Prerequisites
 ======
 
