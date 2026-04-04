@@ -394,7 +394,8 @@ class VectorizedCarrierSystem:
                 
             Ex, Ey, Ez = e_field
             intensity = math.sqrt(Ex*Ex + Ey*Ey + Ez*Ez)
-            
+
+
             # 电场强度检查（降低阈值）
             if intensity <= params['min_field_strength']:
                 self.active[idx] = False
@@ -422,6 +423,26 @@ class VectorizedCarrierSystem:
         
         self.performance_stats['carriers_terminated'] += n_terminated
         return n_terminated
+
+    def _print_selected_e_fields(self):
+        targets = [0, 500, 2000, 4000]
+        z_val = 0  # 根据实际场景设置
+
+        print("===== 指定点电场值 =====")
+        for val in targets:
+            x = y = val
+            try:
+            # 直接调用底层方法，避免副作用
+                e_field = self.my_f.get_e_field_cached(x, y, z_val)
+                if e_field is not None and len(e_field) == 3:
+                    Ex, Ey, Ez = e_field
+                    intensity = math.sqrt(Ex*Ex + Ey*Ey + Ez*Ez)
+                    print(f"({x},{y},{z_val}): Ex={Ex:.6e}, Ey={Ey:.6e}, Ez={Ez:.6e}, |E|={intensity:.6e}")
+                else:
+                    print(f"({x},{y},{z_val}): 无效电场")
+            except Exception as e:
+                print(f"({x},{y},{z_val}): 获取失败 - {e}")
+        print("=========================")
 
     def _get_e_field_reduced(self, my_f, x, y, z, idx, field_x=None, field_y=None):
         """安全的电场获取"""
